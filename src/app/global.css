@@ -4,7 +4,8 @@
     -webkit-user-select: none;
 }
 
-img {
-    pointer-events: none;
-    width: 90%;
+body {
+    background-color: rgb(246, 246, 255);
+    color: black;
+    width: fit-content;
 }

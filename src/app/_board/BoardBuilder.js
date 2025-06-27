@@ -1,5 +1,3 @@
-/* global btoa atob */
-
 /**
  * @typedef {number[]} Run
  * An array of indicies representing sqaures in a run
@@ -66,12 +64,12 @@ export default class BoardBuilder {
         out += (this.height - 1).toString(2).padStart(8, '0');
 
         const colCounts = this.columnCounts ? this.columnCounts : Array(this.width).fill(0);
-        for (let i = 0; i < this.width; i++ ) {
+        for (let i = 0; i < this.width; i++) {
             out += colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
         }
 
         const rowCounts = this.rowCounts ? this.rowCounts : Array(this.height).fill(0);
-        for (let i = 0; i < this.height; i++ ) {
+        for (let i = 0; i < this.height; i++) {
             out += rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
         }
 
@@ -95,14 +93,14 @@ export default class BoardBuilder {
                 out += '11111';
                 out += (currentUnknowns - 1).toString(2).padStart(maxLength, '0');
             } else if (currentUnknowns > 0) {
-                for (let j = 0; j < currentUnknowns; j++ ) {
+                for (let j = 0; j < currentUnknowns; j++) {
                     out += '00000';
                 }
             } else if (currentWaters * 5 > 5 + maxLength) {
                 out += '11110';
                 out += (currentWaters - 1).toString(2).padStart(maxLength, '0');
             } else {
-                for (let j = 0; j < currentWaters; j++ ) {
+                for (let j = 0; j < currentWaters; j++) {
                     out += '00001';
                 }
             }
@@ -201,8 +199,7 @@ export default class BoardBuilder {
                 const repeats = parseInt(binaryString.slice(0, maxLength), 2) + 1;
                 trim(maxLength);
 
-
-                for (let j = 0; j < repeats; j++ ) {
+                for (let j = 0; j < repeats; j++) {
                     state.push(new Ship(bits === '11111' ? GRAPHICAL_TYPES.UNKNOWN : GRAPHICAL_TYPES.WATER));
                     i++;
                 }
@@ -264,7 +261,7 @@ export default class BoardBuilder {
         // should be replaced in the future for an adjustable setting
         const ITERATION_LIMIT = 15;
 
-        const board = ((cache) ? cache.copy() : ogBoard.copy()).computeGraphicalTypes();
+        const board = (cache ? cache.copy() : ogBoard.copy()).computeGraphicalTypes();
         iteration ||= 1;
 
         // check for full or would-be-full rows/columns
@@ -293,7 +290,8 @@ export default class BoardBuilder {
             if (square.playType !== PLAY_TYPES.SHIP) continue;
 
             if (square.isCardinal()) board.setCardinalShips(i, Ship.graphicalTypeToRelativePosition(square.graphicalType));
-            else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE) board.setCardinalShips(i); // makes every surrounding square water
+            else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE)
+                board.setCardinalShips(i); // makes every surrounding square water
             else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.graphicalType);
             else board.floodCorners(i);
         }
@@ -366,8 +364,12 @@ export default class BoardBuilder {
                     }
                 }
 
-                filteredHRuns.forEach((run) => { countPossibilities(run, true); });
-                filteredVRuns.forEach((run) => { countPossibilities(run, false); });
+                filteredHRuns.forEach(run => {
+                    countPossibilities(run, true);
+                });
+                filteredVRuns.forEach(run => {
+                    countPossibilities(run, false);
+                });
 
                 for (const pos in possiblities) {
                     if (possiblities[pos] === totalPossibilities) {
@@ -488,13 +490,13 @@ export default class BoardBuilder {
 
         // consider doing this by checking for duplicates across the entire thing -TODO
         // distinguish snippets of vertical runs from solo ships
-        horizontalRuns = horizontalRuns.filter((run) => {
+        horizontalRuns = horizontalRuns.filter(run => {
             if (run.length === 1 && this.getRelativeShip(run[0], RELATIVE_POSITIONS.TOP)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], RELATIVE_POSITIONS.BOTTOM)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
             return run.length !== 1;
         });
 
         // distinguish snippets of horizontal runs from solo ships
-        verticalRuns = verticalRuns.filter((run) => {
+        verticalRuns = verticalRuns.filter(run => {
             if (run.length === 1 && this.getRelativeShip(run[0], RELATIVE_POSITIONS.LEFT)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], RELATIVE_POSITIONS.RIGHT)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
             return run.length > 1;
         });
@@ -503,18 +505,14 @@ export default class BoardBuilder {
 
         // check if this could be replaced with a .map function -TODO
         // filter singleRuns for duplicates
-        singleRuns.forEach((run) => {
+        singleRuns.forEach(run => {
             if (onlyCountComplete && this.getShip(run[0]).graphicalType !== GRAPHICAL_TYPES.SINGLE) return;
 
             let duplicate = false;
 
             for (let i = 0; i < filteredSingleRuns.length && !duplicate; i++) {
                 const compRun = filteredSingleRuns[i];
-                if (
-                    run.length === compRun.length &&
-                    run[0] === compRun[0] &&
-                    run[1] === compRun[1]
-                ) duplicate = true;
+                if (run.length === compRun.length && run[0] === compRun[0] && run[1] === compRun[1]) duplicate = true;
             }
 
             if (!duplicate) filteredSingleRuns.push(run);
@@ -561,14 +559,14 @@ export default class BoardBuilder {
         for (let x = 0; x < this.width; x++) {
             if (onlyCountShips ? this.getShip([x, y]).playType === PLAY_TYPES.SHIP : this.getShip([x, y]).playType !== PLAY_TYPES.WATER) {
                 run.push(this.positionToIndex([x, y]));
-            } else if (run[0] !== undefined && ((onlyCountComplete && onlyCountShips) ? (this.getShip(run[0]).isEnd() && this.getShip([x - 1, y]).isEnd()) : true)) {
+            } else if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([x - 1, y]).isEnd() : true)) {
                 // run ended, record it
                 runs.push(run);
                 run = [];
             }
         }
 
-        if (run[0] !== undefined && ((onlyCountComplete && onlyCountShips) ? (this.getShip(run[0]).isEnd() && this.getShip([this.width - 1, y]).isEnd()) : true)) {
+        if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([this.width - 1, y]).isEnd() : true)) {
             // end of the board. record any ongoing runs.
             runs.push(run);
         }
@@ -613,14 +611,14 @@ export default class BoardBuilder {
         for (let y = 0; y < this.height; y++) {
             if (onlyCountShips ? this.getShip([x, y]).playType === PLAY_TYPES.SHIP : this.getShip([x, y]).playType !== PLAY_TYPES.WATER) {
                 run.push(this.positionToIndex([x, y]));
-            } else if (run[0] !== undefined && ((onlyCountComplete && onlyCountShips) ? this.getShip(run[0]).isEnd() && this.getShip([x, y - 1]).isEnd() : true)) {
+            } else if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([x, y - 1]).isEnd() : true)) {
                 // run ended, record it
                 runs.push(run);
                 run = [];
             }
         }
 
-        if (run[0] !==undefined && ((onlyCountComplete && onlyCountShips) ? (this.getShip(run[0]).isEnd() && this.getShip([x, this.height - 1]).isEnd()) : true)) {
+        if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([x, this.height - 1]).isEnd() : true)) {
             // end of the column. record any ongoing runs.
             runs.push(run);
         }
@@ -654,13 +652,11 @@ export default class BoardBuilder {
             if (isWater([left, top, right, bottom])) setType(GRAPHICAL_TYPES.SINGLE);
             else if (isShip([left, right])) setType(GRAPHICAL_TYPES.HORIZONTAL);
             else if (isShip([top, bottom])) setType(GRAPHICAL_TYPES.VERTICAL);
-
             // else if (isShip(left) && )
             else if (isShip(left) && isWater(right)) setType(GRAPHICAL_TYPES.LEFT);
             else if (isShip(top) && isWater(bottom)) setType(GRAPHICAL_TYPES.UP);
             else if (isShip(right) && isWater(left)) setType(GRAPHICAL_TYPES.RIGHT);
             else if (isShip(bottom) && isWater(top)) setType(GRAPHICAL_TYPES.DOWN);
-
             // if surrounded by nothing, set unknown ship
             else setType(PLAY_TYPES.SHIP);
         }
@@ -794,7 +790,7 @@ export default class BoardBuilder {
         if (index % this.width === this.width - 1 && relativePosition % 3 === 2) return null;
 
         //               base      vertical offset                                         horizontal offset
-        const absIndex = (index) + ((Math.floor(relativePosition / 3) - 1) * this.width) + (relativePosition % 3 - 1);
+        const absIndex = index + (Math.floor(relativePosition / 3) - 1) * this.width + ((relativePosition % 3) - 1);
 
         // check absIndex is within the board
         if (absIndex < 0 || absIndex > this.width * this.height - 1) return null;
@@ -812,7 +808,7 @@ export default class BoardBuilder {
      */
     getRelativeShip (basePosition, relativePosition) {
         const index = this.relativePositionToIndex(basePosition, relativePosition);
-        return (index !== null) ? this.boardState[index] : null;
+        return index !== null ? this.boardState[index] : null;
     }
 
     /**
@@ -846,7 +842,7 @@ export default class BoardBuilder {
         for (const relativePosition in RELATIVE_POSITIONS) {
             const value = RELATIVE_POSITIONS[relativePosition];
 
-            this.setRelativeShip(position, value, (except === value) ? PLAY_TYPES.SHIP : PLAY_TYPES.WATER);
+            this.setRelativeShip(position, value, except === value ? PLAY_TYPES.SHIP : PLAY_TYPES.WATER);
         }
 
         return this;
@@ -861,9 +857,7 @@ export default class BoardBuilder {
     setOrthogonalShips (position, orientation) {
         // could use some error handling to check if orientation is horizontal or vertical and not left or something -TODO
 
-        const shipDirections = (orientation === GRAPHICAL_TYPES.HORIZONTAL)
-            ? [RELATIVE_POSITIONS.LEFT, RELATIVE_POSITIONS.RIGHT]
-            : [RELATIVE_POSITIONS.TOP, RELATIVE_POSITIONS.BOTTOM];
+        const shipDirections = orientation === GRAPHICAL_TYPES.HORIZONTAL ? [RELATIVE_POSITIONS.LEFT, RELATIVE_POSITIONS.RIGHT] : [RELATIVE_POSITIONS.TOP, RELATIVE_POSITIONS.BOTTOM];
 
         for (const key in RELATIVE_POSITIONS) {
             const relativePosition = RELATIVE_POSITIONS[key];

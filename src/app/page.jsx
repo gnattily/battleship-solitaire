@@ -1,9 +1,7 @@
-/* eslint-disable no-unused-vars */
-import React from 'react';
-import './App.css';
-import Board from './Board/Board';
-import BoardBuilder from './Board/BoardBuilder';
-import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Board/Ship';
+import './global.css';
+import Board from './_board/Board';
+import BoardBuilder from './_board/BoardBuilder';
+import { GRAPHICAL_TYPES } from './_board/Ship';
 
 // https://www.brainbashers.com/showbattleships.asp?date=0227&size=6&puzz=A
 // const preset = new BoardBuilder(6, 6)
@@ -53,20 +51,14 @@ const preset = new BoardBuilder(15, 15, undefined,
     .computeGraphicalTypes()
     .export();
 
-class App extends React.Component {
-    render () {
-        return (
-            <div className="App">
-                <Board
-                    width={preset}
-                    height={15}
-                    columnCounts={[0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1]}
-                    rowCounts={[2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2]}
-                    runs={[5, 4, 3, 2, 1]}
-                />
-            </div>
-        );
-    }
+export default function Page () {
+    return (
+        <Board
+            width={preset}
+            height={15}
+            columnCounts={[0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1]}
+            rowCounts={[2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2]}
+            runs={[5, 4, 3, 2, 1]}
+        />
+    );
 }
-
-export default App;

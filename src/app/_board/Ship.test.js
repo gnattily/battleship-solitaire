@@ -1,8 +1,10 @@
+import { expect, test } from 'vitest';
+
 import { RELATIVE_POSITIONS } from './BoardBuilder';
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
 
 test('toString', () => {
-    for(const type in GRAPHICAL_TYPES) {
+    for (const type in GRAPHICAL_TYPES) {
         const ship = new Ship(GRAPHICAL_TYPES[type]);
         expect(ship.toString().toUpperCase()).toBe(type);
     }

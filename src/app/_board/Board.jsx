@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import './Board.css';
 import BoardBuilder from './BoardBuilder';
 import { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
+import Image from 'next/image';
 
 /**
  * The visible board
@@ -57,43 +60,43 @@ export default class Board extends React.Component {
         this.setState({ draggedType: undefined });
     }
 
-    typeToImg (type) {
+    typeToImg (type, key, size) {
         switch (type) {
-        case GRAPHICAL_TYPES.SINGLE:
-            return <img src='./ships/single.svg' alt='Single'/>;
-        case GRAPHICAL_TYPES.UP:
-            return <img src='./ships/end.svg' alt='Up' style={{ transform: 'rotate(90deg)' }}/>;
-        case GRAPHICAL_TYPES.RIGHT:
-            return <img src='./ships/end.svg' alt='Right' style={{ transform: 'rotate(180deg)' }}/>;
-        case GRAPHICAL_TYPES.LEFT:
-            return <img src='./ships/end.svg' alt='Left'/>;
-        case GRAPHICAL_TYPES.DOWN:
-            return <img src='./ships/end.svg' alt='Down' style={{ transform: 'rotate(-90deg)' }}/>;
-        case GRAPHICAL_TYPES.SHIP:
-            return <img src='./ships/ship.svg' alt='Ship'/>;
-        case GRAPHICAL_TYPES.HORIZONTAL:
-            return <img src='./ships/vertical-horizontal.svg' alt='Vertical/Horizontal'/>;
-        case GRAPHICAL_TYPES.VERTICAL:
-            return <img src='./ships/vertical-horizontal.svg' alt='Vertical/Horizontal'/>;
-        case GRAPHICAL_TYPES.WATER:
-            return <img src='./ships/water.svg' alt='Water'/>;
-        default:
-            return <img alt=''/>;
+            case GRAPHICAL_TYPES.SINGLE:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/single.svg" alt="Single" />;
+            case GRAPHICAL_TYPES.UP:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Up" style={{ transform: 'rotate(90deg)' }} />;
+            case GRAPHICAL_TYPES.RIGHT:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Right" style={{ transform: 'rotate(180deg)' }} />;
+            case GRAPHICAL_TYPES.LEFT:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Left" />;
+            case GRAPHICAL_TYPES.DOWN:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Down" style={{ transform: 'rotate(-90deg)' }} />;
+            case GRAPHICAL_TYPES.SHIP:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/ship.svg" alt="Ship" />;
+            case GRAPHICAL_TYPES.HORIZONTAL:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
+            case GRAPHICAL_TYPES.VERTICAL:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
+            case GRAPHICAL_TYPES.WATER:
+                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/water.svg" alt="Water" />;
         }
     }
 
     displayBoard () {
         return this.state.board.boardState.map((ship, index) => {
-            return <div
-                className='Square nohighlight'
-                key={index}
-                onMouseDown={(event) => this.onMouseDown(event, index)}
-                onMouseEnter={() => this.onMouseEnter(index)}
-                onMouseUp={() => this.onMouseUp()}
-                onContextMenu={(e) => e.preventDefault()}
-            >
-                {this.typeToImg(this.state.solved && ship.playType === PLAY_TYPES.WATER ? PLAY_TYPES.UNKNOWN : ship.graphicalType )}
-            </div>;
+            return (
+                <div
+                    className="Square nohighlight"
+                    key={index}
+                    onMouseDown={event => this.onMouseDown(event, index)}
+                    onMouseEnter={() => this.onMouseEnter(index)}
+                    onMouseUp={() => this.onMouseUp()}
+                    onContextMenu={e => e.preventDefault()}
+                >
+                    {this.typeToImg(this.state.solved && ship.playType === PLAY_TYPES.WATER ? PLAY_TYPES.UNKNOWN : ship.graphicalType)}
+                </div>
+            );
         });
     }
 
@@ -103,9 +106,16 @@ export default class Board extends React.Component {
      * @returns {React.JSX.Element[]} the counts
      */
     displayCounts (rows) {
-        return (rows ? this.state.board.rowCounts : this.state.board.columnCounts).map((count, index) => <p key={index} onClick={() => {
-            this.setState({ board: rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodColumn(index) });
-        }}>{count}</p>);
+        return (rows ? this.state.board.rowCounts : this.state.board.columnCounts).map((count, index) => (
+            <p
+                key={index}
+                onClick={() => {
+                    this.setState({ board: rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodColumn(index) });
+                }}
+            >
+                {count}
+            </p>
+        ));
     }
 
     /**
@@ -138,30 +148,32 @@ export default class Board extends React.Component {
      * @returns {React.JSX[]} the run
      */
     renderRun (length) {
-        if (length === 1) return [this.typeToImg(GRAPHICAL_TYPES.SINGLE)];
+        const SIZE = '25';// px
 
-        const out = [this.typeToImg(GRAPHICAL_TYPES.RIGHT)];
+        if (length === 1) return [this.typeToImg(GRAPHICAL_TYPES.SINGLE, 0, SIZE)];
+
+        const out = [this.typeToImg(GRAPHICAL_TYPES.RIGHT, 0, SIZE)];
 
         for (let i = 0; i < length - 2; i++) {
-            out.push(this.typeToImg(GRAPHICAL_TYPES.HORIZONTAL));
+            out.push(this.typeToImg(GRAPHICAL_TYPES.HORIZONTAL, i + 1, SIZE));
         }
 
-        return [...out, this.typeToImg(GRAPHICAL_TYPES.LEFT)];
+        return [...out, this.typeToImg(GRAPHICAL_TYPES.LEFT, out.length, SIZE)];
     }
 
     render () {
         return (
             <>
-                <div className='Board'>
-                    <div className='Runs'>
+                <div className="Board">
+                    <div className="Runs">
                         {this.displayRuns()}
                     </div>
-                    <div className='Inner'>
-                        <span/>
-                        <div className='Column Counts' style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}>
+                    <div className="Inner">
+                        <span />
+                        <div className="Column Counts" style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}>
                             {this.displayCounts(false) /* false = columns */}
                         </div>
-                        <div className='Row Counts' style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}>
+                        <div className="Row Counts" style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}>
                             {this.displayCounts(true) /* true = rows */}
                         </div>
                         <div className={'Ships' + (this.state.solved ? ' Solved' : '')} style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}>

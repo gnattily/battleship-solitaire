@@ -19,28 +19,28 @@ export default class Ship {
 
     toString () {
         switch (this.graphicalType) {
-        case GRAPHICAL_TYPES.UNKNOWN:
-            return 'Unknown';
-        case GRAPHICAL_TYPES.WATER:
-            return 'Water';
-        case GRAPHICAL_TYPES.SHIP:
-            return 'Ship';
-        case GRAPHICAL_TYPES.DOWN:
-            return 'Down';
-        case GRAPHICAL_TYPES.HORIZONTAL:
-            return 'Horizontal';
-        case GRAPHICAL_TYPES.LEFT:
-            return 'Left';
-        case GRAPHICAL_TYPES.RIGHT:
-            return 'Right';
-        case GRAPHICAL_TYPES.SINGLE:
-            return 'Single';
-        case GRAPHICAL_TYPES.UP:
-            return 'Up';
-        case GRAPHICAL_TYPES.VERTICAL:
-            return 'Vertical';
-        default:
-            throw new Error('graphicalType is not a valid graphical type');
+            case GRAPHICAL_TYPES.UNKNOWN:
+                return 'Unknown';
+            case GRAPHICAL_TYPES.WATER:
+                return 'Water';
+            case GRAPHICAL_TYPES.SHIP:
+                return 'Ship';
+            case GRAPHICAL_TYPES.DOWN:
+                return 'Down';
+            case GRAPHICAL_TYPES.HORIZONTAL:
+                return 'Horizontal';
+            case GRAPHICAL_TYPES.LEFT:
+                return 'Left';
+            case GRAPHICAL_TYPES.RIGHT:
+                return 'Right';
+            case GRAPHICAL_TYPES.SINGLE:
+                return 'Single';
+            case GRAPHICAL_TYPES.UP:
+                return 'Up';
+            case GRAPHICAL_TYPES.VERTICAL:
+                return 'Vertical';
+            default:
+                throw new Error('graphicalType is not a valid graphical type');
         }
     }
 
@@ -152,16 +152,16 @@ export default class Ship {
      */
     static graphicalTypeToRelativePosition (graphicalType) {
         switch (graphicalType) {
-        case GRAPHICAL_TYPES.LEFT:
-            return RELATIVE_POSITIONS.LEFT;
-        case GRAPHICAL_TYPES.RIGHT:
-            return RELATIVE_POSITIONS.RIGHT;
-        case GRAPHICAL_TYPES.UP:
-            return RELATIVE_POSITIONS.TOP;
-        case GRAPHICAL_TYPES.DOWN:
-            return RELATIVE_POSITIONS.BOTTOM;
-        default:
-            throw new Error(`${graphicalType} has no single corresponding relative position`);
+            case GRAPHICAL_TYPES.LEFT:
+                return RELATIVE_POSITIONS.LEFT;
+            case GRAPHICAL_TYPES.RIGHT:
+                return RELATIVE_POSITIONS.RIGHT;
+            case GRAPHICAL_TYPES.UP:
+                return RELATIVE_POSITIONS.TOP;
+            case GRAPHICAL_TYPES.DOWN:
+                return RELATIVE_POSITIONS.BOTTOM;
+            default:
+                throw new Error(`${graphicalType} has no single corresponding relative position`);
         }
     }
 }

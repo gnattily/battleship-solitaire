@@ -9,10 +9,11 @@
 .Run {
     padding: 3px;
     display: inline-block;
+    position: relative;
     height: auto;
 }
 
-.Run img {
+.Run .Ship {
     width: 25px;
     padding: 1px;
 }
@@ -34,10 +35,19 @@
 
 .Ships {
     display: grid;
+    position: relative;
+}
+
+.Ship {
+    pointer-events: none;
+    object-fit: contain;
+    width: 90%;
+    height: auto;
 }
 
 .Square {
     border: 1px solid gray;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,7 +57,7 @@
     background: hsl(145, 69%, 60%);
 }
 
-.Solved div img {
+.Solved div .Ship {
     width: 100%;
 }
 
@@ -55,7 +65,7 @@
     cursor: pointer;
 }
 
-.desaturated img {
+.desaturated .Ship {
     opacity: .5;
 }
 
