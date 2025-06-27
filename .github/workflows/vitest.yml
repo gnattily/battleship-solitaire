@@ -1,4 +1,6 @@
 name: Vitest
+permissions:
+  contents: read
 
 on:
   push:
