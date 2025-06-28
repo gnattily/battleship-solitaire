@@ -1,6 +1,6 @@
 # Battleship solitaire
 
-[![CI - tests](https://github.com/gnattily/battleship-solitare/actions/workflows/vitest.yml/badge.svg)](https://github.com/gnattily/battleship-solitare/actions/workflows/vitest.yml) [![Eslint](https://github.com/lgrom/battleship-solitare/actions/workflows/eslint.yml/badge.svg)](https://github.com/lgrom/battleship-solitare/actions/workflows/eslint.yml)
+[![CI - tests](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml) [![Eslint](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml/badge.svg)](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml)
 
 TODO:
 
