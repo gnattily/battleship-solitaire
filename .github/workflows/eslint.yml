@@ -30,6 +30,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache npm packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('.github/workflows/eslint.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
       - name: Install ESLint
         run: |
           npm install eslint@9.29.0
