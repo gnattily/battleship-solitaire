@@ -3,6 +3,7 @@
  * An array of indicies representing sqaures in a run
  */
 
+import { displayBoard, GRID_TYPES } from './BoardUtils.js';
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship.js';
 
 /**
@@ -38,7 +39,9 @@ export default class BoardBuilder {
             this.boardState = board.boardState;
         } else {
             const width = widthOrPreset;
-            if (presetOrRowCounts && (presetOrRowCounts.width !== width || presetOrRowCounts.height !== heightOrColumnCounts)) throw new Error(`Preset should be the same size as the new board. Expected (${width}, ${heightOrColumnCounts}), received (${presetOrRowCounts.width}, ${presetOrRowCounts.height})`);
+            if (presetOrRowCounts && (presetOrRowCounts.width !== width || presetOrRowCounts.height !== heightOrColumnCounts)) {
+                throw new Error(`Preset should be the same size as the new board. Expected (${width}, ${heightOrColumnCounts}), received (${presetOrRowCounts.width}, ${presetOrRowCounts.height})`);
+            }
 
             this.width = width || this.preset?.width || 4;
             this.height = heightOrColumnCounts || this.preset?.height || 4;
@@ -296,7 +299,7 @@ export default class BoardBuilder {
             else board.floodCorners(i);
         }
 
-        // "there's only one place it could go/places it could go overlap"\
+        // "there's only one place it could go/places it could go overlap"
         // -TODO -URGENT
         // make this only place one ship, rerun the whole thing, then do another ship, etc.
         // when you do that, set the for loop condition back to i > 1
@@ -304,6 +307,57 @@ export default class BoardBuilder {
             const shipsLeft = board.countRunsLeft(true);
             const horizontalRuns = board.getHorizontalRuns();
             const verticalRuns = board.getVerticalRuns();
+
+            /**
+             * Counts possibilities and adds them to a list
+             * @param {Run} run - The run to count
+             * @param {boolean} horizontal - True if the run spans horizontally, false if not
+             * @param {number} i - The current loop index
+             * @returns {[?number[], number]} [possibilities, totalPossibilities]
+             */
+            function countPossibilities (run, horizontal, i) {
+                const possibilities = [];
+                let totalPossibilities = 0;
+
+                for (let j = 0; j + i <= run.length; j++) {
+                    const tmpBoard = board.copy();
+                    let changed = false;
+
+                    for (let k = 0; k < i; k++) {
+                        if (tmpBoard.softSetShip(run[k + j], PLAY_TYPES.SHIP)) changed = true;
+                    }
+
+                    if (!changed) continue;
+
+                    // check if row ships > it's supposed to be
+                    if (horizontal) {
+                        const y = tmpBoard.indexToCoordinates(run[0])[1];
+                        const numShips = tmpBoard.countRow(y, tmpBoard)[0];
+                        if (numShips > tmpBoard.rowCounts[y]) continue;
+                    } else {
+                        const x = tmpBoard.indexToCoordinates(run[0])[0];
+                        const numShips = tmpBoard.countCol(x, tmpBoard)[0];
+
+                        if (numShips > tmpBoard.columnCounts[x]) continue;
+                    }
+
+                    // check the ends of the run to see if it's really i long
+                    if (tmpBoard.getRelativeShip(run[0], horizontal ? RELATIVE_POSITIONS.LEFT : RELATIVE_POSITIONS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
+                    if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? RELATIVE_POSITIONS.RIGHT : RELATIVE_POSITIONS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
+
+                    for (let k = 0; k < run.length; k++) {
+                        if (possibilities[run[k + j]]) {
+                            possibilities[run[k + j]]++;
+                        } else {
+                            possibilities[run[k + j]] = 1;
+                        }
+                    }
+
+                    totalPossibilities++;
+                }
+
+                return [possibilities, totalPossibilities];
+            }
 
             // loop through each length of ship
             for (let i = shipsLeft.length; i > 2; i--) {
@@ -316,63 +370,22 @@ export default class BoardBuilder {
 
                 if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
 
-                const possiblities = {};
+                const possibilities = [];
                 let totalPossibilities = 0;
 
-                // define this outside of the for loop, that's gotta be crazy inefficient -TODO
-                /**
-                 * Counts possibilities and adds them to a list
-                 * @param {Run} run - The run to count
-                 * @param {boolean} horizontal - True if the run spans horizontally, false if not
-                 */
-                function countPossibilities (run, horizontal) {
-                    for (let j = 0; j + i <= run.length; j++) {
-                        const tmpBoard = board.copy();
-                        let changed = false;
-
-                        for (let k = 0; k < i; k++) {
-                            if (tmpBoard.softSetShip(run[k + j], PLAY_TYPES.SHIP)) changed = true;
-                        }
-
-                        if (!changed) continue;
-
-                        // check if row ships > it's supposed to be
-                        if (horizontal) {
-                            const y = tmpBoard.indexToCoordinates(run[0])[1];
-                            const numShips = tmpBoard.countRow(y, tmpBoard)[0];
-                            if (numShips > tmpBoard.rowCounts[y]) continue;
-                        } else {
-                            const x = tmpBoard.indexToCoordinates(run[0])[0];
-                            const numShips = tmpBoard.countCol(x, tmpBoard)[0];
-
-                            if (numShips > tmpBoard.columnCounts[x]) continue;
-                        }
-
-                        // check the ends of the run to see if it's really i long
-                        if (tmpBoard.getRelativeShip(run[0], horizontal ? RELATIVE_POSITIONS.LEFT : RELATIVE_POSITIONS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
-                        if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? RELATIVE_POSITIONS.RIGHT : RELATIVE_POSITIONS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
-
-                        for (let k = 0; k < run.length; k++) {
-                            if (possiblities[run[k + j]]) {
-                                possiblities[run[k + j]]++;
-                            } else {
-                                possiblities[run[k + j]] = 1;
-                            }
-                        }
-
-                        totalPossibilities++;
-                    }
-                }
-
                 filteredHRuns.forEach(run => {
-                    countPossibilities(run, true);
+                    const [hPossibilities, totalHPossibilities] = countPossibilities(run, true, i);
+                    hPossibilities.forEach((val, ind) => { possibilities[ind] = possibilities[ind] ?? 0 + val; });
+                    totalPossibilities += totalHPossibilities;
                 });
                 filteredVRuns.forEach(run => {
-                    countPossibilities(run, false);
+                    const [vPossibilities, totalVPossibilities] = countPossibilities(run, false, i);
+                    vPossibilities.forEach((val, ind) => { possibilities[ind] = possibilities[ind] ?? 0 + val; });
+                    totalPossibilities += totalVPossibilities;
                 });
 
-                for (const pos in possiblities) {
-                    if (possiblities[pos] === totalPossibilities) {
+                for (const pos in possibilities) {
+                    if (possibilities[pos] === totalPossibilities) {
                         board.setShip(Number(pos), GRAPHICAL_TYPES.SHIP);
                     }
                 }
@@ -380,6 +393,7 @@ export default class BoardBuilder {
         }
 
         if (cache?.sameBoardState(board) || iteration >= ITERATION_LIMIT) return board.computeGraphicalTypes();
+        else if (cache?.isSolved()) return board.computeGraphicalTypes();
         else return BoardBuilder.solve(ogBoard, board, ++iteration);
     }
 

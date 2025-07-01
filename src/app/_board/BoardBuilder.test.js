@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import BoardBuilder, { RELATIVE_POSITIONS } from './BoardBuilder';
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
+import { displayBoard, GRID_TYPES } from './BoardUtils';
 
 test('constructor', () => {
     const badPreset = new BoardBuilder(4, 5);
