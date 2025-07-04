@@ -255,150 +255,148 @@ export default class BoardBuilder {
     /**
      * Solves the board
      * @param {BoardBuilder} ogBoard - The original board to solve
-     * @param {BoardBuilder} [cache] - The answer in progress
-     * @param {number} [iteration] - How many times the function has been run
      * @returns {BoardBuilder} The solved board
      */
-    static solve (ogBoard, cache, iteration) {
-        // should be replaced in the future for an adjustable setting
+    static solve (ogBoard) {
         const ITERATION_LIMIT = 15;
+        const board = ogBoard.copy();
+        board.compTypes();
 
-        const board = (cache ? cache.copy() : ogBoard.copy()).compTypes();
-        iteration ||= 1;
+        for (let i = 0; i < ITERATION_LIMIT; i++) {
+            // check for full or would-be-full rows/columns
 
-        // check for full or would-be-full rows/columns
+            for (let y = 0; y < board.height; y++) {
+                const counts = board.countRow(y);
+                const expected = board.rowCounts[y];
+                if (counts[0] === expected) board.softFloodRow(y);
+                if (counts[0] + counts[1] === expected) board.softFloodRow(y, PLAY_TYPES.SHIP);
+            }
 
-        for (let y = 0; y < board.height; y++) {
-            const counts = board.countRow(y);
-            const expected = board.rowCounts[y];
+            for (let x = 0; x < board.width; x++) {
+                const counts = board.countCol(x);
+                const expected = board.columnCounts[x];
+                if (counts[0] === expected) board.softFloodColumn(x);
+                if (counts[0] + counts[1] === expected) board.softFloodColumn(x, PLAY_TYPES.SHIP);
+            }
 
-            if (counts[0] === expected) board.softFloodRow(y);
-            if (counts[0] + counts[1] === expected) board.softFloodRow(y, PLAY_TYPES.SHIP);
-        }
+            // place water/ships around ships
 
-        for (let x = 0; x < board.width; x++) {
-            const counts = board.countCol(x);
-            const expected = board.columnCounts[x];
+            for (let i = 0; i < board.boardState.length; i++) {
+                const square = board.getShip(i);
 
-            if (counts[0] === expected) board.softFloodColumn(x);
-            if (counts[0] + counts[1] === expected) board.softFloodColumn(x, PLAY_TYPES.SHIP);
-        }
+                if (square.playType !== PLAY_TYPES.SHIP) continue;
 
-        // place water/ships around ships
+                if (square.isCardinal()) board.setCardinalShips(i, Ship.graphicalTypeToRelativePosition(square.graphicalType));
+                else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE)
+                    board.setCardinalShips(i); // makes every surrounding square water
+                else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.graphicalType);
+                else board.floodCorners(i);
+            }
 
-        for (let i = 0; i < board.boardState.length; i++) {
-            const square = board.getShip(i);
+            // "there's only one place it could go/places it could go overlap"
+            // -TODO -URGENT
+            // make this only place one ship, rerun the whole thing, then do another ship, etc.
+            // when you do that, set the for loop condition back to i > 1
+            if (cache?.sameBoardState(board)) {
+                const shipsLeft = board.countRunsLeft(true);
+                const horizontalRuns = board.getHorizontalRuns();
+                const verticalRuns = board.getVerticalRuns();
 
-            if (square.playType !== PLAY_TYPES.SHIP) continue;
+                /**
+                 * Counts possibilities and adds them to a list
+                 * @param {Run} run - The run to count
+                 * @param {boolean} horizontal - True if the run spans horizontally, false if not
+                 * @param {number} i - The current loop index
+                 * @returns {[?number[], number]} [possibilities, totalPossibilities]
+                 */
+                function countPossibilities (run, horizontal, i) {
+                    const possibilities = [];
+                    let totalPossibilities = 0;
 
-            if (square.isCardinal()) board.setCardinalShips(i, Ship.graphicalTypeToRelativePosition(square.graphicalType));
-            else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE)
-                board.setCardinalShips(i); // makes every surrounding square water
-            else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.graphicalType);
-            else board.floodCorners(i);
-        }
+                    for (let j = 0; j + i <= run.length; j++) {
+                        const tmpBoard = board.copy();
+                        let changed = false;
 
-        // "there's only one place it could go/places it could go overlap"
-        // -TODO -URGENT
-        // make this only place one ship, rerun the whole thing, then do another ship, etc.
-        // when you do that, set the for loop condition back to i > 1
-        if (cache?.sameBoardState(board)) {
-            const shipsLeft = board.countRunsLeft(true);
-            const horizontalRuns = board.getHorizontalRuns();
-            const verticalRuns = board.getVerticalRuns();
+                        for (let k = 0; k < i; k++) {
+                            if (tmpBoard.softSetShip(run[k + j], PLAY_TYPES.SHIP)) changed = true;
+                        }
 
-            /**
-             * Counts possibilities and adds them to a list
-             * @param {Run} run - The run to count
-             * @param {boolean} horizontal - True if the run spans horizontally, false if not
-             * @param {number} i - The current loop index
-             * @returns {[?number[], number]} [possibilities, totalPossibilities]
-             */
-            function countPossibilities (run, horizontal, i) {
-                const possibilities = [];
-                let totalPossibilities = 0;
+                        if (!changed) continue;
 
-                for (let j = 0; j + i <= run.length; j++) {
-                    const tmpBoard = board.copy();
-                    let changed = false;
-
-                    for (let k = 0; k < i; k++) {
-                        if (tmpBoard.softSetShip(run[k + j], PLAY_TYPES.SHIP)) changed = true;
-                    }
-
-                    if (!changed) continue;
-
-                    // check if row ships > it's supposed to be
-                    if (horizontal) {
-                        const y = tmpBoard.indexToCoordinates(run[0])[1];
-                        const numShips = tmpBoard.countRow(y, tmpBoard)[0];
-                        if (numShips > tmpBoard.rowCounts[y]) continue;
-                    } else {
-                        const x = tmpBoard.indexToCoordinates(run[0])[0];
-                        const numShips = tmpBoard.countCol(x, tmpBoard)[0];
-
-                        if (numShips > tmpBoard.columnCounts[x]) continue;
-                    }
-
-                    // check the ends of the run to see if it's really i long
-                    if (tmpBoard.getRelativeShip(run[0], horizontal ? REL_POS.LEFT : REL_POS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
-                    if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? REL_POS.RIGHT : REL_POS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
-
-                    for (let k = 0; k < run.length; k++) {
-                        if (possibilities[run[k + j]]) {
-                            possibilities[run[k + j]]++;
+                        // check if row ships > it's supposed to be
+                        if (horizontal) {
+                            const y = tmpBoard.indexToCoordinates(run[0])[1];
+                            const numShips = tmpBoard.countRow(y, tmpBoard)[0];
+                            if (numShips > tmpBoard.rowCounts[y]) continue;
                         } else {
-                            possibilities[run[k + j]] = 1;
+                            const x = tmpBoard.indexToCoordinates(run[0])[0];
+                            const numShips = tmpBoard.countCol(x, tmpBoard)[0];
+
+                            if (numShips > tmpBoard.columnCounts[x]) continue;
+                        }
+
+                        // check the ends of the run to see if it's really i long
+                        if (tmpBoard.getRelativeShip(run[0], horizontal ? REL_POS.LEFT : REL_POS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
+                        if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? REL_POS.RIGHT : REL_POS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
+
+                        for (let k = 0; k < run.length; k++) {
+                            if (possibilities[run[k + j]]) {
+                                possibilities[run[k + j]]++;
+                            } else {
+                                possibilities[run[k + j]] = 1;
+                            }
+                        }
+
+                        totalPossibilities++;
+                    }
+
+                    return [possibilities, totalPossibilities];
+                }
+
+                // loop through each length of ship
+                for (let i = shipsLeft.length; i > 1; i--) {
+                    const shipCount = shipsLeft[i - 1];
+
+                    if (shipCount <= 0) continue;
+
+                    const filteredHRuns = horizontalRuns.filter(run => run.length >= i);
+                    const filteredVRuns = verticalRuns.filter(run => run.length >= i);
+
+                    if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
+
+                    const possibilities = [];
+                    let totalPossibilities = 0;
+
+                    filteredHRuns.forEach(run => {
+                        const [hPossibilities, totalHPossibilities] = countPossibilities(run, true, i);
+                        hPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
+                        totalPossibilities += totalHPossibilities;
+                    });
+                    filteredVRuns.forEach(run => {
+                        const [vPossibilities, totalVPossibilities] = countPossibilities(run, false, i);
+                        vPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
+                        totalPossibilities += totalVPossibilities;
+                    });
+
+                    let set = false;
+
+                    for (const ind in possibilities) {
+                        if (possibilities[ind] === totalPossibilities) {
+                            set = board.softSetShip(Number(ind), GRAPHICAL_TYPES.SHIP) || set;
                         }
                     }
 
-                    totalPossibilities++;
+                    if (set) break;
                 }
-
-                return [possibilities, totalPossibilities];
             }
 
-            // loop through each length of ship
-            for (let i = shipsLeft.length; i > 1; i--) {
-                const shipCount = shipsLeft[i - 1];
+            board.compTypes();
 
-                if (shipCount <= 0) continue;
-
-                const filteredHRuns = horizontalRuns.filter(run => run.length >= i);
-                const filteredVRuns = verticalRuns.filter(run => run.length >= i);
-
-                if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
-
-                const possibilities = [];
-                let totalPossibilities = 0;
-
-                filteredHRuns.forEach(run => {
-                    const [hPossibilities, totalHPossibilities] = countPossibilities(run, true, i);
-                    hPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
-                    totalPossibilities += totalHPossibilities;
-                });
-                filteredVRuns.forEach(run => {
-                    const [vPossibilities, totalVPossibilities] = countPossibilities(run, false, i);
-                    vPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
-                    totalPossibilities += totalVPossibilities;
-                });
-
-                let set = false;
-
-                for (const ind in possibilities) {
-                    if (possibilities[ind] === totalPossibilities) {
-                        set = board.softSetShip(Number(ind), GRAPHICAL_TYPES.SHIP) || set;
-                    }
-                }
-
-                if (set) break;
-            }
+            if (board?.sameBoardState(cache)) return board;
+            if (board?.isSolved()) return board;
         }
 
-        if (board?.sameBoardState(cache) || iteration >= ITERATION_LIMIT) return board.compTypes();
-        if (board?.isSolved()) return board.compTypes();
-
-        return BoardBuilder.solve(ogBoard, board, ++iteration);
+        return board;
     }
 
     /**
