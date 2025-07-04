@@ -263,7 +263,7 @@ export default class BoardBuilder {
         board.compTypes();
 
         for (let i = 0; i < ITERATION_LIMIT; i++) {
-            // check for full or would-be-full rows/columns
+            const old = board.copy();
 
             for (let y = 0; y < board.height; y++) {
                 const counts = board.countRow(y);
@@ -297,7 +297,7 @@ export default class BoardBuilder {
             // -TODO -URGENT
             // make this only place one ship, rerun the whole thing, then do another ship, etc.
             // when you do that, set the for loop condition back to i > 1
-            if (cache?.sameBoardState(board)) {
+            if (old?.sameBoardState(board)) {
                 const shipsLeft = board.countRunsLeft(true);
                 const horizontalRuns = board.getHorizontalRuns();
                 const verticalRuns = board.getVerticalRuns();
@@ -392,7 +392,7 @@ export default class BoardBuilder {
 
             board.compTypes();
 
-            if (board?.sameBoardState(cache)) return board;
+            if (board?.sameBoardState(old)) return board;
             if (board?.isSolved()) return board;
         }
 
