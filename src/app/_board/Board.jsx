@@ -44,7 +44,7 @@ export default class Board extends React.Component {
 
         // this makes it +1 for left click and +2 for right click (which basically works as -1, but without making it negative)
         const newType = (ship.playType + 1 + event.button / 2) % 3;
-        const board = this.state.board.setShip(index, newType).computeGraphicalTypes();
+        const board = this.state.board.setShip(index, newType).compTypes();
 
         this.setState({ board: board, solved: board.isSolved(), draggedType: newType });
     }
@@ -52,7 +52,7 @@ export default class Board extends React.Component {
     onMouseEnter (index) {
         if (this.state.board.getShip(index).pinned || !this.state.draggedType) return;
 
-        const board = this.state.board.setShip(index, this.state.draggedType).computeGraphicalTypes();
+        const board = this.state.board.setShip(index, this.state.draggedType).compTypes();
         this.setState({ board: board, solved: board.isSolved() });
     }
 

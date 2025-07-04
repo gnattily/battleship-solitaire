@@ -1,4 +1,4 @@
-import { RELATIVE_POSITIONS } from './BoardBuilder';
+import { REL_POS } from './BoardBuilder';
 
 /**
  * The ship class for the board
@@ -20,25 +20,25 @@ export default class Ship {
     toString () {
         switch (this.graphicalType) {
             case GRAPHICAL_TYPES.UNKNOWN:
-                return 'Unknown';
+                return ' ';
             case GRAPHICAL_TYPES.WATER:
-                return 'Water';
+                return '☵';
             case GRAPHICAL_TYPES.SHIP:
-                return 'Ship';
+                return '◯';
             case GRAPHICAL_TYPES.DOWN:
-                return 'Down';
+                return '⯅';
             case GRAPHICAL_TYPES.HORIZONTAL:
-                return 'Horizontal';
+                return '■';
             case GRAPHICAL_TYPES.LEFT:
-                return 'Left';
+                return '⯈';
             case GRAPHICAL_TYPES.RIGHT:
-                return 'Right';
+                return '⯇';
             case GRAPHICAL_TYPES.SINGLE:
-                return 'Single';
+                return '●';
             case GRAPHICAL_TYPES.UP:
-                return 'Up';
+                return '⯆';
             case GRAPHICAL_TYPES.VERTICAL:
-                return 'Vertical';
+                return '■';
             default:
                 throw new Error('graphicalType is not a valid graphical type');
         }
@@ -82,9 +82,7 @@ export default class Ship {
      * @returns {boolean} true if equal, false if not
      */
     equals (comparate) {
-        return (
-            this.graphicalType === comparate.graphicalType
-        );
+        return this.graphicalType === comparate.graphicalType;
     }
 
     /**
@@ -153,13 +151,13 @@ export default class Ship {
     static graphicalTypeToRelativePosition (graphicalType) {
         switch (graphicalType) {
             case GRAPHICAL_TYPES.LEFT:
-                return RELATIVE_POSITIONS.LEFT;
+                return REL_POS.LEFT;
             case GRAPHICAL_TYPES.RIGHT:
-                return RELATIVE_POSITIONS.RIGHT;
+                return REL_POS.RIGHT;
             case GRAPHICAL_TYPES.UP:
-                return RELATIVE_POSITIONS.TOP;
+                return REL_POS.TOP;
             case GRAPHICAL_TYPES.DOWN:
-                return RELATIVE_POSITIONS.BOTTOM;
+                return REL_POS.BOTTOM;
             default:
                 throw new Error(`${graphicalType} has no single corresponding relative position`);
         }

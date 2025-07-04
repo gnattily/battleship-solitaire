@@ -1,6 +1,6 @@
 /**
  * @typedef {number[]} Run
- * An array of indicies representing sqaures in a run
+ * An array of indicies representing squares in a run
  */
 
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship.js';
@@ -38,7 +38,9 @@ export default class BoardBuilder {
             this.boardState = board.boardState;
         } else {
             const width = widthOrPreset;
-            if (presetOrRowCounts && (presetOrRowCounts.width !== width || presetOrRowCounts.height !== heightOrColumnCounts)) throw new Error(`Preset should be the same size as the new board. Expected (${width}, ${heightOrColumnCounts}), received (${presetOrRowCounts.width}, ${presetOrRowCounts.height})`);
+            if (presetOrRowCounts && (presetOrRowCounts.width !== width || presetOrRowCounts.height !== heightOrColumnCounts)) {
+                throw new Error(`Preset should be the same size as the new board. Expected (${width}, ${heightOrColumnCounts}), received (${presetOrRowCounts.width}, ${presetOrRowCounts.height})`);
+            }
 
             this.width = width || this.preset?.width || 4;
             this.height = heightOrColumnCounts || this.preset?.height || 4;
@@ -253,79 +255,64 @@ export default class BoardBuilder {
     /**
      * Solves the board
      * @param {BoardBuilder} ogBoard - The original board to solve
-     * @param {BoardBuilder} [cache] - The answer in progress
-     * @param {number} [iteration] - How many times the function has been run
      * @returns {BoardBuilder} The solved board
      */
-    static solve (ogBoard, cache, iteration) {
-        // should be replaced in the future for an adjustable setting
+    static solve (ogBoard) {
         const ITERATION_LIMIT = 15;
+        const board = ogBoard.copy();
+        board.compTypes();
 
-        const board = (cache ? cache.copy() : ogBoard.copy()).computeGraphicalTypes();
-        iteration ||= 1;
+        for (let i = 0; i < ITERATION_LIMIT; i++) {
+            const old = board.copy();
 
-        // check for full or would-be-full rows/columns
+            for (let y = 0; y < board.height; y++) {
+                const counts = board.countRow(y);
+                const expected = board.rowCounts[y];
+                if (counts[0] === expected) board.softFloodRow(y);
+                if (counts[0] + counts[1] === expected) board.softFloodRow(y, PLAY_TYPES.SHIP);
+            }
 
-        for (let y = 0; y < board.height; y++) {
-            const counts = board.countRow(y);
-            const expected = board.rowCounts[y];
+            for (let x = 0; x < board.width; x++) {
+                const counts = board.countCol(x);
+                const expected = board.columnCounts[x];
+                if (counts[0] === expected) board.softFloodColumn(x);
+                if (counts[0] + counts[1] === expected) board.softFloodColumn(x, PLAY_TYPES.SHIP);
+            }
 
-            if (counts[0] === expected) board.softFloodRow(y);
-            if (counts[0] + counts[1] === expected) board.softFloodRow(y, PLAY_TYPES.SHIP);
-        }
+            // place water/ships around ships
 
-        for (let x = 0; x < board.width; x++) {
-            const counts = board.countCol(x);
-            const expected = board.columnCounts[x];
+            for (let i = 0; i < board.boardState.length; i++) {
+                const square = board.getShip(i);
 
-            if (counts[0] === expected) board.softFloodColumn(x);
-            if (counts[0] + counts[1] === expected) board.softFloodColumn(x, PLAY_TYPES.SHIP);
-        }
+                if (square.playType !== PLAY_TYPES.SHIP) continue;
 
-        // place water/ships around ships
+                if (square.isCardinal()) board.setCardinalShips(i, Ship.graphicalTypeToRelativePosition(square.graphicalType));
+                else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE)
+                    board.setCardinalShips(i); // makes every surrounding square water
+                else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.graphicalType);
+                else board.floodCorners(i);
+            }
 
-        for (let i = 0; i < board.boardState.length; i++) {
-            const square = board.getShip(i);
+            // "there's only one place it could go/places it could go overlap"
+            // -TODO -URGENT
+            // make this only place one ship, rerun the whole thing, then do another ship, etc.
+            // when you do that, set the for loop condition back to i > 1
+            if (old?.sameBoardState(board)) {
+                const shipsLeft = board.countRunsLeft(true);
+                const horizontalRuns = board.getHorizontalRuns();
+                const verticalRuns = board.getVerticalRuns();
 
-            if (square.playType !== PLAY_TYPES.SHIP) continue;
-
-            if (square.isCardinal()) board.setCardinalShips(i, Ship.graphicalTypeToRelativePosition(square.graphicalType));
-            else if (square.graphicalType === GRAPHICAL_TYPES.SINGLE)
-                board.setCardinalShips(i); // makes every surrounding square water
-            else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.graphicalType);
-            else board.floodCorners(i);
-        }
-
-        // "there's only one place it could go/places it could go overlap"\
-        // -TODO -URGENT
-        // make this only place one ship, rerun the whole thing, then do another ship, etc.
-        // when you do that, set the for loop condition back to i > 1
-        if (cache?.sameBoardState(board)) {
-            const shipsLeft = board.countRunsLeft(true);
-            const horizontalRuns = board.getHorizontalRuns();
-            const verticalRuns = board.getVerticalRuns();
-
-            // loop through each length of ship
-            for (let i = shipsLeft.length; i > 2; i--) {
-                const shipCount = shipsLeft[i];
-
-                if (shipCount <= 0) continue;
-
-                const filteredHRuns = horizontalRuns.filter(run => run.length >= i);
-                const filteredVRuns = verticalRuns.filter(run => run.length >= i);
-
-                if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
-
-                const possiblities = {};
-                let totalPossibilities = 0;
-
-                // define this outside of the for loop, that's gotta be crazy inefficient -TODO
                 /**
                  * Counts possibilities and adds them to a list
                  * @param {Run} run - The run to count
                  * @param {boolean} horizontal - True if the run spans horizontally, false if not
+                 * @param {number} i - The current loop index
+                 * @returns {[?number[], number]} [possibilities, totalPossibilities]
                  */
-                function countPossibilities (run, horizontal) {
+                function countPossibilities (run, horizontal, i) {
+                    const possibilities = [];
+                    let totalPossibilities = 0;
+
                     for (let j = 0; j + i <= run.length; j++) {
                         const tmpBoard = board.copy();
                         let changed = false;
@@ -349,38 +336,67 @@ export default class BoardBuilder {
                         }
 
                         // check the ends of the run to see if it's really i long
-                        if (tmpBoard.getRelativeShip(run[0], horizontal ? RELATIVE_POSITIONS.LEFT : RELATIVE_POSITIONS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
-                        if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? RELATIVE_POSITIONS.RIGHT : RELATIVE_POSITIONS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
+                        if (tmpBoard.getRelativeShip(run[0], horizontal ? REL_POS.LEFT : REL_POS.TOP)?.playType === PLAY_TYPES.SHIP) continue;
+                        if (tmpBoard.getRelativeShip(run[run.length - 1], horizontal ? REL_POS.RIGHT : REL_POS.BOTTOM)?.playType === PLAY_TYPES.SHIP) continue;
 
                         for (let k = 0; k < run.length; k++) {
-                            if (possiblities[run[k + j]]) {
-                                possiblities[run[k + j]]++;
+                            if (possibilities[run[k + j]]) {
+                                possibilities[run[k + j]]++;
                             } else {
-                                possiblities[run[k + j]] = 1;
+                                possibilities[run[k + j]] = 1;
                             }
                         }
 
                         totalPossibilities++;
                     }
+
+                    return [possibilities, totalPossibilities];
                 }
 
-                filteredHRuns.forEach(run => {
-                    countPossibilities(run, true);
-                });
-                filteredVRuns.forEach(run => {
-                    countPossibilities(run, false);
-                });
+                // loop through each length of ship
+                for (let i = shipsLeft.length; i > 1; i--) {
+                    const shipCount = shipsLeft[i - 1];
 
-                for (const pos in possiblities) {
-                    if (possiblities[pos] === totalPossibilities) {
-                        board.setShip(Number(pos), GRAPHICAL_TYPES.SHIP);
+                    if (shipCount <= 0) continue;
+
+                    const filteredHRuns = horizontalRuns.filter(run => run.length >= i);
+                    const filteredVRuns = verticalRuns.filter(run => run.length >= i);
+
+                    if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
+
+                    const possibilities = [];
+                    let totalPossibilities = 0;
+
+                    filteredHRuns.forEach(run => {
+                        const [hPossibilities, totalHPossibilities] = countPossibilities(run, true, i);
+                        hPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
+                        totalPossibilities += totalHPossibilities;
+                    });
+                    filteredVRuns.forEach(run => {
+                        const [vPossibilities, totalVPossibilities] = countPossibilities(run, false, i);
+                        vPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
+                        totalPossibilities += totalVPossibilities;
+                    });
+
+                    let set = false;
+
+                    for (const ind in possibilities) {
+                        if (possibilities[ind] === totalPossibilities) {
+                            set = board.softSetShip(Number(ind), GRAPHICAL_TYPES.SHIP) || set;
+                        }
                     }
+
+                    if (set) break;
                 }
             }
+
+            board.compTypes();
+
+            if (board?.sameBoardState(old)) return board;
+            if (board?.isSolved()) return board;
         }
 
-        if (cache?.sameBoardState(board) || iteration >= ITERATION_LIMIT) return board.computeGraphicalTypes();
-        else return BoardBuilder.solve(ogBoard, board, ++iteration);
+        return board;
     }
 
     /**
@@ -491,13 +507,13 @@ export default class BoardBuilder {
         // consider doing this by checking for duplicates across the entire thing -TODO
         // distinguish snippets of vertical runs from solo ships
         horizontalRuns = horizontalRuns.filter(run => {
-            if (run.length === 1 && this.getRelativeShip(run[0], RELATIVE_POSITIONS.TOP)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], RELATIVE_POSITIONS.BOTTOM)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
+            if (run.length === 1 && this.getRelativeShip(run[0], REL_POS.TOP)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], REL_POS.BOTTOM)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
             return run.length !== 1;
         });
 
         // distinguish snippets of horizontal runs from solo ships
         verticalRuns = verticalRuns.filter(run => {
-            if (run.length === 1 && this.getRelativeShip(run[0], RELATIVE_POSITIONS.LEFT)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], RELATIVE_POSITIONS.RIGHT)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
+            if (run.length === 1 && this.getRelativeShip(run[0], REL_POS.LEFT)?.playType !== PLAY_TYPES.SHIP && this.getRelativeShip(run[0], REL_POS.RIGHT)?.playType !== PLAY_TYPES.SHIP) singleRuns.push(run);
             return run.length > 1;
         });
 
@@ -628,25 +644,23 @@ export default class BoardBuilder {
 
     // consistency in syntax and whatnot could use some work here -TODO
     // add jsdoc here -TODO
-    computeGraphicalTypes () {
-        for (let i = 0; i < this.width * this.height; i++) {
+    compTypes () {
+        // for legibility
+        const isShip = Ship.isShip;
+        const isWater = Ship.isWater;
+
+        for (let i = 0; i < this.boardState.length; i++) {
             const ship = this.getShip(i);
             if (ship.pinned && ship.graphicalType > PLAY_TYPES.SHIP) continue;
-
-            // for legibility
-            const [isShip, isWater] = [Ship.isShip, Ship.isWater];
-
             if (!isShip(ship)) continue;
 
-            function setType (type) {
-                ship.setGraphicalType(type);
-            }
+            const setType = t => ship.setGraphicalType(t);
 
             // makes the edges act as water
-            const left = this.getRelativeShip(i, RELATIVE_POSITIONS.LEFT) || new Ship(PLAY_TYPES.WATER);
-            const top = this.getRelativeShip(i, RELATIVE_POSITIONS.TOP) || new Ship(PLAY_TYPES.WATER);
-            const right = this.getRelativeShip(i, RELATIVE_POSITIONS.RIGHT) || new Ship(PLAY_TYPES.WATER);
-            const bottom = this.getRelativeShip(i, RELATIVE_POSITIONS.BOTTOM) || new Ship(PLAY_TYPES.WATER);
+            const left = this.getRelativeShip(i, REL_POS.LEFT) || new Ship(PLAY_TYPES.WATER);
+            const top = this.getRelativeShip(i, REL_POS.TOP) || new Ship(PLAY_TYPES.WATER);
+            const right = this.getRelativeShip(i, REL_POS.RIGHT) || new Ship(PLAY_TYPES.WATER);
+            const bottom = this.getRelativeShip(i, REL_POS.BOTTOM) || new Ship(PLAY_TYPES.WATER);
 
             // now just do all the logic from here and have a grand ol' time
             if (isWater([left, top, right, bottom])) setType(GRAPHICAL_TYPES.SINGLE);
@@ -826,7 +840,7 @@ export default class BoardBuilder {
 
         if (index === null) return null;
 
-        return this.setShip(index, value, pinned);
+        return this.softSetShip(index, value, pinned);
     }
 
     // make this automatically infer the relative position from a ship type -TODO
@@ -839,8 +853,8 @@ export default class BoardBuilder {
      * @throws {TypeError} If position is not an index (integer) or array of coordinates
      */
     setCardinalShips (position, except) {
-        for (const relativePosition in RELATIVE_POSITIONS) {
-            const value = RELATIVE_POSITIONS[relativePosition];
+        for (const relativePosition in REL_POS) {
+            const value = REL_POS[relativePosition];
 
             this.setRelativeShip(position, value, except === value ? PLAY_TYPES.SHIP : PLAY_TYPES.WATER);
         }
@@ -857,10 +871,10 @@ export default class BoardBuilder {
     setOrthogonalShips (position, orientation) {
         // could use some error handling to check if orientation is horizontal or vertical and not left or something -TODO
 
-        const shipDirections = orientation === GRAPHICAL_TYPES.HORIZONTAL ? [RELATIVE_POSITIONS.LEFT, RELATIVE_POSITIONS.RIGHT] : [RELATIVE_POSITIONS.TOP, RELATIVE_POSITIONS.BOTTOM];
+        const shipDirections = orientation === GRAPHICAL_TYPES.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
 
-        for (const key in RELATIVE_POSITIONS) {
-            const relativePosition = RELATIVE_POSITIONS[key];
+        for (const key in REL_POS) {
+            const relativePosition = REL_POS[key];
 
             if (!shipDirections.includes(relativePosition)) this.setRelativeShip(position, relativePosition, PLAY_TYPES.WATER);
             else if (this.getRelativeShip(relativePosition)?.playType !== PLAY_TYPES.SHIP) this.setRelativeShip(position, relativePosition, PLAY_TYPES.SHIP);
@@ -903,15 +917,15 @@ export default class BoardBuilder {
      * @returns {BoardBuilder} this
      */
     floodCorners (position) {
-        this.setRelativeShip(position, RELATIVE_POSITIONS.TOP_LEFT, PLAY_TYPES.WATER);
-        this.setRelativeShip(position, RELATIVE_POSITIONS.TOP_RIGHT, PLAY_TYPES.WATER);
-        this.setRelativeShip(position, RELATIVE_POSITIONS.BOTTOM_LEFT, PLAY_TYPES.WATER);
-        this.setRelativeShip(position, RELATIVE_POSITIONS.BOTTOM_RIGHT, PLAY_TYPES.WATER);
+        this.setRelativeShip(position, REL_POS.TOP_LEFT, PLAY_TYPES.WATER);
+        this.setRelativeShip(position, REL_POS.TOP_RIGHT, PLAY_TYPES.WATER);
+        this.setRelativeShip(position, REL_POS.BOTTOM_LEFT, PLAY_TYPES.WATER);
+        this.setRelativeShip(position, REL_POS.BOTTOM_RIGHT, PLAY_TYPES.WATER);
         return this;
     }
 }
 
-export const RELATIVE_POSITIONS = {
+export const REL_POS = {
     TOP_LEFT: 0,
     TOP: 1,
     TOP_RIGHT: 2,

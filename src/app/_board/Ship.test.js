@@ -1,14 +1,9 @@
 import { expect, test } from 'vitest';
 
-import { RELATIVE_POSITIONS } from './BoardBuilder';
+import { REL_POS } from './BoardBuilder';
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
 
 test('toString', () => {
-    for (const type in GRAPHICAL_TYPES) {
-        const ship = new Ship(GRAPHICAL_TYPES[type]);
-        expect(ship.toString().toUpperCase()).toBe(type);
-    }
-
     const ship = new Ship(GRAPHICAL_TYPES.UNKNOWN);
     ship.graphicalType = 10;
 
@@ -164,10 +159,10 @@ test('graphicalTypeToRelativePosition', () => {
     const ship5 = GRAPHICAL_TYPES.HORIZONTAL;
     const ship6 = PLAY_TYPES.SHIP;
 
-    expect(Ship.graphicalTypeToRelativePosition(ship1)).toBe(RELATIVE_POSITIONS.LEFT);
-    expect(Ship.graphicalTypeToRelativePosition(ship2)).toBe(RELATIVE_POSITIONS.RIGHT);
-    expect(Ship.graphicalTypeToRelativePosition(ship3)).toBe(RELATIVE_POSITIONS.TOP);
-    expect(Ship.graphicalTypeToRelativePosition(ship4)).toBe(RELATIVE_POSITIONS.BOTTOM);
+    expect(Ship.graphicalTypeToRelativePosition(ship1)).toBe(REL_POS.LEFT);
+    expect(Ship.graphicalTypeToRelativePosition(ship2)).toBe(REL_POS.RIGHT);
+    expect(Ship.graphicalTypeToRelativePosition(ship3)).toBe(REL_POS.TOP);
+    expect(Ship.graphicalTypeToRelativePosition(ship4)).toBe(REL_POS.BOTTOM);
 
     expect(() => { Ship.graphicalTypeToRelativePosition(ship5); }).toThrow('has no single corresponding relative position');
     expect(() => { Ship.graphicalTypeToRelativePosition(ship6); }).toThrow('has no single corresponding relative position');
