@@ -48,7 +48,7 @@ const preset = new BoardBuilder(15, 15, undefined,
     .setShip([6, 13], GRAPHICAL_TYPES.WATER, true)
     .setShip([3, 14], GRAPHICAL_TYPES.WATER, true)
     .setShip([14, 14], GRAPHICAL_TYPES.SINGLE, true)
-    .computeGraphicalTypes()
+    .compTypes()
     .export();
 
 export default function Page () {

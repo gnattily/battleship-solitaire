@@ -1,8 +1,7 @@
 import { expect, test } from 'vitest';
 
-import BoardBuilder, { RELATIVE_POSITIONS } from './BoardBuilder';
+import BoardBuilder, { REL_POS } from './BoardBuilder';
 import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
-import { displayBoard, GRID_TYPES } from './BoardUtils';
 
 test('constructor', () => {
     const badPreset = new BoardBuilder(4, 5);
@@ -383,7 +382,7 @@ test('computeGraphicalTypes', () => {
         .softFloodRow(4)
         .setShip([1, 2], GRAPHICAL_TYPES.RIGHT);
 
-    expect(board.computeGraphicalTypes() instanceof BoardBuilder).toBeTruthy();
+    expect(board.compTypes() instanceof BoardBuilder).toBeTruthy();
 
     expect(board.getShip(0).graphicalType).toBe(GRAPHICAL_TYPES.RIGHT);
     expect(board.getShip(1).graphicalType).toBe(GRAPHICAL_TYPES.HORIZONTAL);
@@ -461,9 +460,9 @@ test('softSetShip', () => {
 test('relativePositionToIndex', () => {
     const board = new BoardBuilder(4, 4);
 
-    expect(board.relativePositionToIndex(0, RELATIVE_POSITIONS.RIGHT)).toBe(1);
-    expect(board.relativePositionToIndex(0, RELATIVE_POSITIONS.LEFT)).toBeNull();
-    expect(board.relativePositionToIndex(3, RELATIVE_POSITIONS.RIGHT)).toBeNull();
+    expect(board.relativePositionToIndex(0, REL_POS.RIGHT)).toBe(1);
+    expect(board.relativePositionToIndex(0, REL_POS.LEFT)).toBeNull();
+    expect(board.relativePositionToIndex(3, REL_POS.RIGHT)).toBeNull();
 });
 
 test('getRelativeShip', () => {
@@ -472,22 +471,22 @@ test('getRelativeShip', () => {
     board.setShip(1, PLAY_TYPES.WATER);
     board.setShip(4, GRAPHICAL_TYPES.VERTICAL);
 
-    expect(board.getRelativeShip(0, RELATIVE_POSITIONS.BOTTOM).graphicalType).toBe(GRAPHICAL_TYPES.VERTICAL);
-    expect(board.getRelativeShip(0, RELATIVE_POSITIONS.LEFT)).toBeNull();
-    expect(board.getRelativeShip(0, RELATIVE_POSITIONS.RIGHT).playType).toBe(PLAY_TYPES.WATER);
+    expect(board.getRelativeShip(0, REL_POS.BOTTOM).graphicalType).toBe(GRAPHICAL_TYPES.VERTICAL);
+    expect(board.getRelativeShip(0, REL_POS.LEFT)).toBeNull();
+    expect(board.getRelativeShip(0, REL_POS.RIGHT).playType).toBe(PLAY_TYPES.WATER);
 });
 
 test('setRelativeShip', () => {
     const board = new BoardBuilder(4, 4);
 
-    expect(board.setRelativeShip(0, RELATIVE_POSITIONS.RIGHT, PLAY_TYPES.SHIP) instanceof BoardBuilder).toBeTruthy();
-    expect(board.setRelativeShip(0, RELATIVE_POSITIONS.LEFT, PLAY_TYPES.SHIP)).toBeNull();
+    expect(board.setRelativeShip(0, REL_POS.RIGHT, PLAY_TYPES.SHIP)).toBeTruthy();
+    expect(board.setRelativeShip(0, REL_POS.LEFT, PLAY_TYPES.SHIP)).toBeNull();
     expect(board.boardState[1].playType).toBe(PLAY_TYPES.SHIP);
 });
 
 test('setCardinalShips', () => {
     const board = new BoardBuilder(4, 4);
-    expect(board.setCardinalShips([1, 1], RELATIVE_POSITIONS.TOP) instanceof BoardBuilder).toBeTruthy();
+    expect(board.setCardinalShips([1, 1], REL_POS.TOP) instanceof BoardBuilder).toBeTruthy();
 
     expect(board.boardState[0].playType).toBe(PLAY_TYPES.WATER);
     expect(board.boardState[1].playType).toBe(PLAY_TYPES.SHIP);

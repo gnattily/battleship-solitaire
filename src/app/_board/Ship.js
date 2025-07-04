@@ -1,4 +1,4 @@
-import { RELATIVE_POSITIONS } from './BoardBuilder';
+import { REL_POS } from './BoardBuilder';
 
 /**
  * The ship class for the board
@@ -151,13 +151,13 @@ export default class Ship {
     static graphicalTypeToRelativePosition (graphicalType) {
         switch (graphicalType) {
             case GRAPHICAL_TYPES.LEFT:
-                return RELATIVE_POSITIONS.LEFT;
+                return REL_POS.LEFT;
             case GRAPHICAL_TYPES.RIGHT:
-                return RELATIVE_POSITIONS.RIGHT;
+                return REL_POS.RIGHT;
             case GRAPHICAL_TYPES.UP:
-                return RELATIVE_POSITIONS.TOP;
+                return REL_POS.TOP;
             case GRAPHICAL_TYPES.DOWN:
-                return RELATIVE_POSITIONS.BOTTOM;
+                return REL_POS.BOTTOM;
             default:
                 throw new Error(`${graphicalType} has no single corresponding relative position`);
         }

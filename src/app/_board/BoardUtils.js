@@ -8,24 +8,35 @@
 
 */
 
+const RESET = '\x1b[0m';
+const CYAN = '\x1b[36m';
+const WHITE = '\x1b[37m';
+const GRAY = '\x1b[90m';
+
+const BRIGHT = '\x1b[1m';
+const DIM = '\x1b[2m';
+
 import BoardBuilder from './BoardBuilder';
+import { PLAY_TYPES } from './Ship';
 
 /**
  * Prints out a representation of the board to the console
  * @param {BoardBuilder} board - The board to display
- * @param {number} [gridType=0] - 0 for no grid, 1 for minimal, 2 for square
+ * @param {number} [gridType=2] - 0 for no grid, 1 for minimal, 2 for full
  */
-export function displayBoard (board, gridType = 0) {
+export function displayBoard (board, gridType = GRID_TYPES.FULL) {
     switch (gridType) {
         case (GRID_TYPES.NONE):
             for (let y = 0; y < board.height; y++) {
-                let line = '';
+                let out = '';
 
                 for (let x = 0; x < board.width; x++) {
-                    line += board.getShip([x, y]);
+                    const ship = board.getShip([x, y]);
+                    if (ship.playType === PLAY_TYPES.WATER) out += DIM + CYAN;
+                    out += ship + RESET;
                 }
 
-                console.log(line);
+                console.log(out);
             }
 
             break;
@@ -34,11 +45,12 @@ export function displayBoard (board, gridType = 0) {
             printEnd(board.width, gridType, true);
 
             for (let y = 0; y < board.height; y++) {
-                let out = '│';
+                let out = GRAY + '│' + RESET;
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
-                    out += gridType === GRID_TYPES.MINIMAL ? `${ship}│` : ` ${ship} |`;
+                    if (ship.playType === PLAY_TYPES.WATER) out += DIM + CYAN;
+                    out += BRIGHT + WHITE + (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship} `) + `${GRAY}│${RESET}`;
                 }
 
                 console.log(out);
@@ -54,24 +66,24 @@ export function displayBoard (board, gridType = 0) {
 }
 
 function printEnd (width, gridType, top) {
-    let out = top ? '┌' : '└';
+    let out = GRAY + (top ? '┌' : '└');
 
     for (let i = 0; i < width; i++) {
         out += gridType === GRID_TYPES.MINIMAL ? '─' : '───';
         out += top ? '┬' : '┴';
     }
 
-    console.log(out.slice(0, -1) + (top ? '┐' : '┘'));
+    console.log(out.slice(0, -1) + (top ? '┐' : '┘') + RESET);
 }
 
 function printBar (width, gridType) {
-    let out = '├';
+    let out = GRAY + '├';
 
     for (let i = 0; i < width; i++) {
         out += gridType === GRID_TYPES.MINIMAL ? '─┼' : '───┼';
     }
 
-    console.log(out.slice(0, -1) + '┤');
+    console.log(out.slice(0, -1) + '┤' + RESET);
 }
 
 /**
