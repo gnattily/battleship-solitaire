@@ -48,6 +48,8 @@ const eslintConfig = [
             'jsdoc/require-jsdoc': 'off',
             'jsdoc/require-hyphen-before-param-description': 'warn',
             'jsdoc/no-defaults': 'off',
+            'jsdoc/require-property-description': 'off',
+            'jsdoc/require-hyphen-before-param-description': ['warn', 'never'],
         },
     },
 

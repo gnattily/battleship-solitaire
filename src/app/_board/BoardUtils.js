@@ -21,8 +21,8 @@ import { PLAY_TYPES } from './Ship';
 
 /**
  * Prints out a representation of the board to the console
- * @param {BoardBuilder} board - The board to display
- * @param {number} [gridType=2] - 0 for no grid, 1 for minimal, 2 for full
+ * @param {BoardBuilder} board The board to display
+ * @param {number} [gridType=2] 0 for no grid, 1 for minimal, 2 for full
  */
 export function displayBoard (board, gridType = GRID_TYPES.FULL) {
     switch (gridType) {

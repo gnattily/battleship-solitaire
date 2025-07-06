@@ -1,50 +1,50 @@
 import { expect, test } from 'vitest';
 
 import { REL_POS } from './BoardBuilder';
-import Ship, { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
+import Ship, { TYPE } from './Ship';
 
 test('toString', () => {
-    const ship = new Ship(GRAPHICAL_TYPES.UNKNOWN);
-    ship.graphicalType = 10;
+    const ship = new Ship(TYPE.UNKNOWN);
+    ship.graphicalType = 11;
 
     expect(() => { ship.toString(); }).toThrow('graphicalType is not a valid graphical type');
 });
 
 test('setPlayType', () => {
-    const ship = new Ship(PLAY_TYPES.UNKNOWN);
+    const ship = new Ship(TYPE.UNKNOWN);
 
-    expect(() => { ship.setPlayType(GRAPHICAL_TYPES.HORIZONTAL); }).toThrow('newType must be a play type');
+    expect(() => { ship.setPlayType(TYPE.HORIZONTAL); }).toThrow('newType must be a play type');
 
-    ship.setPlayType(PLAY_TYPES.SHIP);
-    expect(ship.graphicalType).toBe(PLAY_TYPES.SHIP);
+    ship.setPlayType(TYPE.SHIP);
+    expect(ship.graphicalType).toBe(TYPE.SHIP);
 
-    ship.setGraphicalType(GRAPHICAL_TYPES.HORIZONTAL);
-    ship.setPlayType(PLAY_TYPES.SHIP);
-    expect(ship.graphicalType).toBe(GRAPHICAL_TYPES.HORIZONTAL);
+    ship.setGraphicalType(TYPE.HORIZONTAL);
+    ship.setPlayType(TYPE.SHIP);
+    expect(ship.graphicalType).toBe(TYPE.HORIZONTAL);
 
-    expect(ship.playType).toBe(PLAY_TYPES.SHIP);
-    expect(ship.setPlayType(PLAY_TYPES.WATER) instanceof Ship).toBeTruthy();
+    expect(ship.playType).toBe(TYPE.SHIP);
+    expect(ship.setPlayType(TYPE.WATER) instanceof Ship).toBeTruthy();
 });
 
 test('setGraphicalType', () => {
-    const ship = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
+    const ship = new Ship(TYPE.HORIZONTAL);
 
     expect(() => { ship.setGraphicalType(20); }).toThrow('newType must be a graphical type');
 
-    ship.setGraphicalType(GRAPHICAL_TYPES.WATER);
-    expect(ship.playType).toBe(PLAY_TYPES.WATER);
+    ship.setGraphicalType(TYPE.WATER);
+    expect(ship.playType).toBe(TYPE.WATER);
 
-    ship.setGraphicalType(GRAPHICAL_TYPES.VERTICAL);
-    expect(ship.playType).toBe(PLAY_TYPES.SHIP);
+    ship.setGraphicalType(TYPE.VERTICAL);
+    expect(ship.playType).toBe(TYPE.SHIP);
 
-    expect(ship.graphicalType).toBe(GRAPHICAL_TYPES.VERTICAL);
-    expect(ship.setGraphicalType(GRAPHICAL_TYPES.RIGHT) instanceof Ship).toBeTruthy();
+    expect(ship.graphicalType).toBe(TYPE.VERTICAL);
+    expect(ship.setGraphicalType(TYPE.RIGHT) instanceof Ship).toBeTruthy();
 });
 
 test('equals', () => {
-    const ship1 = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
-    const ship2 = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
-    const ship3 = new Ship(GRAPHICAL_TYPES.LEFT);
+    const ship1 = new Ship(TYPE.HORIZONTAL);
+    const ship2 = new Ship(TYPE.HORIZONTAL);
+    const ship3 = new Ship(TYPE.LEFT);
 
     expect(ship1.equals(ship2)).toBeTruthy();
     expect(ship1.equals(ship3)).toBeFalsy();
@@ -53,10 +53,10 @@ test('equals', () => {
 });
 
 test('isCardinal', () => {
-    const left = new Ship(GRAPHICAL_TYPES.LEFT);
-    const up = new Ship(GRAPHICAL_TYPES.DOWN);
-    const horiztonal = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
-    const ship = new Ship(GRAPHICAL_TYPES.SHIP);
+    const left = new Ship(TYPE.LEFT);
+    const up = new Ship(TYPE.DOWN);
+    const horiztonal = new Ship(TYPE.HORIZONTAL);
+    const ship = new Ship(TYPE.SHIP);
 
     expect(left.isCardinal()).toBeTruthy();
     expect(up.isCardinal()).toBeTruthy();
@@ -65,11 +65,11 @@ test('isCardinal', () => {
 });
 
 test('isOrthogonal', () => {
-    const left = new Ship(GRAPHICAL_TYPES.LEFT);
-    const up = new Ship(GRAPHICAL_TYPES.DOWN);
-    const horiztonal = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
-    const vertical = new Ship(GRAPHICAL_TYPES.VERTICAL);
-    const ship = new Ship(GRAPHICAL_TYPES.SHIP);
+    const left = new Ship(TYPE.LEFT);
+    const up = new Ship(TYPE.DOWN);
+    const horiztonal = new Ship(TYPE.HORIZONTAL);
+    const vertical = new Ship(TYPE.VERTICAL);
+    const ship = new Ship(TYPE.SHIP);
 
     expect(left.isOrthogonal()).toBeFalsy();
     expect(up.isOrthogonal()).toBeFalsy();
@@ -79,11 +79,11 @@ test('isOrthogonal', () => {
 });
 
 test('isEnd', () => {
-    const left = new Ship(GRAPHICAL_TYPES.LEFT);
-    const up = new Ship(GRAPHICAL_TYPES.DOWN);
-    const single = new Ship(GRAPHICAL_TYPES.SINGLE);
-    const horiztonal = new Ship(GRAPHICAL_TYPES.HORIZONTAL);
-    const ship = new Ship(GRAPHICAL_TYPES.SHIP);
+    const left = new Ship(TYPE.LEFT);
+    const up = new Ship(TYPE.DOWN);
+    const single = new Ship(TYPE.SINGLE);
+    const horiztonal = new Ship(TYPE.HORIZONTAL);
+    const ship = new Ship(TYPE.SHIP);
 
     expect(left.isEnd()).toBeTruthy();
     expect(up.isEnd()).toBeTruthy();
@@ -93,14 +93,14 @@ test('isEnd', () => {
 });
 
 test('isPlayType', () => {
-    const comparate1 = PLAY_TYPES.SHIP;
-    const comparate2 = PLAY_TYPES.WATER;
-    const comparate3 = PLAY_TYPES.UNKNOWN;
+    const comparate1 = TYPE.SHIP;
+    const comparate2 = TYPE.WATER;
+    const comparate3 = TYPE.UNKNOWN;
 
-    const ship1 = new Ship(PLAY_TYPES.SHIP);
-    const ship2 = new Ship(PLAY_TYPES.WATER);
-    const ship3 = new Ship(PLAY_TYPES.UNKNOWN);
-    const ship4 = new Ship(PLAY_TYPES.SHIP);
+    const ship1 = new Ship(TYPE.SHIP);
+    const ship2 = new Ship(TYPE.WATER);
+    const ship3 = new Ship(TYPE.UNKNOWN);
+    const ship4 = new Ship(TYPE.SHIP);
 
     const combo1 = [ship1, ship2, ship3];
     const combo2 = [ship1, ship4];
@@ -122,9 +122,9 @@ test('isPlayType', () => {
 });
 
 test('isWater', () => {
-    const ship1 = new Ship(PLAY_TYPES.SHIP);
-    const ship2 = new Ship(PLAY_TYPES.WATER);
-    const ship3 = new Ship(PLAY_TYPES.UNKNOWN);
+    const ship1 = new Ship(TYPE.SHIP);
+    const ship2 = new Ship(TYPE.WATER);
+    const ship3 = new Ship(TYPE.UNKNOWN);
 
     expect(Ship.isWater(ship1)).toBeFalsy();
     expect(Ship.isWater(ship2)).toBeTruthy();
@@ -132,9 +132,9 @@ test('isWater', () => {
 });
 
 test('isShip', () => {
-    const ship1 = new Ship(PLAY_TYPES.SHIP);
-    const ship2 = new Ship(PLAY_TYPES.WATER);
-    const ship3 = new Ship(PLAY_TYPES.UNKNOWN);
+    const ship1 = new Ship(TYPE.SHIP);
+    const ship2 = new Ship(TYPE.WATER);
+    const ship3 = new Ship(TYPE.UNKNOWN);
 
     expect(Ship.isShip(ship1)).toBeTruthy();
     expect(Ship.isShip(ship2)).toBeFalsy();
@@ -142,34 +142,34 @@ test('isShip', () => {
 });
 
 test('isUnknown', () => {
-    const ship1 = new Ship(PLAY_TYPES.SHIP);
-    const ship2 = new Ship(PLAY_TYPES.WATER);
-    const ship3 = new Ship(PLAY_TYPES.UNKNOWN);
+    const ship1 = new Ship(TYPE.SHIP);
+    const ship2 = new Ship(TYPE.WATER);
+    const ship3 = new Ship(TYPE.UNKNOWN);
 
     expect(Ship.isUnknown(ship1)).toBeFalsy();
     expect(Ship.isUnknown(ship2)).toBeFalsy();
     expect(Ship.isUnknown(ship3)).toBeTruthy();
 });
 
-test('graphicalTypeToRelativePosition', () => {
-    const ship1 = GRAPHICAL_TYPES.LEFT;
-    const ship2 = GRAPHICAL_TYPES.RIGHT;
-    const ship3 = GRAPHICAL_TYPES.UP;
-    const ship4 = GRAPHICAL_TYPES.DOWN;
-    const ship5 = GRAPHICAL_TYPES.HORIZONTAL;
-    const ship6 = PLAY_TYPES.SHIP;
+test('typeToRelativePosition', () => {
+    const ship1 = TYPE.LEFT;
+    const ship2 = TYPE.RIGHT;
+    const ship3 = TYPE.UP;
+    const ship4 = TYPE.DOWN;
+    const ship5 = TYPE.HORIZONTAL;
+    const ship6 = TYPE.SHIP;
 
-    expect(Ship.graphicalTypeToRelativePosition(ship1)).toBe(REL_POS.LEFT);
-    expect(Ship.graphicalTypeToRelativePosition(ship2)).toBe(REL_POS.RIGHT);
-    expect(Ship.graphicalTypeToRelativePosition(ship3)).toBe(REL_POS.TOP);
-    expect(Ship.graphicalTypeToRelativePosition(ship4)).toBe(REL_POS.BOTTOM);
+    expect(Ship.typeToRelativePosition(ship1)).toBe(REL_POS.LEFT);
+    expect(Ship.typeToRelativePosition(ship2)).toBe(REL_POS.RIGHT);
+    expect(Ship.typeToRelativePosition(ship3)).toBe(REL_POS.TOP);
+    expect(Ship.typeToRelativePosition(ship4)).toBe(REL_POS.BOTTOM);
 
-    expect(() => { Ship.graphicalTypeToRelativePosition(ship5); }).toThrow('has no single corresponding relative position');
-    expect(() => { Ship.graphicalTypeToRelativePosition(ship6); }).toThrow('has no single corresponding relative position');
+    expect(() => { Ship.typeToRelativePosition(ship5); }).toThrow('has no single corresponding relative position');
+    expect(() => { Ship.typeToRelativePosition(ship6); }).toThrow('has no single corresponding relative position');
 });
 
 test('doesn\'t delete attributes', () => {
-    expect(new Ship(PLAY_TYPES.SHIP).playType).toBeDefined();
-    expect(new Ship(PLAY_TYPES.WATER).playType).toBeDefined();
-    expect(new Ship(PLAY_TYPES.UNKNOWN).playType).toBeDefined();
+    expect(new Ship(TYPE.SHIP).playType).toBeDefined();
+    expect(new Ship(TYPE.WATER).playType).toBeDefined();
+    expect(new Ship(TYPE.UNKNOWN).playType).toBeDefined();
 });

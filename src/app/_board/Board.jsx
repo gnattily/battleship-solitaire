@@ -3,17 +3,17 @@
 import React from 'react';
 import './Board.css';
 import BoardBuilder from './BoardBuilder';
-import { GRAPHICAL_TYPES, PLAY_TYPES } from './Ship';
+import { TYPE } from './Ship';
 import Image from 'next/image';
 
 /**
  * The visible board
- * @param {number} width - Width in squares
- * @param {number} height - Height in squares
- * @param {BoardBuilder} [preset] - Pre-existing ships
- * @param {number[]} [columnCounts] - Number of ships in each column (left to right)
- * @param {number[]} [rowCounts] - Number of ships in each row (top to bottom)
- * @param {number[]} [shipsLeft] - Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
+ * @param {number} width Width in squares
+ * @param {number} height Height in squares
+ * @param {BoardBuilder} [preset] Pre-existing ships
+ * @param {number[]} [columnCounts] Number of ships in each column (left to right)
+ * @param {number[]} [rowCounts] Number of ships in each row (top to bottom)
+ * @param {number[]} [shipsLeft] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
  */
 export default class Board extends React.Component {
     constructor (props) {
@@ -62,23 +62,23 @@ export default class Board extends React.Component {
 
     typeToImg (type, key, size) {
         switch (type) {
-            case GRAPHICAL_TYPES.SINGLE:
+            case TYPE.SINGLE:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/single.svg" alt="Single" />;
-            case GRAPHICAL_TYPES.UP:
+            case TYPE.UP:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Up" style={{ transform: 'rotate(90deg)' }} />;
-            case GRAPHICAL_TYPES.RIGHT:
+            case TYPE.RIGHT:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Right" style={{ transform: 'rotate(180deg)' }} />;
-            case GRAPHICAL_TYPES.LEFT:
+            case TYPE.LEFT:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Left" />;
-            case GRAPHICAL_TYPES.DOWN:
+            case TYPE.DOWN:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Down" style={{ transform: 'rotate(-90deg)' }} />;
-            case GRAPHICAL_TYPES.SHIP:
+            case TYPE.SHIP:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/ship.svg" alt="Ship" />;
-            case GRAPHICAL_TYPES.HORIZONTAL:
+            case TYPE.HORIZONTAL:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
-            case GRAPHICAL_TYPES.VERTICAL:
+            case TYPE.VERTICAL:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
-            case GRAPHICAL_TYPES.WATER:
+            case TYPE.WATER:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/water.svg" alt="Water" />;
         }
     }
@@ -94,7 +94,7 @@ export default class Board extends React.Component {
                     onMouseUp={() => this.onMouseUp()}
                     onContextMenu={e => e.preventDefault()}
                 >
-                    {this.typeToImg(this.state.solved && ship.playType === PLAY_TYPES.WATER ? PLAY_TYPES.UNKNOWN : ship.graphicalType)}
+                    {this.typeToImg(this.state.solved && ship.playType === TYPE.WATER ? TYPE.UNKNOWN : ship.graphicalType)}
                 </div>
             );
         });
@@ -102,7 +102,7 @@ export default class Board extends React.Component {
 
     /**
      * displays counts for columns and rows
-     * @param {boolean} rows - true if it should return row counts instead of column counts
+     * @param {boolean} rows true if it should return row counts instead of column counts
      * @returns {React.JSX.Element[]} the counts
      */
     displayCounts (rows) {
@@ -144,21 +144,21 @@ export default class Board extends React.Component {
 
     /**
      * converts a length into a jsx
-     * @param {number} length - the length of the run
+     * @param {number} length the length of the run
      * @returns {React.JSX[]} the run
      */
     renderRun (length) {
         const SIZE = '25';// px
 
-        if (length === 1) return [this.typeToImg(GRAPHICAL_TYPES.SINGLE, 0, SIZE)];
+        if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0, SIZE)];
 
-        const out = [this.typeToImg(GRAPHICAL_TYPES.RIGHT, 0, SIZE)];
+        const out = [this.typeToImg(TYPE.RIGHT, 0, SIZE)];
 
         for (let i = 0; i < length - 2; i++) {
-            out.push(this.typeToImg(GRAPHICAL_TYPES.HORIZONTAL, i + 1, SIZE));
+            out.push(this.typeToImg(TYPE.HORIZONTAL, i + 1, SIZE));
         }
 
-        return [...out, this.typeToImg(GRAPHICAL_TYPES.LEFT, out.length, SIZE)];
+        return [...out, this.typeToImg(TYPE.LEFT, out.length, SIZE)];
     }
 
     render () {
