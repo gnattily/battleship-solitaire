@@ -14,32 +14,30 @@ export default class Ship {
      * @param {AnyType} type The play or graphical type of the ship
      * @param {boolean} [pinned] Should the Ship's type change (used for presets)
      */
-    constructor (type, pinned) {
+    constructor (type = TYPE.UNKNOWN, pinned = false) {
         this.internalType = type;
         this.pinned = pinned;
     }
 
     toString () {
         switch (this.graphicalType) {
-            case GRAPHICAL_TYPES.UNKNOWN:
+            case TYPE.UNKNOWN:
                 return ' ';
-            case GRAPHICAL_TYPES.WATER:
+            case TYPE.WATER:
                 return '☵';
-            case GRAPHICAL_TYPES.SHIP:
+            case TYPE.SHIP:
                 return '◯';
-            case GRAPHICAL_TYPES.DOWN:
+            case TYPE.DOWN:
                 return '⯅';
-            case GRAPHICAL_TYPES.HORIZONTAL:
-                return '■';
-            case GRAPHICAL_TYPES.LEFT:
+            case TYPE.LEFT:
                 return '⯈';
-            case GRAPHICAL_TYPES.RIGHT:
+            case TYPE.RIGHT:
                 return '⯇';
-            case GRAPHICAL_TYPES.SINGLE:
-                return '●';
-            case GRAPHICAL_TYPES.UP:
+            case TYPE.UP:
                 return '⯆';
-            case GRAPHICAL_TYPES.VERTICAL:
+            case TYPE.SINGLE:
+                return '●';
+            case TYPE.ORTHOGONAL:
                 return '■';
         }
     }
@@ -49,6 +47,7 @@ export default class Ship {
      * @param {PlayType} type The new type
      */
     set playType (type) {
+        if (type > TYPE.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
         if (type >= TYPE.SHIP && this.#type >= TYPE.SHIP) return;
         this.#type = type;
     }
@@ -58,6 +57,7 @@ export default class Ship {
      * @param {GraphicalType} type The new type
      */
     set graphicalType (type) {
+        if (type > TYPE.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
         if (type >= TYPE.ORTHOGONAL && this.#type >= TYPE.ORTHOGONAL) return;
         this.#type = type;
     }
@@ -67,6 +67,7 @@ export default class Ship {
      * @param {InternalType} type The new type
      */
     set internalType (type) {
+        if (type > TYPE.HORIZONTAL) throw new Error('Expected type to be an InternalType (0-10), got ' + type);
         this.#type = type;
     }
 
@@ -121,8 +122,6 @@ export default class Ship {
         return [TYPE.LEFT, TYPE.RIGHT, TYPE.UP, TYPE.DOWN, TYPE.SINGLE].includes(this.graphicalType);
     }
 
-    // -TODO make this use a spread argument instead of an array
-    // so type first then all your arguments (but can still accept an array)
     /**
      * Returns true if all provided squares are a certain type
      * @param {PlayType} type The play type to check the square(s) for
@@ -130,9 +129,12 @@ export default class Ship {
      * @returns {boolean} True if the square is the given play type
      */
     static isPlayType (type, ...squares) {
-        squares.forEach(square => {
+        if (type >= TYPE.UNKNOWN && type <= TYPE.SHIP);
+        else throw Error('Expected type to be a PlayType, got ' + type);
+
+        for (const square of squares) {
             if (square.playType !== type) return false;
-        });
+        }
 
         return true;
     }
