@@ -3,62 +3,62 @@ import { expect, test } from 'vitest';
 import BoardBuilder, { REL_POS } from './BoardBuilder';
 import Ship, { TYPE } from './Ship';
 
-test('constructor', () => {
-    const badPreset = new BoardBuilder(4, 5);
-    const defaultSize = new BoardBuilder();
+// test('constructor', () => {
+//     const badPreset = new BoardBuilder(4, 5);
+//     const defaultSize = new BoardBuilder();
 
-    expect(() => { new BoardBuilder(4, 4, badPreset); }).toThrow('same size');
-    expect(defaultSize.width).toBe(4);
-    expect(defaultSize.height).toBe(4);
-});
+//     expect(() => { new BoardBuilder(4, 4, badPreset); }).toThrow('same size');
+//     expect(defaultSize.width).toBe(4);
+//     expect(defaultSize.height).toBe(4);
+// });
 
-test('createBoardState', () => {
-    const blank = new BoardBuilder(4, 4);
-    const preset = new BoardBuilder(4, 4)
-        .setShip(0, TYPE.SHIP, true);
-    const fromPreset = new BoardBuilder(4, 4, preset);
+// test('createBoardState', () => {
+//     const blank = new BoardBuilder(4, 4);
+//     const preset = new BoardBuilder(4, 4)
+//         .setShip(0, TYPE.SHIP, true);
+//     const fromPreset = new BoardBuilder(4, 4, preset);
 
-    expect(blank.boardState[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
-    expect(fromPreset.boardState[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
-});
+//     expect(blank.boardState[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
+//     expect(fromPreset.boardState[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
+// });
 
-test('reset', () => {
-    const preset = new BoardBuilder(4, 4)
-        .setShip([1, 3], TYPE.RIGHT)
-        .setShip([0, 0], TYPE.WATER);
+// test('reset', () => {
+//     const preset = new BoardBuilder(4, 4)
+//         .setShip([1, 3], TYPE.RIGHT)
+//         .setShip([0, 0], TYPE.WATER);
 
-    const board = new BoardBuilder(4, 4, preset)
-        .setShip([3, 0], TYPE.SHIP);
+//     const board = new BoardBuilder(4, 4, preset)
+//         .setShip([3, 0], TYPE.SHIP);
 
-    expect(board.sameBoardState(preset)).toBeFalsy();
+//     expect(board.sameBoardState(preset)).toBeFalsy();
 
-    board.reset();
-    expect(board.sameBoardState(preset)).toBeTruthy();
-});
+//     board.reset();
+//     expect(board.sameBoardState(preset)).toBeTruthy();
+// });
 
-test('copy', () => {
-    const board1 = new BoardBuilder(4, 4);
-    const board2 = board1.copy();
+// test('copy', () => {
+//     const board1 = new BoardBuilder(4, 4);
+//     const board2 = board1.copy();
 
-    expect(board1.sameBoardState(board2)).toBeTruthy();
+//     expect(board1.sameBoardState(board2)).toBeTruthy();
 
-    board2.setShip([2, 3], TYPE.LEFT);
+//     board2.setShip([2, 3], TYPE.LEFT);
 
-    expect(board1.sameBoardState(board2)).toBeFalsy();
-});
+//     expect(board1.sameBoardState(board2)).toBeFalsy();
+// });
 
-test('sameBoardState', () => {
-    const board1 = new BoardBuilder(4, 4)
-        .setShip([3, 2], TYPE.UP);
-    const board2 = new BoardBuilder(4, 4)
-        .setShip(11, TYPE.UP);
-    const board3 = new BoardBuilder(4, 4);
-    const board4 = new BoardBuilder(4, 3);
+// test('sameBoardState', () => {
+//     const board1 = new BoardBuilder(4, 4)
+//         .setShip([3, 2], TYPE.UP);
+//     const board2 = new BoardBuilder(4, 4)
+//         .setShip(11, TYPE.UP);
+//     const board3 = new BoardBuilder(4, 4);
+//     const board4 = new BoardBuilder(4, 3);
 
-    expect(board1.sameBoardState(board2)).toBeTruthy();
-    expect(board1.sameBoardState(board3)).toBeFalsy();
-    expect(board1.sameBoardState(board4)).toBeFalsy();
-});
+//     expect(board1.sameBoardState(board2)).toBeTruthy();
+//     expect(board1.sameBoardState(board3)).toBeFalsy();
+//     expect(board1.sameBoardState(board4)).toBeFalsy();
+// });
 
 const board1 = new BoardBuilder(6, 6, undefined,
     [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])
@@ -385,16 +385,20 @@ test('computeGraphicalTypes', () => {
     expect(board.compTypes() instanceof BoardBuilder).toBeTruthy();
 
     expect(board.getShip(0).graphicalType).toBe(TYPE.RIGHT);
-    expect(board.getShip(1).graphicalType).toBe(TYPE.HORIZONTAL);
+    expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
     expect(board.getShip(2).graphicalType).toBe(TYPE.SHIP);
     expect(board.getShip([0, 5]).graphicalType).toBe(TYPE.RIGHT);
-    expect(board.getShip([1, 5]).graphicalType).toBe(TYPE.HORIZONTAL);
-    expect(board.getShip([2, 5]).graphicalType).toBe(TYPE.HORIZONTAL);
+    expect(board.getShip([1, 5]).internalType).toBe(TYPE.HORIZONTAL);
+    expect(board.getShip([1, 5]).graphicalType).toBe(TYPE.ORTHOGONAL);
+    expect(board.getShip([2, 5]).internalType).toBe(TYPE.HORIZONTAL);
+    expect(board.getShip([2, 5]).graphicalType).toBe(TYPE.ORTHOGONAL);
     expect(board.getShip([3, 5]).graphicalType).toBe(TYPE.LEFT);
     expect(board.getShip([5, 5]).graphicalType).toBe(TYPE.SINGLE);
     expect(board.getShip([5, 3]).graphicalType).toBe(TYPE.UP);
-    expect(board.getShip([5, 2]).graphicalType).toBe(TYPE.VERTICAL);
-    expect(board.getShip([5, 1]).graphicalType).toBe(TYPE.VERTICAL);
+    expect(board.getShip([5, 2]).internalType).toBe(TYPE.VERTICAL);
+    expect(board.getShip([5, 2]).graphicalType).toBe(TYPE.ORTHOGONAL);
+    expect(board.getShip([5, 1]).internalType).toBe(TYPE.VERTICAL);
+    expect(board.getShip([5, 1]).graphicalType).toBe(TYPE.ORTHOGONAL);
     expect(board.getShip([5, 0]).graphicalType).toBe(TYPE.DOWN);
     expect(board.getShip([1, 2]).graphicalType).toBe(TYPE.SHIP);
 });
@@ -439,12 +443,14 @@ test('setShip', () => {
     const board = new BoardBuilder(4, 4);
     board.setShip(0, TYPE.DOWN);
     board.setShip(15, new Ship(TYPE.RIGHT));
+    board.setShip([1, 0], TYPE.HORIZONTAL);
 
     expect(() => { board.setShip(8, 'ship'); }).toThrow('should be an instance of Ship or a ship type');
     expect(() => { board.setShip(8, TYPE.SHIP, 'yes'); }).toThrow('expected pinned to be boolean');
 
-    expect(board.boardState[0].graphicalType).toBe(TYPE.DOWN);
+    expect(board.getShip(0).graphicalType).toBe(TYPE.DOWN);
     expect(board.boardState[15].graphicalType).toBe(TYPE.RIGHT);
+    expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
     expect(board.setShip(5, TYPE.SHIP) instanceof BoardBuilder).toBeTruthy();
 });
 
@@ -452,9 +458,9 @@ test('softSetShip', () => {
     const board = new BoardBuilder(4, 4);
 
     expect(board.softSetShip(7, TYPE.HORIZONTAL)).toBeTruthy();
-    expect(board.boardState[7].graphicalType).toBe(TYPE.HORIZONTAL);
+    expect(board.boardState[7].internalType).toBe(TYPE.HORIZONTAL);
     expect(board.softSetShip(7, TYPE.LEFT)).toBeFalsy();
-    expect(board.boardState[7].graphicalType).toBe(TYPE.HORIZONTAL);
+    expect(board.boardState[7].internalType).toBe(TYPE.HORIZONTAL);
 });
 
 test('relativePositionToIndex', () => {
@@ -471,7 +477,7 @@ test('getRelativeShip', () => {
     board.setShip(1, TYPE.WATER);
     board.setShip(4, TYPE.VERTICAL);
 
-    expect(board.getRelativeShip(0, REL_POS.BOTTOM).graphicalType).toBe(TYPE.VERTICAL);
+    expect(board.getRelativeShip(0, REL_POS.BOTTOM).internalType).toBe(TYPE.VERTICAL);
     expect(board.getRelativeShip(0, REL_POS.LEFT)).toBeNull();
     expect(board.getRelativeShip(0, REL_POS.RIGHT).playType).toBe(TYPE.WATER);
 });

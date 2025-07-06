@@ -17,14 +17,15 @@ const BRIGHT = '\x1b[1m';
 const DIM = '\x1b[2m';
 
 import BoardBuilder from './BoardBuilder';
-import { PLAY_TYPES } from './Ship';
+import { TYPE } from './Ship';
 
 /**
  * Prints out a representation of the board to the console
  * @param {BoardBuilder} board The board to display
+ * @param {boolean} showInternal Whether to show the internal types as well
  * @param {number} [gridType=2] 0 for no grid, 1 for minimal, 2 for full
  */
-export function displayBoard (board, gridType = GRID_TYPES.FULL) {
+export function displayBoard (board, showInternal, gridType = GRID_TYPES.FULL) {
     switch (gridType) {
         case (GRID_TYPES.NONE):
             for (let y = 0; y < board.height; y++) {
@@ -32,7 +33,7 @@ export function displayBoard (board, gridType = GRID_TYPES.FULL) {
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
-                    if (ship.playType === PLAY_TYPES.WATER) out += DIM + CYAN;
+                    if (ship.playType === TYPE.WATER) out += DIM + CYAN;
                     out += ship + RESET;
                 }
 
@@ -49,8 +50,8 @@ export function displayBoard (board, gridType = GRID_TYPES.FULL) {
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
-                    if (ship.playType === PLAY_TYPES.WATER) out += DIM + CYAN;
-                    out += BRIGHT + WHITE + (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship} `) + `${GRAY}│${RESET}`;
+                    if (ship.playType === TYPE.WATER) out += DIM + CYAN;
+                    out += BRIGHT + WHITE + (gridType === GRID_TYPES.MINIMAL ? `${ship}` : `${ship.internalType === TYPE.HORIZONTAL ? RED : ship.internalType === TYPE.VERTICAL ? YELLOW : ''} ${ship} ${RESET}`) + `${GRAY}│${RESET}`;
                 }
 
                 console.log(out);

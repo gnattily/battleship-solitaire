@@ -3,16 +3,17 @@ import { REL_POS } from './BoardBuilder';
 
 /**
  * The ship class for the board
- * @property {PlayType} playType - The play type of the ship
- * @property {GraphicalType} graphicalType - The graphical type of the ship
- * @property {InternalType} internalType = The internal type of the ship
+ * @property {PlayType} playType The play type of the ship
+ * @property {GraphicalType} graphicalType The graphical type of the ship
+ * @property {InternalType} internalType The internal type of the ship
+ * @property {boolean} pinned Should the ship's type change (useful for presets)
  */
 export default class Ship {
     #type = 0;
 
     /**
-     * @param {AnyType} type The play or graphical type of the ship
-     * @param {boolean} [pinned] Should the Ship's type change (used for presets)
+     * @param {AnyType} type The type of the ship
+     * @param {boolean} [pinned] Should the ship's type change (useful for presets)
      */
     constructor (type = TYPE.UNKNOWN, pinned = false) {
         this.internalType = type;
@@ -48,8 +49,8 @@ export default class Ship {
      */
     set playType (type) {
         if (type > TYPE.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
-        if (type >= TYPE.SHIP && this.#type >= TYPE.SHIP) return;
-        this.#type = type;
+        if (type === TYPE.SHIP && this.#type >= TYPE.SHIP);
+        else this.#type = type;
     }
 
     /**
@@ -58,8 +59,8 @@ export default class Ship {
      */
     set graphicalType (type) {
         if (type > TYPE.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
-        if (type >= TYPE.ORTHOGONAL && this.#type >= TYPE.ORTHOGONAL) return;
-        this.#type = type;
+        if (type === TYPE.ORTHOGONAL && this.#type >= TYPE.ORTHOGONAL);
+        else this.#type = type;
     }
 
     /**

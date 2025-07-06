@@ -239,7 +239,7 @@ export default class BoardBuilder {
     }
 
     /**
-     * Compares the board states of two boards
+     * Compares the states of two boards
      * @param {BoardBuilder} comparate The board to compare with
      * @returns {boolean} true if equal, false if not
      */
@@ -294,7 +294,7 @@ export default class BoardBuilder {
                 if (square.isCardinal()) board.setCardinalShips(i, Ship.typeToRelativePosition(square.internalType));
                 else if (square.graphicalType === TYPE.SINGLE)
                     board.setCardinalShips(i); // makes every surrounding square water
-                else if (square.isOrthogonal()) board.setOrthogonalShips(i, square.internalType);
+                else if (square.internalType > TYPE.ORTHOGONAL) board.setOrthogonalShips(i, square.internalType);
                 else board.floodCorners(i);
             }
 
@@ -648,7 +648,10 @@ export default class BoardBuilder {
     }
 
     // consistency in syntax and whatnot could use some work here -TODO
-    // add jsdoc here -TODO
+    /**
+     * Computes the internal and graphical types based off information available
+     * @returns {BoardBuilder} this
+     */
     compTypes () {
         // for legibility
         const isShip = Ship.isShip;
@@ -656,7 +659,7 @@ export default class BoardBuilder {
 
         for (let i = 0; i < this.boardState.length; i++) {
             const ship = this.getShip(i);
-            if (ship.pinned) continue;
+            if (ship.pinned && ship.internalType > TYPE.SHIP) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
@@ -666,9 +669,9 @@ export default class BoardBuilder {
             const bottom = this.getRelativeShip(i, REL_POS.BOTTOM) || new Ship(TYPE.WATER);
 
             // now just do all the logic from here and have a grand ol' time
-            if (isWater([left, top, right, bottom])) ship.internalType = TYPE.SINGLE;
-            else if (isShip([left, right])) ship.internalType = TYPE.HORIZONTAL;
-            else if (isShip([top, bottom])) ship.internalType = TYPE.VERTICAL;
+            if (isWater(left, top, right, bottom)) ship.internalType = TYPE.SINGLE;
+            else if (isShip(left, right)) ship.internalType = TYPE.HORIZONTAL;
+            else if (isShip(top, bottom)) ship.internalType = TYPE.VERTICAL;
             else if (isShip(left) && isWater(right)) ship.internalType = TYPE.LEFT;
             else if (isShip(top) && isWater(bottom)) ship.internalType = TYPE.UP;
             else if (isShip(right) && isWater(left)) ship.internalType = TYPE.RIGHT;
@@ -710,11 +713,8 @@ export default class BoardBuilder {
      * @throws {TypeError} If coordinates are not integers
      */
     indexToCoordinates (index) {
-        if (index < 0 || index > this.width * this.height - 1) {
-            throw new RangeError(`index (${index}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
-        } else if (!Number.isInteger(index)) {
-            throw new TypeError(`index must be an integer (is ${typeof index})`);
-        }
+        if (index < 0 || index > this.width * this.height - 1) throw new RangeError(`index (${index}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
+        if (!Number.isInteger(index)) throw new TypeError(`index must be an integer (is ${typeof index})`);
 
         return [index % this.width, Math.floor(index / this.width)];
     }
@@ -728,16 +728,10 @@ export default class BoardBuilder {
      */
     positionToIndex (position) {
         if (typeof position === 'number') {
-            if (position < 0 || position > this.width * this.height - 1) {
-                throw new RangeError(`index (${position}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
-            }
-
+            if (position < 0 || position > this.width * this.height - 1) throw new RangeError(`index (${position}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
             return position;
         } else if (Array.isArray(position) && position.length === 2) {
-            if (position[0] < 0 || position[0] > this.width - 1 || position[1] < 0 || position[1] > this.height - 1) {
-                throw new RangeError(`coordinates (${position[0]}, ${position[1]}) must be within the board`);
-            }
-
+            if (position[0] < 0 || position[0] > this.width - 1 || position[1] < 0 || position[1] > this.height - 1) throw new RangeError(`coordinates (${position[0]}, ${position[1]}) must be within the board`);
             return this.coordinatesToIndex(position);
         }
 
@@ -757,81 +751,27 @@ export default class BoardBuilder {
     }
 
     /**
-     * Set the ship at a coordinate
-     * @function
-     * @overload
-     * @param {number} x The x coordinate
-     * @param {number} y The y coordinate
-     * @param {Ship|AnyType} ship The Ship object or type
-     * @param {boolean} [pinned=false] Should the type be changeable by the user
-     * @returns {BoardBuilder} this
-     */
-
-    /**
-     * Set the ship at an index
-     * @function
-     * @overload
-     * @param {number} index The index to place the ship at
-     * @param {Ship|AnyType} ship The Ship object or type
-     * @param {boolean} [pinned] Should the type be changeable by the user
-     * @returns {BoardBuilder} this
-     */
-
-    /**
      * Set the ship at a position
-     * @param {...any} args The arguments
+     * @param {number} position An index or array starting at 0 as [x, y]
+     * @param {Ship|AnyType|number} value The ship object or type
+     * @param {boolean} [pinned] Should compTypes() ignore the ship (only works if value is a ship type)
      * @returns {BoardBuilder} this
+     * @throws {RangeError} If position is not within the board
+     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @throws {TypeError} If value is not a ship nor a graphical or play type
      */
-    setShip (...args) {
-        let index, ship;
+    setShip (position, value, pinned) {
+        const index = this.positionToIndex(position);
 
-        function handleShipOrType (shipOrType, pinned) {
-            if (typeof shipOrType === 'number') ship = new Ship(shipOrType);
-            else {
-                // without this condition and if pinned was not supplied, ship.pinned would be set to undefined, which is falsy
-                if (typeof pinned === 'boolean') shipOrType.pinned = pinned;
-                ship = shipOrType;
-            }
-        }
+        let ship = value;
 
-        /* eslint-disable @stylistic/brace-style */
+        if (typeof value === 'number') ship = new Ship(value, pinned);
+        else if (!(value instanceof Ship)) throw new TypeError('value should be an instance of Ship or a ship type');
 
-        // index, ship
-        if (args.length === 2) {
-            const [i, shipOrType] = args;
-            index = i;
-
-            handleShipOrType(shipOrType);
-        }
-
-        // index, ship, pinned
-        else if (args.length === 3 && typeof args[2] === 'boolean') {
-            const [i, shipOrType, pinned] = args;
-            index = i;
-
-            handleShipOrType(shipOrType, pinned);
-        }
-
-        // x, y, ship
-        else if (args.length === 3) {
-            const [x, y, shipOrType] = args;
-            index = this.coordinatesToIndex([x, y]);
-
-            handleShipOrType(shipOrType);
-        }
-
-        // x, y, ship, pinned
-        else if (args.length === 4) {
-            const [x, y, shipOrType, pinned] = args;
-            index = this.coordinatesToIndex([x, y]);
-
-            handleShipOrType(shipOrType, pinned);
-        }
-
-        else throw new Error('Expected 2-4 arguments, got ' + args.length);
-        /* eslint-enable @stylistic/brace-style */
+        if (pinned && typeof pinned !== 'boolean') throw new TypeError('expected pinned to be boolean, received: ' + pinned);
 
         this.boardState[index] = ship;
+
         return this;
     }
 
@@ -866,7 +806,7 @@ export default class BoardBuilder {
         if (index % this.width === 0 && relativePosition % 3 === 0) return null;
         if (index % this.width === this.width - 1 && relativePosition % 3 === 2) return null;
 
-        //               base     vertical offset                                        horizontal offset
+        //               base      vertical offset                                         horizontal offset
         const absIndex = index + (Math.floor(relativePosition / 3) - 1) * this.width + ((relativePosition % 3) - 1);
 
         // check absIndex is within the board
@@ -1013,7 +953,7 @@ function createBoardState (width, height, preset) {
     for (let i = 0; i < width * height; i++) {
         if (preset) {
             const ship = preset.getShip(i);
-            out.push(new Ship(ship.graphicalType, ship.pinned));
+            out.push(new Ship(ship.internalType, ship.pinned));
         } else {
             out.push(new Ship(TYPE.UNKNOWN));
         }
