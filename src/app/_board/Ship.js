@@ -1,88 +1,110 @@
+/* eslint-disable jsdoc/no-undefined-types */
 import { REL_POS } from './BoardBuilder';
 
 /**
  * The ship class for the board
- * @param {number} type - The play or graphical type of the ship
- * @param {boolean} [pinned] - Should the Ship's type change (used for presets)
- * @property {number} playType - The play type of the ship
- * @property {number} graphicalType - The graphical type of the ship
+ * @property {PlayType} playType The play type of the ship
+ * @property {GraphicalType} graphicalType The graphical type of the ship
+ * @property {InternalType} internalType The internal type of the ship
+ * @property {boolean} pinned Should the ship's type change (useful for presets)
  */
 export default class Ship {
-    playType;
-    graphicalType;
+    #type = 0;
 
-    constructor (type, pinned) {
-        // sets the play and graphical types
-        this.setGraphicalType(type);
-        this.pinned = pinned || false;
+    /**
+     * @param {AnyType} type The type of the ship
+     * @param {boolean} [pinned] Should the ship's type change (useful for presets)
+     */
+    constructor (type = TYPE.UNKNOWN, pinned = false) {
+        this.internalType = type;
+        this.pinned = pinned;
     }
 
     toString () {
         switch (this.graphicalType) {
-            case GRAPHICAL_TYPES.UNKNOWN:
+            case TYPE.UNKNOWN:
                 return ' ';
-            case GRAPHICAL_TYPES.WATER:
+            case TYPE.WATER:
                 return '☵';
-            case GRAPHICAL_TYPES.SHIP:
+            case TYPE.SHIP:
                 return '◯';
-            case GRAPHICAL_TYPES.DOWN:
+            case TYPE.DOWN:
                 return '⯅';
-            case GRAPHICAL_TYPES.HORIZONTAL:
-                return '■';
-            case GRAPHICAL_TYPES.LEFT:
+            case TYPE.LEFT:
                 return '⯈';
-            case GRAPHICAL_TYPES.RIGHT:
+            case TYPE.RIGHT:
                 return '⯇';
-            case GRAPHICAL_TYPES.SINGLE:
-                return '●';
-            case GRAPHICAL_TYPES.UP:
+            case TYPE.UP:
                 return '⯆';
-            case GRAPHICAL_TYPES.VERTICAL:
+            case TYPE.SINGLE:
+                return '●';
+            case TYPE.ORTHOGONAL:
                 return '■';
-            default:
-                throw new Error('graphicalType is not a valid graphical type');
         }
     }
 
-    // -TODO make setPlayType not call setGraphicalType and update testing accordingly
     /**
-     * Set the play type of the ship
-     * @param {number} newType - The type to change it to
-     * @returns {Ship} this
-     * @throws {TypeError} If newType is not a play type
+     * Set the play type
+     * @param {PlayType} type The new type
      */
-    setPlayType (newType) {
-        if (!Object.values(PLAY_TYPES).includes(newType)) throw new TypeError(`newType must be a play type (received: ${newType})`);
-
-        if (this.graphicalType < GRAPHICAL_TYPES.SHIP || newType < GRAPHICAL_TYPES.SHIP) this.setGraphicalType(newType);
-
-        this.playType = newType;
-        return this;
+    set playType (type) {
+        if (type > TYPE.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
+        if (type === TYPE.SHIP && this.#type >= TYPE.SHIP);
+        else this.#type = type;
     }
 
     /**
-     * Set the graphical type of the ship
-     * @param {number} newType - The type to change it to
-     * @returns {Ship} this
-     * @throws {TypeError} If newType is not a graphical type
+     * Set the graphical type
+     * @param {GraphicalType} type The new type
      */
-    setGraphicalType (newType) {
-        if (!Object.values(GRAPHICAL_TYPES).includes(newType)) throw new TypeError(`newType must be a graphical type (received: ${newType})`);
+    set graphicalType (type) {
+        if (type > TYPE.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
+        if (type === TYPE.ORTHOGONAL && this.#type >= TYPE.ORTHOGONAL);
+        else this.#type = type;
+    }
 
-        if (newType <= PLAY_TYPES.SHIP) this.playType = newType;
-        else this.playType = PLAY_TYPES.SHIP;
+    /**
+     * Set the internal type
+     * @param {InternalType} type The new type
+     */
+    set internalType (type) {
+        if (type > TYPE.HORIZONTAL) throw new Error('Expected type to be an InternalType (0-10), got ' + type);
+        this.#type = type;
+    }
 
-        this.graphicalType = newType;
-        return this;
+    /**
+     * Get the play type
+     * @returns {PlayType} The play type
+     */
+    get playType () {
+        if (this.#type >= TYPE.SHIP) return TYPE.SHIP;
+        else return this.#type;
+    }
+
+    /**
+     * Get the graphical type
+     * @returns {GraphicalType} The graphical type
+     */
+    get graphicalType () {
+        if (this.#type >= TYPE.ORTHOGONAL) return TYPE.ORTHOGONAL;
+        else return this.#type;
+    }
+
+    /**
+     * Get the internal type
+     * @returns {InternalType} The internal type
+     */
+    get internalType () {
+        return this.#type;
     }
 
     /**
      * Use this instead of ===, doesn't check for pins
-     * @param {Ship} comparate - The ship to compare with
-     * @returns {boolean} true if equal, false if not
+     * @param {Ship} comparate The ship to compare with
+     * @returns {boolean} true if internal types are equal
      */
     equals (comparate) {
-        return this.graphicalType === comparate.graphicalType;
+        return comparate.internalType === this.internalType;
     }
 
     /**
@@ -90,15 +112,7 @@ export default class Ship {
      * @returns {boolean} true if ship is left, right, up, or down
      */
     isCardinal () {
-        return [GRAPHICAL_TYPES.LEFT, GRAPHICAL_TYPES.RIGHT, GRAPHICAL_TYPES.UP, GRAPHICAL_TYPES.DOWN].includes(this.graphicalType);
-    }
-
-    /**
-     * Checks if the ship is orthogonal
-     * @returns {boolean} true if ship is horizontal or vertical
-     */
-    isOrthogonal () {
-        return [GRAPHICAL_TYPES.HORIZONTAL, GRAPHICAL_TYPES.VERTICAL].includes(this.graphicalType);
+        return [TYPE.LEFT, TYPE.RIGHT, TYPE.UP, TYPE.DOWN].includes(this.graphicalType);
     }
 
     /**
@@ -106,91 +120,112 @@ export default class Ship {
      * @returns {boolean} true if ship is left, right, up, down, or single
      */
     isEnd () {
-        return [GRAPHICAL_TYPES.LEFT, GRAPHICAL_TYPES.RIGHT, GRAPHICAL_TYPES.UP, GRAPHICAL_TYPES.DOWN, GRAPHICAL_TYPES.SINGLE].includes(this.graphicalType);
+        return [TYPE.LEFT, TYPE.RIGHT, TYPE.UP, TYPE.DOWN, TYPE.SINGLE].includes(this.graphicalType);
     }
 
-    // -TODO make this use a spread argument instead of an array
-    // so type first then all your arguments (but can still accept an array)
     /**
      * Returns true if all provided squares are a certain type
-     * @param {Ship|Ship[]} squares - The square(s) to check
-     * @param {number} type - The type to check the square(s) for
+     * @param {PlayType} type The play type to check the square(s) for
+     * @param {...Ship} squares The square(s) to check
      * @returns {boolean} True if the square is the given play type
      */
-    static isPlayType (squares, type) {
-        if (Array.isArray(squares)) {
-            for (const square of squares) {
-                if (square.playType !== type) return false;
-            }
+    static isPlayType (type, ...squares) {
+        if (type >= TYPE.UNKNOWN && type <= TYPE.SHIP);
+        else throw Error('Expected type to be a PlayType, got ' + type);
 
-            return true;
+        for (const square of squares) {
+            if (square.playType !== type) return false;
         }
 
-        return squares.playType === type;
+        return true;
     }
 
-    static isWater (squares) {
-        return Ship.isPlayType(squares, PLAY_TYPES.WATER);
+    static isWater (...squares) {
+        return Ship.isPlayType(TYPE.WATER, ...squares);
     }
 
-    static isShip (squares) {
-        return Ship.isPlayType(squares, PLAY_TYPES.SHIP);
+    static isShip (...squares) {
+        return Ship.isPlayType(TYPE.SHIP, ...squares);
     }
 
-    static isUnknown (squares) {
-        return Ship.isPlayType(squares, PLAY_TYPES.UNKNOWN);
+    static isUnknown (...squares) {
+        return Ship.isPlayType(TYPE.UNKNOWN, ...squares);
     }
 
     // -TODO rename this
     /**
      * Convert a graphical type to its corresponding relative position
-     * @param {number} graphicalType - The graphical type to convert
+     * @param {AnyType} type The type to convert
      * @returns {number} The corresponding relative position
      * @throws If there's no single corresponding relative position
      */
-    static graphicalTypeToRelativePosition (graphicalType) {
-        switch (graphicalType) {
-            case GRAPHICAL_TYPES.LEFT:
+    static typeToRelativePosition (type) {
+        switch (type) {
+            case TYPE.LEFT:
                 return REL_POS.LEFT;
-            case GRAPHICAL_TYPES.RIGHT:
+            case TYPE.RIGHT:
                 return REL_POS.RIGHT;
-            case GRAPHICAL_TYPES.UP:
+            case TYPE.UP:
                 return REL_POS.TOP;
-            case GRAPHICAL_TYPES.DOWN:
+            case TYPE.DOWN:
                 return REL_POS.BOTTOM;
             default:
-                throw new Error(`${graphicalType} has no single corresponding relative position`);
+                throw new Error(`${type} has no single corresponding relative position`);
         }
     }
 }
 
 /**
- * Controlled by the player; required for gameplay
- * @constant
+ * Everything a square could be
+ * @enum {number}
  */
-export const PLAY_TYPES = {
-    // playable/basics
+export const TYPE = {
+    /** @type {0} */
     UNKNOWN: 0,
+    /** @type {1} */
     WATER: 1,
+    /** @type {2} */
     SHIP: 2,
+
+    /** @type {3} */
+    SINGLE: 3,
+    /** @type {4} */
+    UP: 4,
+    /** @type {5} */
+    RIGHT: 5,
+    /** @type {6} */
+    DOWN: 6,
+    /** @type {7} */
+    LEFT: 7,
+    /** @type {8} */
+    ORTHOGONAL: 8,
+
+    /** @type {9} */
+    VERTICAL: 9,
+    /** @type {10} */
+    HORIZONTAL: 10,
 };
+
+// I know this is massive but trust it's worth it
+// no I will not use typescript
 
 /**
- * Not required for gameplay; purely for visual effect
- * @constant
+ * @typedef { typeof TYPE.UNKNOWN | typeof TYPE.WATER | typeof TYPE.SHIP } PlayType
  */
-export const GRAPHICAL_TYPES = {
-    UNKNOWN: 0,
-    WATER: 1,
 
-    // ships
-    SHIP: 2,
-    SINGLE: 3,
-    UP: 4,
-    RIGHT: 5,
-    DOWN: 6,
-    LEFT: 7,
+/**
+ * @typedef { typeof TYPE.UNKNOWN | typeof TYPE.WATER | typeof TYPE.SHIP |
+ *            typeof TYPE.SINGLE | typeof TYPE.UP | typeof TYPE.RIGHT |
+ *            typeof TYPE.DOWN | typeof TYPE.LEFT | typeof TYPE.ORTHOGONAL } GraphicalType
+ */
 
-    VERTICAL: 8,
-    HORIZONTAL: 9,
-};
+/**
+ * @typedef { typeof TYPE.UNKNOWN | typeof TYPE.WATER | typeof TYPE.SHIP |
+ *            typeof TYPE.SINGLE | typeof TYPE.UP | typeof TYPE.RIGHT |
+ *            typeof TYPE.DOWN | typeof TYPE.LEFT | typeof TYPE.ORTHOGONAL |
+ *            typeof TYPE.VERTICAL | typeof TYPE.HORIZONTAL } InternalType
+ */
+
+/**
+ * @typedef {InternalType} AnyType
+ */
