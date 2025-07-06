@@ -3,62 +3,62 @@ import { expect, test } from 'vitest';
 import BoardBuilder, { REL_POS } from './BoardBuilder';
 import Ship, { TYPE } from './Ship';
 
-// test('constructor', () => {
-//     const badPreset = new BoardBuilder(4, 5);
-//     const defaultSize = new BoardBuilder();
+test('constructor', () => {
+    const badPreset = new BoardBuilder(4, 5);
+    const defaultSize = new BoardBuilder();
 
-//     expect(() => { new BoardBuilder(4, 4, badPreset); }).toThrow('same size');
-//     expect(defaultSize.width).toBe(4);
-//     expect(defaultSize.height).toBe(4);
-// });
+    expect(() => { new BoardBuilder(4, 4, badPreset); }).toThrow('same size');
+    expect(defaultSize.width).toBe(4);
+    expect(defaultSize.height).toBe(4);
+});
 
-// test('createBoardState', () => {
-//     const blank = new BoardBuilder(4, 4);
-//     const preset = new BoardBuilder(4, 4)
-//         .setShip(0, TYPE.SHIP, true);
-//     const fromPreset = new BoardBuilder(4, 4, preset);
+test('createBoardState', () => {
+    const blank = new BoardBuilder(4, 4);
+    const preset = new BoardBuilder(4, 4)
+        .setShip(0, TYPE.SHIP, true);
+    const fromPreset = new BoardBuilder(4, 4, preset);
 
-//     expect(blank.boardState[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
-//     expect(fromPreset.boardState[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
-// });
+    expect(blank.boardState[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
+    expect(fromPreset.boardState[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
+});
 
-// test('reset', () => {
-//     const preset = new BoardBuilder(4, 4)
-//         .setShip([1, 3], TYPE.RIGHT)
-//         .setShip([0, 0], TYPE.WATER);
+test('reset', () => {
+    const preset = new BoardBuilder(4, 4)
+        .setShip([1, 3], TYPE.RIGHT)
+        .setShip([0, 0], TYPE.WATER);
 
-//     const board = new BoardBuilder(4, 4, preset)
-//         .setShip([3, 0], TYPE.SHIP);
+    const board = new BoardBuilder(4, 4, preset)
+        .setShip([3, 0], TYPE.SHIP);
 
-//     expect(board.sameBoardState(preset)).toBeFalsy();
+    expect(board.sameBoardState(preset)).toBeFalsy();
 
-//     board.reset();
-//     expect(board.sameBoardState(preset)).toBeTruthy();
-// });
+    board.reset();
+    expect(board.sameBoardState(preset)).toBeTruthy();
+});
 
-// test('copy', () => {
-//     const board1 = new BoardBuilder(4, 4);
-//     const board2 = board1.copy();
+test('copy', () => {
+    const board1 = new BoardBuilder(4, 4);
+    const board2 = board1.copy();
 
-//     expect(board1.sameBoardState(board2)).toBeTruthy();
+    expect(board1.sameBoardState(board2)).toBeTruthy();
 
-//     board2.setShip([2, 3], TYPE.LEFT);
+    board2.setShip([2, 3], TYPE.LEFT);
 
-//     expect(board1.sameBoardState(board2)).toBeFalsy();
-// });
+    expect(board1.sameBoardState(board2)).toBeFalsy();
+});
 
-// test('sameBoardState', () => {
-//     const board1 = new BoardBuilder(4, 4)
-//         .setShip([3, 2], TYPE.UP);
-//     const board2 = new BoardBuilder(4, 4)
-//         .setShip(11, TYPE.UP);
-//     const board3 = new BoardBuilder(4, 4);
-//     const board4 = new BoardBuilder(4, 3);
+test('sameBoardState', () => {
+    const board1 = new BoardBuilder(4, 4)
+        .setShip([3, 2], TYPE.UP);
+    const board2 = new BoardBuilder(4, 4)
+        .setShip(11, TYPE.UP);
+    const board3 = new BoardBuilder(4, 4);
+    const board4 = new BoardBuilder(4, 3);
 
-//     expect(board1.sameBoardState(board2)).toBeTruthy();
-//     expect(board1.sameBoardState(board3)).toBeFalsy();
-//     expect(board1.sameBoardState(board4)).toBeFalsy();
-// });
+    expect(board1.sameBoardState(board2)).toBeTruthy();
+    expect(board1.sameBoardState(board3)).toBeFalsy();
+    expect(board1.sameBoardState(board4)).toBeFalsy();
+});
 
 const board1 = new BoardBuilder(6, 6, undefined,
     [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])

@@ -74,9 +74,7 @@ export default class Board extends React.Component {
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Down" style={{ transform: 'rotate(-90deg)' }} />;
             case TYPE.SHIP:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/ship.svg" alt="Ship" />;
-            case TYPE.HORIZONTAL:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
-            case TYPE.VERTICAL:
+            case TYPE.ORTHOGONAL:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
             case TYPE.WATER:
                 return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/water.svg" alt="Water" />;

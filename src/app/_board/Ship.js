@@ -1,4 +1,5 @@
 /* eslint-disable jsdoc/no-undefined-types */
+import { CropLandscapeOutlined } from '@mui/icons-material';
 import { REL_POS } from './BoardBuilder';
 
 /**
@@ -39,6 +40,7 @@ export default class Ship {
             case TYPE.SINGLE:
                 return '●';
             case TYPE.ORTHOGONAL:
+                console.log('sup bitch');
                 return '■';
         }
     }
