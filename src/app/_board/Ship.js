@@ -1,9 +1,7 @@
-/* eslint-disable jsdoc/no-undefined-types */
-import { CropLandscapeOutlined } from '@mui/icons-material';
-import { REL_POS } from './BoardBuilder';
+import { REL_POS } from './Board';
 
 /**
- * The ship class for the board
+ * Ships on the Board
  * @property {PlayType} playType The play type of the ship
  * @property {GraphicalType} graphicalType The graphical type of the ship
  * @property {InternalType} internalType The internal type of the ship
@@ -19,30 +17,6 @@ export default class Ship {
     constructor (type = TYPE.UNKNOWN, pinned = false) {
         this.internalType = type;
         this.pinned = pinned;
-    }
-
-    toString () {
-        switch (this.graphicalType) {
-            case TYPE.UNKNOWN:
-                return ' ';
-            case TYPE.WATER:
-                return '☵';
-            case TYPE.SHIP:
-                return '◯';
-            case TYPE.DOWN:
-                return '⯅';
-            case TYPE.LEFT:
-                return '⯈';
-            case TYPE.RIGHT:
-                return '⯇';
-            case TYPE.UP:
-                return '⯆';
-            case TYPE.SINGLE:
-                return '●';
-            case TYPE.ORTHOGONAL:
-                console.log('sup bitch');
-                return '■';
-        }
     }
 
     /**
@@ -100,6 +74,29 @@ export default class Ship {
         return this.#type;
     }
 
+    toString () {
+        switch (this.graphicalType) {
+            case TYPE.UNKNOWN:
+                return ' ';
+            case TYPE.WATER:
+                return '☵';
+            case TYPE.SHIP:
+                return '◯';
+            case TYPE.DOWN:
+                return '⯅';
+            case TYPE.LEFT:
+                return '⯈';
+            case TYPE.RIGHT:
+                return '⯇';
+            case TYPE.UP:
+                return '⯆';
+            case TYPE.SINGLE:
+                return '●';
+            case TYPE.ORTHOGONAL:
+                return '■';
+        }
+    }
+
     /**
      * Use this instead of ===, doesn't check for pins
      * @param {Ship} comparate The ship to compare with
@@ -154,14 +151,13 @@ export default class Ship {
         return Ship.isPlayType(TYPE.UNKNOWN, ...squares);
     }
 
-    // -TODO rename this
     /**
-     * Convert a graphical type to its corresponding relative position
+     * Converts a graphical type to its corresponding relative position
      * @param {AnyType} type The type to convert
      * @returns {number} The corresponding relative position
      * @throws If there's no single corresponding relative position
      */
-    static typeToRelativePosition (type) {
+    static typeToRelPos (type) {
         switch (type) {
             case TYPE.LEFT:
                 return REL_POS.LEFT;
@@ -181,7 +177,7 @@ export default class Ship {
  * Everything a square could be
  * @enum {number}
  */
-export const TYPE = {
+export const TYPE = Object.freeze({
     /** @type {0} */
     UNKNOWN: 0,
     /** @type {1} */
@@ -206,10 +202,12 @@ export const TYPE = {
     VERTICAL: 9,
     /** @type {10} */
     HORIZONTAL: 10,
-};
+});
 
 // I know this is massive but trust it's worth it
 // no I will not use typescript
+
+/* eslint-disable jsdoc/no-undefined-types */
 
 /**
  * @typedef { typeof TYPE.UNKNOWN | typeof TYPE.WATER | typeof TYPE.SHIP } PlayType
