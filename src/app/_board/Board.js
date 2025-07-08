@@ -11,7 +11,7 @@
 import Ship, { TYPE } from './Ship.js';
 
 /**
- * The underlying Board class. For use as a preset, supply width and height. For use as a puzzle, also supply preset, counts, and runs.
+ * The underlying Board class. For use as a preset, supply width and height. For use as a puzzle, supply preset, counts, and runs.
  * @param {...any} args All arguments
  */
 export default class Board {

@@ -4,7 +4,7 @@ import Board, { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
 
 test('constructor', () => {
-    // REVAMP
+    // will do after migrating to ts
 });
 
 test('createState', () => {
