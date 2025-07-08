@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { REL_POS } from './BoardBuilder';
+import { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
 
 test('toString', () => {
@@ -10,7 +10,7 @@ test('toString', () => {
     expect(typeof ('' + ship)).toBe('string');
 });
 
-test('setters', () => {
+test('setters/getters', () => {
     const ship = new Ship();
 
     ship.playType = TYPE.SHIP;
@@ -132,7 +132,7 @@ test('isUnknown', () => {
     expect(Ship.isUnknown(ship3)).toBeTruthy();
 });
 
-test('typeToRelativePosition', () => {
+test('typeToRelPos', () => {
     const ship1 = TYPE.LEFT;
     const ship2 = TYPE.RIGHT;
     const ship3 = TYPE.UP;
@@ -140,11 +140,11 @@ test('typeToRelativePosition', () => {
     const ship5 = TYPE.HORIZONTAL;
     const ship6 = TYPE.SHIP;
 
-    expect(Ship.typeToRelativePosition(ship1)).toBe(REL_POS.LEFT);
-    expect(Ship.typeToRelativePosition(ship2)).toBe(REL_POS.RIGHT);
-    expect(Ship.typeToRelativePosition(ship3)).toBe(REL_POS.TOP);
-    expect(Ship.typeToRelativePosition(ship4)).toBe(REL_POS.BOTTOM);
+    expect(Ship.typeToRelPos(ship1)).toBe(REL_POS.LEFT);
+    expect(Ship.typeToRelPos(ship2)).toBe(REL_POS.RIGHT);
+    expect(Ship.typeToRelPos(ship3)).toBe(REL_POS.TOP);
+    expect(Ship.typeToRelPos(ship4)).toBe(REL_POS.BOTTOM);
 
-    expect(() => { Ship.typeToRelativePosition(ship5); }).toThrow('has no single corresponding relative position');
-    expect(() => { Ship.typeToRelativePosition(ship6); }).toThrow('has no single corresponding relative position');
+    expect(() => { Ship.typeToRelPos(ship5); }).toThrow('has no single corresponding relative position');
+    expect(() => { Ship.typeToRelPos(ship6); }).toThrow('has no single corresponding relative position');
 });

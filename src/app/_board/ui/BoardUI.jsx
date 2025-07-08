@@ -2,32 +2,32 @@
 
 import React from 'react';
 import './Board.css';
-import BoardBuilder from './BoardBuilder';
-import { TYPE } from './Ship';
+import Board from '../Board';
+import { TYPE } from '../Ship';
 import Image from 'next/image';
 
 /**
  * The visible board
  * @param {number} width Width in squares
  * @param {number} height Height in squares
- * @param {BoardBuilder} [preset] Pre-existing ships
+ * @param {Board} [preset] Pre-existing ships
  * @param {number[]} [columnCounts] Number of ships in each column (left to right)
  * @param {number[]} [rowCounts] Number of ships in each row (top to bottom)
  * @param {number[]} [shipsLeft] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
  */
-export default class Board extends React.Component {
+export default class BoardUI extends React.Component {
     constructor (props) {
         super(props);
 
         this.state = {
-            board: new BoardBuilder(this.props.width, this.props.height, this.props.preset, this.props.columnCounts, this.props.rowCounts, this.props.runs),
+            board: new Board(this.props.width, this.props.height, this.props.preset, this.props.columnCounts, this.props.rowCounts, this.props.runs),
             solved: false,
             draggedType: undefined,
         };
     }
 
     solveBoard () {
-        const newBoard = BoardBuilder.solve(this.state.board);
+        const newBoard = Board.solve(this.state.board);
         this.setState({ board: newBoard });
         this.setState({ solved: newBoard.isSolved() });
     }
@@ -82,7 +82,7 @@ export default class Board extends React.Component {
     }
 
     displayBoard () {
-        return this.state.board.boardState.map((ship, index) => {
+        return this.state.board.state.map((ship, index) => {
             return (
                 <div
                     className="Square nohighlight"
@@ -108,7 +108,7 @@ export default class Board extends React.Component {
             <p
                 key={index}
                 onClick={() => {
-                    this.setState({ board: rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodColumn(index) });
+                    this.setState({ board: rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodCol(index) });
                 }}
             >
                 {count}

@@ -14,8 +14,8 @@ TODO:
 - [ ] add styling to webpage
 - [ ] make a solvable board generator with with options for difficulty and guess and check
 - [ ] add dev documentation
-- [ ] rename functions to be more consistent and concise
-- [ ] improve overall code consistency
+- [X] rename functions to be more consistent and concise
+- [X] improve overall code consistency
 - [X] migrate to Next.js
 - [ ] use containers with Docker
 
@@ -25,9 +25,9 @@ more specific things
 - [X] make position arrays start at 0 instead of 1
 - [ ] ~~make setPlayType not call setGraphical type and update test accordingly~~
 - [ ] ~~make isPlayType use a spread argument instead of an array for ships to compare~~
-- [ ] rename graphicalTypeToRelativePosition to something shorter
+- [X] rename graphicalTypeToRelativePosition to something shorter
 - [X] soft flood row/column when the user clicks the number
-- [ ] allow for click + drag
+- [X] allow for click + drag
 - [ ] ~~consider removing play type~~
 - [X] make jsdoc more consistent (eg. dashes after param names, capitalization)
 - [X] name "uni/bi-directional" variables as "cardinal" and "orthognol" (or however it's spelled)

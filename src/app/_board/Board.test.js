@@ -1,71 +1,71 @@
 import { expect, test } from 'vitest';
 
-import BoardBuilder, { REL_POS } from './BoardBuilder';
+import Board, { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
 
 test('constructor', () => {
-    const badPreset = new BoardBuilder(4, 5);
-    const defaultSize = new BoardBuilder();
+    const badPreset = new Board(4, 5);
+    const defaultSize = new Board();
 
-    expect(() => { new BoardBuilder(4, 4, badPreset); }).toThrow('same size');
+    expect(() => { new Board(4, 4, badPreset); }).toThrow('same size');
     expect(defaultSize.width).toBe(4);
     expect(defaultSize.height).toBe(4);
 });
 
-test('createBoardState', () => {
-    const blank = new BoardBuilder(4, 4);
-    const preset = new BoardBuilder(4, 4)
+test('createState', () => {
+    const blank = new Board(4, 4);
+    const preset = new Board(4, 4)
         .setShip(0, TYPE.SHIP, true);
-    const fromPreset = new BoardBuilder(4, 4, preset);
+    const fromPreset = new Board(4, 4, preset);
 
-    expect(blank.boardState[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
-    expect(fromPreset.boardState[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
+    expect(blank.state[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
+    expect(fromPreset.state[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
 });
 
 test('reset', () => {
-    const preset = new BoardBuilder(4, 4)
+    const preset = new Board(4, 4)
         .setShip([1, 3], TYPE.RIGHT)
         .setShip([0, 0], TYPE.WATER);
 
-    const board = new BoardBuilder(4, 4, preset)
+    const board = new Board(4, 4, preset)
         .setShip([3, 0], TYPE.SHIP);
 
-    expect(board.sameBoardState(preset)).toBeFalsy();
+    expect(board.sameState(preset)).toBeFalsy();
 
     board.reset();
-    expect(board.sameBoardState(preset)).toBeTruthy();
+    expect(board.sameState(preset)).toBeTruthy();
 });
 
 test('copy', () => {
-    const board1 = new BoardBuilder(4, 4);
+    const board1 = new Board(4, 4);
     const board2 = board1.copy();
 
-    expect(board1.sameBoardState(board2)).toBeTruthy();
+    expect(board1.sameState(board2)).toBeTruthy();
 
     board2.setShip([2, 3], TYPE.LEFT);
 
-    expect(board1.sameBoardState(board2)).toBeFalsy();
+    expect(board1.sameState(board2)).toBeFalsy();
 });
 
-test('sameBoardState', () => {
-    const board1 = new BoardBuilder(4, 4)
+test('sameState', () => {
+    const board1 = new Board(4, 4)
         .setShip([3, 2], TYPE.UP);
-    const board2 = new BoardBuilder(4, 4)
+    const board2 = new Board(4, 4)
         .setShip(11, TYPE.UP);
-    const board3 = new BoardBuilder(4, 4);
-    const board4 = new BoardBuilder(4, 3);
+    const board3 = new Board(4, 4);
+    const board4 = new Board(4, 3);
 
-    expect(board1.sameBoardState(board2)).toBeTruthy();
-    expect(board1.sameBoardState(board3)).toBeFalsy();
-    expect(board1.sameBoardState(board4)).toBeFalsy();
+    expect(board1.sameState(board2)).toBeTruthy();
+    expect(board1.sameState(board3)).toBeFalsy();
+    expect(board1.sameState(board4)).toBeFalsy();
 });
 
-const board1 = new BoardBuilder(6, 6, undefined,
+const board1 = new Board(6, 6, undefined,
     [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])
     .setShip([5, 2], TYPE.SINGLE, true)
     .setShip([1, 2], TYPE.WATER, true);
 
-const solution1 = new BoardBuilder(6, 6, undefined,
+const solution1 = new Board(6, 6, undefined,
     [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])
     .setShip([5, 2], TYPE.SINGLE)
     .setShip([0, 1], TYPE.DOWN)
@@ -77,15 +77,15 @@ const solution1 = new BoardBuilder(6, 6, undefined,
     .setShip([3, 5], TYPE.SINGLE)
     .setShip([5, 4], TYPE.DOWN)
     .setShip([5, 5], TYPE.UP)
-    .softFloodColumn(0)
-    .softFloodColumn(1)
-    .softFloodColumn(2)
-    .softFloodColumn(3)
-    .softFloodColumn(4)
-    .softFloodColumn(5);
+    .softFloodCol(0)
+    .softFloodCol(1)
+    .softFloodCol(2)
+    .softFloodCol(3)
+    .softFloodCol(4)
+    .softFloodCol(5);
 
 test('solve', () => {
-    const board2 = new BoardBuilder(15, 15, undefined,
+    const board2 = new Board(15, 15, undefined,
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
@@ -120,7 +120,7 @@ test('solve', () => {
         .setShip([3, 14], TYPE.WATER, true)
         .setShip([14, 14], TYPE.SINGLE, true);
 
-    const solution2 = new BoardBuilder(15, 15, undefined,
+    const solution2 = new Board(15, 15, undefined,
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
@@ -175,22 +175,22 @@ test('solve', () => {
         .softFloodRow(13)
         .softFloodRow(14);
 
-    expect(BoardBuilder.solve(board1).sameBoardState(solution1)).toBeTruthy();
-    expect(BoardBuilder.solve(board2).sameBoardState(solution2)).toBeTruthy();
+    expect(Board.solve(board1).sameState(solution1)).toBeTruthy();
+    expect(Board.solve(board2).sameState(solution2)).toBeTruthy();
 });
 
 test('isSolved', () => {
-    const board = new BoardBuilder(4, 4, undefined, [3, 0, 0, 3], [2, 2, 1, 1], [1, 1, 1])
-        .softFloodColumn(1)
-        .softFloodColumn(2)
+    const board = new Board(4, 4, undefined, [3, 0, 0, 3], [2, 2, 1, 1], [1, 1, 1])
+        .softFloodCol(1)
+        .softFloodCol(2)
         .softFloodRow(3)
-        .softFloodColumn(0, TYPE.SHIP);
+        .softFloodCol(0, TYPE.SHIP);
 
     // test unknown
     expect(board.isSolved()).toBeFalsy();
 
     // test rows
-    board.softFloodColumn(3, TYPE.SHIP);
+    board.softFloodCol(3, TYPE.SHIP);
     expect(board.isSolved()).toBeFalsy();
 
     // test columns
@@ -208,7 +208,7 @@ test('isSolved', () => {
     expect(board.isSolved()).toBeTruthy();
 
     // test runs (this board is impossible to solve by the way)
-    const board2 = new BoardBuilder(4, 4, board, [3, 0, 0, 3], [2, 2, 1, 1], [0, 1, 1]);
+    const board2 = new Board(4, 4, board, [3, 0, 0, 3], [2, 2, 1, 1], [0, 1, 1]);
     expect(board2.isSolved()).toBeFalsy();
 });
 
@@ -247,7 +247,7 @@ test('countRow', () => {
 });
 
 test('countRunsLeft', () => {
-    expect(new BoardBuilder(4, 4).countRunsLeft()).toBeUndefined();
+    expect(new Board(4, 4).countRunsLeft()).toBeUndefined();
 
     expect(board1.countRunsLeft()).toEqual([2, 2, 1]);
     expect(board1.countRunsLeft(true)).toEqual([2, 2, 1]);
@@ -282,26 +282,26 @@ test('getRuns', () => {
     expect(tempBoard.getRuns(true)).toEqual([[17], [0, 1, 2]]);
 });
 
-test('getHorizontalRuns', () => {
-    expect(board1.getHorizontalRuns()[0]).toEqual([0, 1, 2, 3, 4, 5]);
-    expect(board1.getHorizontalRuns(true, false, false)[0]).toEqual([0, 1, 2, 3, 4, 5]);
-    expect(board1.getHorizontalRuns(true, true, false)).toEqual([]);
+test('getHorRuns', () => {
+    expect(board1.getHorRuns()[0]).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(board1.getHorRuns(true, false, false)[0]).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(board1.getHorRuns(true, true, false)).toEqual([]);
 
     const tempBoard = board1.copy()
         .setShip([0, 0], TYPE.RIGHT)
         .setShip([1, 0], TYPE.HORIZONTAL);
 
-    expect(tempBoard.getHorizontalRuns(false, true, false)).toEqual([[0, 1]]);
-    expect(tempBoard.getHorizontalRuns(true, true, false)).toEqual([]);
-    expect(tempBoard.getHorizontalRuns(false, true, true)).toEqual([[0, 1], [17]]);
-    expect(tempBoard.getHorizontalRuns(true, true, true)).toEqual([[17]]);
+    expect(tempBoard.getHorRuns(false, true, false)).toEqual([[0, 1]]);
+    expect(tempBoard.getHorRuns(true, true, false)).toEqual([]);
+    expect(tempBoard.getHorRuns(false, true, true)).toEqual([[0, 1], [17]]);
+    expect(tempBoard.getHorRuns(true, true, true)).toEqual([[17]]);
 
     tempBoard.setShip([2, 0], TYPE.LEFT);
 
-    expect(tempBoard.getHorizontalRuns(false, true, false)).toEqual([[0, 1, 2]]);
-    expect(tempBoard.getHorizontalRuns(true, true, false)).toEqual([[0, 1, 2]]);
-    expect(tempBoard.getHorizontalRuns(false, true, true)).toEqual([[0, 1, 2], [17]]);
-    expect(tempBoard.getHorizontalRuns(true, true, true)).toEqual([[0, 1, 2], [17]]);
+    expect(tempBoard.getHorRuns(false, true, false)).toEqual([[0, 1, 2]]);
+    expect(tempBoard.getHorRuns(true, true, false)).toEqual([[0, 1, 2]]);
+    expect(tempBoard.getHorRuns(false, true, true)).toEqual([[0, 1, 2], [17]]);
+    expect(tempBoard.getHorRuns(true, true, true)).toEqual([[0, 1, 2], [17]]);
 });
 
 test('getRowRuns', () => {
@@ -323,49 +323,49 @@ test('getRowRuns', () => {
     expect(tempBoard.getRowRuns(0, true, true)).toEqual([[0, 1, 2]]);
 });
 
-test('getVerticalRuns', () => {
-    expect(board1.getVerticalRuns()[0]).toEqual([0, 6, 12, 18, 24, 30]);
-    expect(board1.getVerticalRuns(true, false, false)[0]).toEqual([0, 6, 12, 18, 24, 30]);
-    expect(board1.getVerticalRuns(true, true, false)).toEqual([]);
+test('getVertRuns', () => {
+    expect(board1.getVertRuns()[0]).toEqual([0, 6, 12, 18, 24, 30]);
+    expect(board1.getVertRuns(true, false, false)[0]).toEqual([0, 6, 12, 18, 24, 30]);
+    expect(board1.getVertRuns(true, true, false)).toEqual([]);
 
     const tempBoard = board1.copy()
         .setShip([0, 0], TYPE.DOWN)
         .setShip([0, 1], TYPE.VERTICAL);
 
-    expect(tempBoard.getVerticalRuns(false, true, false)).toEqual([[0, 6]]);
-    expect(tempBoard.getVerticalRuns(true, true, false)).toEqual([]);
-    expect(tempBoard.getVerticalRuns(false, true, true)).toEqual([[0, 6], [17]]);
-    expect(tempBoard.getVerticalRuns(true, true, true)).toEqual([[17]]);
+    expect(tempBoard.getVertRuns(false, true, false)).toEqual([[0, 6]]);
+    expect(tempBoard.getVertRuns(true, true, false)).toEqual([]);
+    expect(tempBoard.getVertRuns(false, true, true)).toEqual([[0, 6], [17]]);
+    expect(tempBoard.getVertRuns(true, true, true)).toEqual([[17]]);
 
     tempBoard.setShip([0, 2], TYPE.UP);
 
-    expect(tempBoard.getVerticalRuns(false, true, false)).toEqual([[0, 6, 12]]);
-    expect(tempBoard.getVerticalRuns(true, true, false)).toEqual([[0, 6, 12]]);
-    expect(tempBoard.getVerticalRuns(false, true, true)).toEqual([[0, 6, 12], [17]]);
-    expect(tempBoard.getVerticalRuns(true, true, true)).toEqual([[0, 6, 12], [17]]);
+    expect(tempBoard.getVertRuns(false, true, false)).toEqual([[0, 6, 12]]);
+    expect(tempBoard.getVertRuns(true, true, false)).toEqual([[0, 6, 12]]);
+    expect(tempBoard.getVertRuns(false, true, true)).toEqual([[0, 6, 12], [17]]);
+    expect(tempBoard.getVertRuns(true, true, true)).toEqual([[0, 6, 12], [17]]);
 });
 
-test('getColumnRuns', () => {
-    expect(() => { board1.getColumnRuns(6); }).toThrow('must be within the board');
+test('getColRuns', () => {
+    expect(() => { board1.getColRuns(6); }).toThrow('must be within the board');
 
     // check if behavior with undefined squares is expected
-    expect(board1.getColumnRuns(5, true, true)).toEqual([[17]]);
+    expect(board1.getColRuns(5, true, true)).toEqual([[17]]);
 
     const tempBoard = board1.copy()
         .setShip([0, 0], TYPE.DOWN)
         .setShip([0, 1], TYPE.VERTICAL);
 
-    expect(tempBoard.getColumnRuns(0, false, true)).toEqual([[0, 6]]);
-    expect(tempBoard.getColumnRuns(0, true, true)).toEqual([]);
+    expect(tempBoard.getColRuns(0, false, true)).toEqual([[0, 6]]);
+    expect(tempBoard.getColRuns(0, true, true)).toEqual([]);
 
     tempBoard.setShip([0, 2], TYPE.UP);
 
-    expect(tempBoard.getColumnRuns(0, false, true)).toEqual([[0, 6, 12]]);
-    expect(tempBoard.getColumnRuns(0, true, true)).toEqual([[0, 6, 12]]);
+    expect(tempBoard.getColRuns(0, false, true)).toEqual([[0, 6, 12]]);
+    expect(tempBoard.getColRuns(0, true, true)).toEqual([[0, 6, 12]]);
 });
 
-test('computeGraphicalTypes', () => {
-    const board = new BoardBuilder(6, 6)
+test('compTypes', () => {
+    const board = new Board(6, 6)
         .setShip(0, TYPE.RIGHT, true)
         .setShip(1, TYPE.SHIP, true)
         .setShip(2, TYPE.SHIP)
@@ -378,11 +378,11 @@ test('computeGraphicalTypes', () => {
         .setShip([5, 2], TYPE.SHIP)
         .setShip([5, 1], TYPE.SHIP)
         .setShip([5, 0], TYPE.SHIP)
-        .softFloodColumn(4)
+        .softFloodCol(4)
         .softFloodRow(4)
         .setShip([1, 2], TYPE.RIGHT);
 
-    expect(board.compTypes() instanceof BoardBuilder).toBeTruthy();
+    expect(board.compTypes() instanceof Board).toBeTruthy();
 
     expect(board.getShip(0).graphicalType).toBe(TYPE.RIGHT);
     expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
@@ -403,44 +403,44 @@ test('computeGraphicalTypes', () => {
     expect(board.getShip([1, 2]).graphicalType).toBe(TYPE.SHIP);
 });
 
-test('coordinatesToIndex', () => {
-    const board = new BoardBuilder(4, 4);
-    expect(() => { board.coordinatesToIndex([4, 4]); }).toThrow('must be within board');
-    expect(() => { board.coordinatesToIndex([3, 'e']); }).toThrow('must be integers');
+test('coordToInd', () => {
+    const board = new Board(4, 4);
+    expect(() => { board.coordToInd([4, 4]); }).toThrow('must be within board');
+    expect(() => { board.coordToInd([3, 'e']); }).toThrow('must be integers');
 
-    expect(board.coordinatesToIndex([3, 3])).toBe(15);
+    expect(board.coordToInd([3, 3])).toBe(15);
 });
 
-test('indexToCoordinates', () => {
-    const board = new BoardBuilder(4, 4);
-    expect(() => { board.indexToCoordinates(-1); }).toThrow('must be within the board');
-    expect(() => { board.indexToCoordinates(16); }).toThrow('must be within the board');
+test('indToCoord', () => {
+    const board = new Board(4, 4);
+    expect(() => { board.indToCoord(-1); }).toThrow('must be within the board');
+    expect(() => { board.indToCoord(16); }).toThrow('must be within the board');
 
-    expect(board.indexToCoordinates(15)).toStrictEqual([3, 3]);
+    expect(board.indToCoord(15)).toStrictEqual([3, 3]);
 });
 
-test('positionToIndex', () => {
-    const board = new BoardBuilder(4, 4);
-    expect(() => { board.positionToIndex(-1); }).toThrow('must be within the board');
-    expect(() => { board.positionToIndex(16); }).toThrow('must be within the board');
-    expect(() => { board.positionToIndex([-1, 0]); }).toThrow('must be within the board');
-    expect(() => { board.positionToIndex([4, 3]); }).toThrow('must be within the board');
-    expect(() => { board.positionToIndex('e'); }).toThrow('must be an index or array of coordinates');
+test('posToInd', () => {
+    const board = new Board(4, 4);
+    expect(() => { board.posToInd(-1); }).toThrow('must be within the board');
+    expect(() => { board.posToInd(16); }).toThrow('must be within the board');
+    expect(() => { board.posToInd([-1, 0]); }).toThrow('must be within the board');
+    expect(() => { board.posToInd([4, 3]); }).toThrow('must be within the board');
+    expect(() => { board.posToInd('e'); }).toThrow('must be an index or array of coordinates');
 
-    expect(board.positionToIndex(4)).toBe(4);
-    expect(board.positionToIndex([0, 1])).toBe(4);
+    expect(board.posToInd(4)).toBe(4);
+    expect(board.posToInd([0, 1])).toBe(4);
 });
 
 test('getShip', () => {
-    const board = new BoardBuilder(4, 4);
-    board.boardState[8] = new Ship(TYPE.SINGLE, true);
+    const board = new Board(4, 4);
+    board.state[8] = new Ship(TYPE.SINGLE, true);
 
     expect(board.getShip(8).graphicalType).toBe(TYPE.SINGLE);
     expect(board.getShip(8).pinned).toBeTruthy();
 });
 
 test('setShip', () => {
-    const board = new BoardBuilder(4, 4);
+    const board = new Board(4, 4);
     board.setShip(0, TYPE.DOWN);
     board.setShip(15, new Ship(TYPE.RIGHT));
     board.setShip([1, 0], TYPE.HORIZONTAL);
@@ -449,145 +449,145 @@ test('setShip', () => {
     expect(() => { board.setShip(8, TYPE.SHIP, 'yes'); }).toThrow('expected pinned to be boolean');
 
     expect(board.getShip(0).graphicalType).toBe(TYPE.DOWN);
-    expect(board.boardState[15].graphicalType).toBe(TYPE.RIGHT);
+    expect(board.state[15].graphicalType).toBe(TYPE.RIGHT);
     expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.setShip(5, TYPE.SHIP) instanceof BoardBuilder).toBeTruthy();
+    expect(board.setShip(5, TYPE.SHIP) instanceof Board).toBeTruthy();
 });
 
 test('softSetShip', () => {
-    const board = new BoardBuilder(4, 4);
+    const board = new Board(4, 4);
 
     expect(board.softSetShip(7, TYPE.HORIZONTAL)).toBeTruthy();
-    expect(board.boardState[7].internalType).toBe(TYPE.HORIZONTAL);
+    expect(board.state[7].internalType).toBe(TYPE.HORIZONTAL);
     expect(board.softSetShip(7, TYPE.LEFT)).toBeFalsy();
-    expect(board.boardState[7].internalType).toBe(TYPE.HORIZONTAL);
+    expect(board.state[7].internalType).toBe(TYPE.HORIZONTAL);
 });
 
-test('relativePositionToIndex', () => {
-    const board = new BoardBuilder(4, 4);
+test('relPosToInd', () => {
+    const board = new Board(4, 4);
 
-    expect(board.relativePositionToIndex(0, REL_POS.RIGHT)).toBe(1);
-    expect(board.relativePositionToIndex(0, REL_POS.LEFT)).toBeNull();
-    expect(board.relativePositionToIndex(3, REL_POS.RIGHT)).toBeNull();
+    expect(board.relPosToInd(0, REL_POS.RIGHT)).toBe(1);
+    expect(board.relPosToInd(0, REL_POS.LEFT)).toBeNull();
+    expect(board.relPosToInd(3, REL_POS.RIGHT)).toBeNull();
 });
 
-test('getRelativeShip', () => {
-    const board = new BoardBuilder(4, 4);
+test('getRelShip', () => {
+    const board = new Board(4, 4);
     board.setShip(0, TYPE.SHIP);
     board.setShip(1, TYPE.WATER);
     board.setShip(4, TYPE.VERTICAL);
 
-    expect(board.getRelativeShip(0, REL_POS.BOTTOM).internalType).toBe(TYPE.VERTICAL);
-    expect(board.getRelativeShip(0, REL_POS.LEFT)).toBeNull();
-    expect(board.getRelativeShip(0, REL_POS.RIGHT).playType).toBe(TYPE.WATER);
+    expect(board.getRelShip(0, REL_POS.BOTTOM).internalType).toBe(TYPE.VERTICAL);
+    expect(board.getRelShip(0, REL_POS.LEFT)).toBeNull();
+    expect(board.getRelShip(0, REL_POS.RIGHT).playType).toBe(TYPE.WATER);
 });
 
-test('setRelativeShip', () => {
-    const board = new BoardBuilder(4, 4);
+test('setRelShip', () => {
+    const board = new Board(4, 4);
 
-    expect(board.setRelativeShip(0, REL_POS.RIGHT, TYPE.SHIP)).toBeTruthy();
-    expect(board.setRelativeShip(0, REL_POS.LEFT, TYPE.SHIP)).toBeNull();
-    expect(board.boardState[1].playType).toBe(TYPE.SHIP);
+    expect(board.setRelShip(0, REL_POS.RIGHT, TYPE.SHIP)).toBeTruthy();
+    expect(board.setRelShip(0, REL_POS.LEFT, TYPE.SHIP)).toBeNull();
+    expect(board.state[1].playType).toBe(TYPE.SHIP);
 });
 
-test('setCardinalShips', () => {
-    const board = new BoardBuilder(4, 4);
-    expect(board.setCardinalShips([1, 1], REL_POS.TOP) instanceof BoardBuilder).toBeTruthy();
+test('setCarShips', () => {
+    const board = new Board(4, 4);
+    expect(board.setCarShips([1, 1], REL_POS.TOP) instanceof Board).toBeTruthy();
 
-    expect(board.boardState[0].playType).toBe(TYPE.WATER);
-    expect(board.boardState[1].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[2].playType).toBe(TYPE.WATER);
-    expect(board.boardState[4].playType).toBe(TYPE.WATER);
-    expect(board.boardState[6].playType).toBe(TYPE.WATER);
-    expect(board.boardState[8].playType).toBe(TYPE.WATER);
-    expect(board.boardState[9].playType).toBe(TYPE.WATER);
-    expect(board.boardState[10].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPE.WATER);
+    expect(board.state[1].playType).toBe(TYPE.SHIP);
+    expect(board.state[2].playType).toBe(TYPE.WATER);
+    expect(board.state[4].playType).toBe(TYPE.WATER);
+    expect(board.state[6].playType).toBe(TYPE.WATER);
+    expect(board.state[8].playType).toBe(TYPE.WATER);
+    expect(board.state[9].playType).toBe(TYPE.WATER);
+    expect(board.state[10].playType).toBe(TYPE.WATER);
 });
 
-test('setOrthogonalShips', () => {
-    const board = new BoardBuilder(4, 4);
-    expect(board.setOrthogonalShips([1, 1], TYPE.VERTICAL) instanceof BoardBuilder).toBeTruthy();
+test('setOrthoShips', () => {
+    const board = new Board(4, 4);
+    expect(board.setOrthoShips([1, 1], TYPE.VERTICAL) instanceof Board).toBeTruthy();
 
-    expect(board.boardState[0].playType).toBe(TYPE.WATER);
-    expect(board.boardState[1].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[2].playType).toBe(TYPE.WATER);
-    expect(board.boardState[4].playType).toBe(TYPE.WATER);
-    expect(board.boardState[6].playType).toBe(TYPE.WATER);
-    expect(board.boardState[8].playType).toBe(TYPE.WATER);
-    expect(board.boardState[9].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[10].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPE.WATER);
+    expect(board.state[1].playType).toBe(TYPE.SHIP);
+    expect(board.state[2].playType).toBe(TYPE.WATER);
+    expect(board.state[4].playType).toBe(TYPE.WATER);
+    expect(board.state[6].playType).toBe(TYPE.WATER);
+    expect(board.state[8].playType).toBe(TYPE.WATER);
+    expect(board.state[9].playType).toBe(TYPE.SHIP);
+    expect(board.state[10].playType).toBe(TYPE.WATER);
 });
 
-test('floodColumn', () => {
-    const board = new BoardBuilder(4, 4);
+test('softFloodCol', () => {
+    const board = new Board(4, 4);
 
-    expect(board.softFloodColumn(0) instanceof BoardBuilder).toBeTruthy();
-    expect(board.boardState[0].playType).toBe(TYPE.WATER);
-    expect(board.boardState[4].playType).toBe(TYPE.WATER);
-    expect(board.boardState[8].playType).toBe(TYPE.WATER);
-    expect(board.boardState[12].playType).toBe(TYPE.WATER);
+    expect(board.softFloodCol(0) instanceof Board).toBeTruthy();
+    expect(board.state[0].playType).toBe(TYPE.WATER);
+    expect(board.state[4].playType).toBe(TYPE.WATER);
+    expect(board.state[8].playType).toBe(TYPE.WATER);
+    expect(board.state[12].playType).toBe(TYPE.WATER);
 
-    expect(board.softFloodColumn(3, TYPE.SHIP) instanceof BoardBuilder).toBeTruthy();
-    expect(board.boardState[3].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[7].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[11].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[15].playType).toBe(TYPE.SHIP);
+    expect(board.softFloodCol(3, TYPE.SHIP) instanceof Board).toBeTruthy();
+    expect(board.state[3].playType).toBe(TYPE.SHIP);
+    expect(board.state[7].playType).toBe(TYPE.SHIP);
+    expect(board.state[11].playType).toBe(TYPE.SHIP);
+    expect(board.state[15].playType).toBe(TYPE.SHIP);
 });
 
-test('floodRow', () => {
-    const board = new BoardBuilder(4, 4);
+test('softFloodRow', () => {
+    const board = new Board(4, 4);
 
-    expect(board.softFloodRow(0) instanceof BoardBuilder).toBeTruthy();
-    expect(board.boardState[0].playType).toBe(TYPE.WATER);
-    expect(board.boardState[1].playType).toBe(TYPE.WATER);
-    expect(board.boardState[2].playType).toBe(TYPE.WATER);
-    expect(board.boardState[3].playType).toBe(TYPE.WATER);
+    expect(board.softFloodRow(0) instanceof Board).toBeTruthy();
+    expect(board.state[0].playType).toBe(TYPE.WATER);
+    expect(board.state[1].playType).toBe(TYPE.WATER);
+    expect(board.state[2].playType).toBe(TYPE.WATER);
+    expect(board.state[3].playType).toBe(TYPE.WATER);
 
-    expect(board.softFloodRow(3, TYPE.SHIP) instanceof BoardBuilder).toBeTruthy();
-    expect(board.boardState[12].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[13].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[14].playType).toBe(TYPE.SHIP);
-    expect(board.boardState[15].playType).toBe(TYPE.SHIP);
+    expect(board.softFloodRow(3, TYPE.SHIP) instanceof Board).toBeTruthy();
+    expect(board.state[12].playType).toBe(TYPE.SHIP);
+    expect(board.state[13].playType).toBe(TYPE.SHIP);
+    expect(board.state[14].playType).toBe(TYPE.SHIP);
+    expect(board.state[15].playType).toBe(TYPE.SHIP);
 });
 
 test('floodCorners', () => {
-    const board = new BoardBuilder(4, 4);
+    const board = new Board(4, 4);
 
-    expect(board.floodCorners([1, 1]) instanceof BoardBuilder).toBeTruthy();
-    expect(board.boardState[0].playType).toBe(TYPE.WATER);
-    expect(board.boardState[2].playType).toBe(TYPE.WATER);
-    expect(board.boardState[8].playType).toBe(TYPE.WATER);
-    expect(board.boardState[10].playType).toBe(TYPE.WATER);
+    expect(board.floodCorners([1, 1]) instanceof Board).toBeTruthy();
+    expect(board.state[0].playType).toBe(TYPE.WATER);
+    expect(board.state[2].playType).toBe(TYPE.WATER);
+    expect(board.state[8].playType).toBe(TYPE.WATER);
+    expect(board.state[10].playType).toBe(TYPE.WATER);
 });
 
 test('base64 export/import', () => {
-    const board = new BoardBuilder(2, 2, undefined, [2, 0], [1, 1], [0, 1])
+    const board = new Board(2, 2, undefined, [2, 0], [1, 1], [0, 1])
         .setShip(0, TYPE.DOWN)
         .setShip(2, TYPE.UP);
     const b64 = board.export();
-    const importedBoard = new BoardBuilder(b64);
+    const importedBoard = new Board(b64);
 
-    expect(importedBoard.sameBoardState(board)).toBeTruthy();
+    expect(importedBoard.sameState(board)).toBeTruthy();
     expect(importedBoard.columnCounts).toEqual(board.columnCounts);
     expect(importedBoard.rowCounts).toEqual(board.rowCounts);
     expect(importedBoard.runs).toEqual(board.runs);
 
-    const board2 = new BoardBuilder(2, 2)
+    const board2 = new Board(2, 2)
         .setShip(0, TYPE.DOWN)
         .setShip(2, TYPE.UP);
     const board2B64 = board2.export();
-    const importedBoard2 = new BoardBuilder(board2B64);
+    const importedBoard2 = new Board(board2B64);
 
-    expect(importedBoard2.sameBoardState(board2)).toBeTruthy();
+    expect(importedBoard2.sameState(board2)).toBeTruthy();
     expect(importedBoard2.columnCounts).toEqual([0, 0]);
     expect(importedBoard2.rowCounts).toEqual([0, 0]);
     expect(importedBoard2.runs).toEqual([0]);
 
-    const board3 = new BoardBuilder(16, 16)
+    const board3 = new Board(16, 16)
         .setShip([2, 0], TYPE.SINGLE, true)
         .setShip([6, 4], TYPE.WATER);
     const board3B64 = board3.export();
-    const importedBoard3 = BoardBuilder.b64ToBoard(board3B64);
+    const importedBoard3 = Board.from(board3B64);
 
-    expect(importedBoard3.sameBoardState(board3)).toBeTruthy();
+    expect(importedBoard3.sameState(board3)).toBeTruthy();
 });
