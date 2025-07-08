@@ -446,7 +446,7 @@ test('setShip', () => {
     board.setShip([1, 0], TYPE.HORIZONTAL);
 
     expect(() => { board.setShip(8, 'ship'); }).toThrow('should be an instance of Ship or a ship type');
-    expect(() => { board.setShip(8, TYPE.SHIP, 'yes'); }).toThrow('expected pinned to be boolean');
+    expect(() => { board.setShip(8, TYPE.SHIP, 'yes'); }).toThrow('Expected pinned to be boolean');
 
     expect(board.getShip(0).graphicalType).toBe(TYPE.DOWN);
     expect(board.state[15].graphicalType).toBe(TYPE.RIGHT);
