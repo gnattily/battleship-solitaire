@@ -1,17 +1,18 @@
 'use client';
 
 import React from 'react';
-import './Board.css';
+import './BoardUI.css';
 import Board from '../Board';
 import { TYPE } from '../Ship';
 import Image from 'next/image';
 
 /**
  * The visible board
+ * @param {string} board The exported board
  * @param {number} width Width in squares
  * @param {number} height Height in squares
  * @param {Board} [preset] Pre-existing ships
- * @param {number[]} [columnCounts] Number of ships in each column (left to right)
+ * @param {number[]} [colCounts] Number of ships in each column (left to right)
  * @param {number[]} [rowCounts] Number of ships in each row (top to bottom)
  * @param {number[]} [shipsLeft] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
  */
@@ -19,8 +20,14 @@ export default class BoardUI extends React.Component {
     constructor (props) {
         super(props);
 
+        let board;
+
+        if (this.props.board) board = Board.from(this.props.board);
+        else if (this.props.width && this.props.height) board = new Board(this.props.width, this.props.height, this.props.colCounts, this.props.rowCounts, this.props.runs);
+        else if (this.props.preset instanceof Board) board = new Board(this.props.preset, this.props.colCounts, this.props.rowCounts, this.props.runs);
+
         this.state = {
-            board: new Board(this.props.width, this.props.height, this.props.preset, this.props.columnCounts, this.props.rowCounts, this.props.runs),
+            board: board,
             solved: false,
             draggedType: undefined,
         };
@@ -104,7 +111,7 @@ export default class BoardUI extends React.Component {
      * @returns {React.JSX.Element[]} the counts
      */
     displayCounts (rows) {
-        return (rows ? this.state.board.rowCounts : this.state.board.columnCounts).map((count, index) => (
+        return (rows ? this.state.board.rowCounts : this.state.board.colCounts).map((count, index) => (
             <p
                 key={index}
                 onClick={() => {

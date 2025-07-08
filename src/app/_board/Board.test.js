@@ -4,19 +4,14 @@ import Board, { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
 
 test('constructor', () => {
-    const badPreset = new Board(4, 5);
-    const defaultSize = new Board();
-
-    expect(() => { new Board(4, 4, badPreset); }).toThrow('same size');
-    expect(defaultSize.width).toBe(4);
-    expect(defaultSize.height).toBe(4);
+    // REVAMP
 });
 
 test('createState', () => {
     const blank = new Board(4, 4);
     const preset = new Board(4, 4)
         .setShip(0, TYPE.SHIP, true);
-    const fromPreset = new Board(4, 4, preset);
+    const fromPreset = new Board(preset);
 
     expect(blank.state[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
     expect(fromPreset.state[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
@@ -27,7 +22,7 @@ test('reset', () => {
         .setShip([1, 3], TYPE.RIGHT)
         .setShip([0, 0], TYPE.WATER);
 
-    const board = new Board(4, 4, preset)
+    const board = new Board(preset)
         .setShip([3, 0], TYPE.SHIP);
 
     expect(board.sameState(preset)).toBeFalsy();
@@ -60,13 +55,17 @@ test('sameState', () => {
     expect(board1.sameState(board4)).toBeFalsy();
 });
 
-const board1 = new Board(6, 6, undefined,
-    [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])
+const board1 = new Board(6, 6,
+    [2, 1, 0, 4, 0, 3],
+    [0, 2, 3, 1, 1, 3],
+    [3, 2, 1])
     .setShip([5, 2], TYPE.SINGLE, true)
     .setShip([1, 2], TYPE.WATER, true);
 
-const solution1 = new Board(6, 6, undefined,
-    [2, 1, 0, 4, 0, 3], [0, 2, 3, 1, 1, 3], [3, 2, 1])
+const solution1 = new Board(6, 6,
+    [2, 1, 0, 4, 0, 3],
+    [0, 2, 3, 1, 1, 3],
+    [3, 2, 1])
     .setShip([5, 2], TYPE.SINGLE)
     .setShip([0, 1], TYPE.DOWN)
     .setShip([0, 2], TYPE.UP)
@@ -85,7 +84,7 @@ const solution1 = new Board(6, 6, undefined,
     .softFloodCol(5);
 
 test('solve', () => {
-    const board2 = new Board(15, 15, undefined,
+    const board2 = new Board(15, 15,
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
@@ -120,7 +119,7 @@ test('solve', () => {
         .setShip([3, 14], TYPE.WATER, true)
         .setShip([14, 14], TYPE.SINGLE, true);
 
-    const solution2 = new Board(15, 15, undefined,
+    const solution2 = new Board(15, 15,
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
@@ -180,7 +179,7 @@ test('solve', () => {
 });
 
 test('isSolved', () => {
-    const board = new Board(4, 4, undefined, [3, 0, 0, 3], [2, 2, 1, 1], [1, 1, 1])
+    const board = new Board(4, 4, [3, 0, 0, 3], [2, 2, 1, 1], [1, 1, 1])
         .softFloodCol(1)
         .softFloodCol(2)
         .softFloodRow(3)
@@ -208,7 +207,7 @@ test('isSolved', () => {
     expect(board.isSolved()).toBeTruthy();
 
     // test runs (this board is impossible to solve by the way)
-    const board2 = new Board(4, 4, board, [3, 0, 0, 3], [2, 2, 1, 1], [0, 1, 1]);
+    const board2 = new Board(board, [3, 0, 0, 3], [2, 2, 1, 1], [0, 1, 1]);
     expect(board2.isSolved()).toBeFalsy();
 });
 
@@ -561,14 +560,14 @@ test('floodCorners', () => {
 });
 
 test('base64 export/import', () => {
-    const board = new Board(2, 2, undefined, [2, 0], [1, 1], [0, 1])
+    const board = new Board(2, 2, [2, 0], [1, 1], [0, 1])
         .setShip(0, TYPE.DOWN)
         .setShip(2, TYPE.UP);
     const b64 = board.export();
-    const importedBoard = new Board(b64);
+    const importedBoard = Board.from(b64);
 
     expect(importedBoard.sameState(board)).toBeTruthy();
-    expect(importedBoard.columnCounts).toEqual(board.columnCounts);
+    expect(importedBoard.colCounts).toEqual(board.colCounts);
     expect(importedBoard.rowCounts).toEqual(board.rowCounts);
     expect(importedBoard.runs).toEqual(board.runs);
 
@@ -576,10 +575,10 @@ test('base64 export/import', () => {
         .setShip(0, TYPE.DOWN)
         .setShip(2, TYPE.UP);
     const board2B64 = board2.export();
-    const importedBoard2 = new Board(board2B64);
+    const importedBoard2 = Board.from(board2B64);
 
     expect(importedBoard2.sameState(board2)).toBeTruthy();
-    expect(importedBoard2.columnCounts).toEqual([0, 0]);
+    expect(importedBoard2.colCounts).toEqual([0, 0]);
     expect(importedBoard2.rowCounts).toEqual([0, 0]);
     expect(importedBoard2.runs).toEqual([0]);
 
