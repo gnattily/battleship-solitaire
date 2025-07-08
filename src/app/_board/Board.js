@@ -11,51 +11,57 @@
 import Ship, { TYPE } from './Ship.js';
 
 /**
- * The underlying Board class. For use as a preset, supply width and height. For use as a puzzle, also supply preset, counts, and runs.
- * @param {number|Board|string} [widthOrPreset] Width in squares (default 4) or the preset
- * @param {number|number[]} [heightOrColumnCounts] Height in squares (default 4) or column counts
- * @param {Board|string|number[]} [presetOrRowCounts] Pre-existing ships or row counts
- * @param {number[]} [columnCountsOrRunCounts] Number of ships in each column (left to right) or runs
- * @param {number[]} [rowCounts] Number of ships in each row (top to bottom)
- * @param {number[]} [runs] Number of each type of run (eg. 3 solos and 1 double = [3, 1])
+ * The underlying Board class. For use as a preset, supply width and height. For use as a puzzle, supply preset, counts, and runs.
+ * @param {...any} args All arguments
  */
 export default class Board {
-    constructor (widthOrPreset, heightOrColumnCounts, presetOrRowCounts, columnCountsOrRunCounts, rowCounts, runs) {
-        if (widthOrPreset instanceof Board) {
-            const preset = widthOrPreset;
+    constructor (...args) {
+        if (args.length === 0) throw new Error('Expected at minimum preset or width and height');
 
-            this.width = widthOrPreset.width;
-            this.height = widthOrPreset.height;
-            this.preset = preset;
-            this.columnCounts = heightOrColumnCounts;
-            this.rowCounts = presetOrRowCounts;
-            this.runs = columnCountsOrRunCounts;
-            this.state = createState(this.width, this.height, preset);
-        } else if (typeof widthOrPreset === 'string') {
-            const board = Board.from(widthOrPreset);
+        if (typeof args[0] === 'number') {
+            const [width, height, colCounts, rowCounts, runs] = args;
 
-            this.width = board.width;
-            this.height = board.height;
-            this.preset = board.preset;
-            this.columnCounts = board.columnCounts;
-            this.rowCounts = board.rowCounts;
-            this.runs = board.runs;
-            this.state = board.state;
-        } else {
-            const width = widthOrPreset;
-            if (presetOrRowCounts && (presetOrRowCounts.width !== width || presetOrRowCounts.height !== heightOrColumnCounts)) {
-                throw new Error(`Preset should be the same size as the new board. Expected (${width}, ${heightOrColumnCounts}), received (${presetOrRowCounts.width}, ${presetOrRowCounts.height})`);
+            // mild type validation
+            // nothing too extensive to save space
+            if (typeof width !== 'number'
+                || typeof height !== 'number'
+                || (colCounts && !Array.isArray(colCounts))
+                || (rowCounts && !Array.isArray(rowCounts))
+                || (runs && !Array.isArray(runs))) {
+                throw new TypeError('Types of arguments incorrect');
             }
 
-            this.width = width || this.preset?.width || 4;
-            this.height = heightOrColumnCounts || this.preset?.height || 4;
+            if (!Number.isInteger(height) || !Number.isInteger(width)) {
+                throw new TypeError(`Expected width and height to be given and integers, got ${width} and ${height}`);
+            }
 
-            this.preset = presetOrRowCounts;
-            this.columnCounts = columnCountsOrRunCounts;
+            this.width = width;
+            this.height = height;
+            this.colCounts = colCounts;
             this.rowCounts = rowCounts;
-            this.state = createState(this.width, this.height, this.preset);
-
             this.runs = runs;
+            this.state = createState(this.width, this.height);
+        } else if (args[0] instanceof Board || typeof args[0] === 'string') {
+            let [preset, colCounts, rowCounts, runs] = args;
+
+            // more mild type validation
+            if ((colCounts && !Array.isArray(colCounts))
+                || (rowCounts && !Array.isArray(rowCounts))
+                || (runs && !Array.isArray(runs))) {
+                throw new TypeError('Types of arguments incorrect');
+            }
+
+            if (typeof preset === 'string') preset = Board.from(preset);
+
+            this.preset = preset;
+            this.width = preset.width;
+            this.height = preset.height;
+            this.colCounts = colCounts;
+            this.rowCounts = rowCounts;
+            this.runs = runs;
+            this.state = createState(this.width, this.height, preset);
+        } else {
+            throw new TypeError('Types of arguments incorrect');
         }
     }
 
@@ -70,18 +76,18 @@ export default class Board {
         out += (this.width - 1).toString(2).padStart(8, '0');
         out += (this.height - 1).toString(2).padStart(8, '0');
 
-        const colCounts = this.columnCounts ? this.columnCounts : Array(this.width).fill(0);
+        const colCounts = this.colCounts || Array(this.width).fill(0);
         for (let i = 0; i < this.width; i++) {
             out += colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
         }
 
-        const rowCounts = this.rowCounts ? this.rowCounts : Array(this.height).fill(0);
+        const rowCounts = this.rowCounts || Array(this.height).fill(0);
         for (let i = 0; i < this.height; i++) {
             out += rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
         }
 
         let runsBytes = '';
-        const runs = this.runs ? this.runs : [0];
+        const runs = this.runs || [0];
         const runBuffer = Math.max(Math.ceil(Math.log2(this.width)), Math.ceil(Math.log2(this.height)) + 1);
         runs.forEach((count, size) => {
             runsBytes += size.toString(2).padStart(runBuffer, '0');
@@ -215,7 +221,7 @@ export default class Board {
             }
         }
 
-        const board = new Board(width, height, undefined, colCounts, rowCounts, runs);
+        const board = new Board(width, height, colCounts, rowCounts, runs);
         board.state = state;
 
         return board;
@@ -235,7 +241,7 @@ export default class Board {
      * @returns {Board} A copy of the board
      */
     copy () {
-        return new Board(this.width, this.height, this, this.columnCounts, this.rowCounts, this.runs);
+        return new Board(this, this.colCounts, this.rowCounts, this.runs);
     }
 
     /**
@@ -278,7 +284,7 @@ export default class Board {
 
             for (let x = 0; x < board.width; x++) {
                 const counts = board.countCol(x);
-                const expected = board.columnCounts[x];
+                const expected = board.colCounts[x];
                 if (counts[0] === expected) board.softFloodCol(x);
                 if (counts[0] + counts[1] === expected) board.softFloodCol(x, TYPE.SHIP);
             }
@@ -297,7 +303,7 @@ export default class Board {
                 else board.floodCorners(i);
             }
 
-            if (old?.sameState(board)) {
+            if (old.sameState(board)) {
                 const shipsLeft = board.countRunsLeft(true);
                 const horizontalRuns = board.getHorRuns();
                 const verticalRuns = board.getVertRuns();
@@ -332,7 +338,7 @@ export default class Board {
                             const x = tmpBoard.indToCoord(run[0])[0];
                             const numShips = tmpBoard.countCol(x, tmpBoard)[0];
 
-                            if (numShips > tmpBoard.columnCounts[x]) continue;
+                            if (numShips > tmpBoard.colCounts[x]) continue;
                         }
 
                         // check the ends of the run to see if it's really i long
@@ -392,8 +398,8 @@ export default class Board {
 
             board.compTypes();
 
-            if (board?.sameState(old)) return board;
-            if (board?.isSolved()) return board;
+            if (board.sameState(old)) return board;
+            if (board.isSolved()) return board;
         }
 
         return board;
@@ -410,7 +416,7 @@ export default class Board {
 
         for (let x = 0; x < this.width; x++) {
             const counts = this.countCol(x);
-            if (counts[0] !== this.columnCounts[x]) return false;
+            if (counts[0] !== this.colCounts[x]) return false;
         }
 
         for (let y = 0; y < this.height; y++) {
