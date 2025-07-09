@@ -2,6 +2,7 @@ import './global.css';
 import BoardUI from './_board/ui/BoardUI';
 import Board from './_board/Board';
 import { TYPE } from './_board/Ship';
+import type { JSX } from 'react';
 
 // https://www.brainbashers.com/showbattleships.asp?date=0227&size=6&puzz=A
 // const preset = new Board(6, 6)
@@ -51,7 +52,7 @@ const board = new Board(15, 15,
     .compTypes()
     .export();
 
-export default function Page () {
+export default function Page (): JSX.Element {
     return (
         <BoardUI
             board={board}

@@ -1,64 +1,56 @@
-/**
- * An array of indicies representing squares in a run
- * @typedef {number[]} Run
- */
-
-/** @typedef {import('./Ship.js').PlayType} PlayType */
-/** @typedef {import('./Ship.js').GraphicalType} GraphicalType */
-/** @typedef {import('./Ship.js').InternalType} InternalType */
-/** @typedef {import('./Ship.js').AnyType} AnyType */
-
-import Ship, { TYPE } from './Ship.js';
+import Ship, { TYPE } from './Ship';
+import type { AnyType } from './Ship';
 
 /**
  * The underlying Board class. For use as a preset, supply width and height. For use as a puzzle, supply preset, counts, and runs.
  * @param {...any} args All arguments
  */
 export default class Board {
-    constructor (...args) {
-        if (args.length === 0) throw new Error('Expected at minimum preset or width and height');
+    width: number;
+    height: number;
+    colCounts: number[];
+    rowCounts: number[];
+    runs: number[];
+    preset: Board | undefined;
+    state: Ship[];
 
-        if (typeof args[0] === 'number') {
+    constructor (width: number, height: number);
+    constructor (width: number, height: number, colCounts: number[], rowCounts: number[], runs: number[]);
+    constructor (preset: Board | string);
+    constructor (preset: Board | string, colCounts: number[], rowCounts: number[], runs: number[]);
+    constructor (...args:
+        | [number, number]
+        | [number, number, number[], number[], number[]]
+        | [Board | string]
+        | [Board | string, number[], number[], number[]]
+    ) {
+        if (typeof args[0] === 'number' && typeof args[1] === 'number') {
             const [width, height, colCounts, rowCounts, runs] = args;
 
-            // mild type validation
-            // nothing too extensive to save space
-            if (typeof width !== 'number'
-                || typeof height !== 'number'
-                || (colCounts && !Array.isArray(colCounts))
-                || (rowCounts && !Array.isArray(rowCounts))
-                || (runs && !Array.isArray(runs))) {
-                throw new TypeError('Types of arguments incorrect');
-            }
-
             if (!Number.isInteger(height) || !Number.isInteger(width)) {
-                throw new TypeError(`Expected width and height to be given and integers, got ${width} and ${height}`);
+                throw new TypeError(`Expected width and height to be integers, got ${width} and ${height}`);
             }
 
             this.width = width;
             this.height = height;
-            this.colCounts = colCounts;
-            this.rowCounts = rowCounts;
-            this.runs = runs;
+            this.colCounts = colCounts || [];
+            this.rowCounts = rowCounts || [];
+            this.runs = runs || [];
             this.state = createState(this.width, this.height);
-        } else if (args[0] instanceof Board || typeof args[0] === 'string') {
-            let [preset, colCounts, rowCounts, runs] = args;
-
-            // more mild type validation
-            if ((colCounts && !Array.isArray(colCounts))
-                || (rowCounts && !Array.isArray(rowCounts))
-                || (runs && !Array.isArray(runs))) {
-                throw new TypeError('Types of arguments incorrect');
-            }
+        } else if (
+            (args[0] instanceof Board || typeof args[0] === 'string')
+            && typeof args[1] !== 'number') {
+            let preset = args[0];
+            const [, colCounts, rowCounts, runs] = args;
 
             if (typeof preset === 'string') preset = Board.from(preset);
 
             this.preset = preset;
             this.width = preset.width;
             this.height = preset.height;
-            this.colCounts = colCounts;
-            this.rowCounts = rowCounts;
-            this.runs = runs;
+            this.colCounts = colCounts || [];
+            this.rowCounts = rowCounts || [];
+            this.runs = runs || [];
             this.state = createState(this.width, this.height, preset);
         } else {
             throw new TypeError('Types of arguments incorrect');
@@ -68,20 +60,19 @@ export default class Board {
     /**
      * Converts the board to its base64 representation
      * If the board has no counts or runs, they will be exported as 0
-     * @returns {string} The base64 version of the board
      */
-    export () {
+    export (): string {
         let out = '';
 
         out += (this.width - 1).toString(2).padStart(8, '0');
         out += (this.height - 1).toString(2).padStart(8, '0');
 
-        const colCounts = this.colCounts || Array(this.width).fill(0);
+        const colCounts = this.colCounts?.length === this.width ? this.colCounts : Array(this.width).fill(0);
         for (let i = 0; i < this.width; i++) {
             out += colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
         }
 
-        const rowCounts = this.rowCounts || Array(this.height).fill(0);
+        const rowCounts = this.rowCounts?.length === this.height ? this.rowCounts : Array(this.height).fill(0);
         for (let i = 0; i < this.height; i++) {
             out += rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
         }
@@ -101,7 +92,7 @@ export default class Board {
         let currentWaters = 0;
 
         const maxLength = Math.ceil(Math.log2(this.width * this.height + 1));
-        function addMultipleShips () {
+        function addMultipleShips (): void {
             if (currentUnknowns * 5 > 5 + maxLength) {
                 out += '11111';
                 out += (currentUnknowns - 1).toString(2).padStart(maxLength, '0');
@@ -152,10 +143,8 @@ export default class Board {
 
     /**
      * Converts a base64 board to its Board object counterpart
-     * @param {string} base64 The base64 board to convert
-     * @returns {Board} The board as a Board object
      */
-    static from (base64) {
+    static from (base64: string): Board {
         const string = atob(base64);
 
         let binaryString = '';
@@ -163,7 +152,7 @@ export default class Board {
             binaryString += string.charCodeAt(i).toString(2).padStart(8, '0');
         }
 
-        function trim (length) {
+        function trim (length: number): void {
             binaryString = binaryString.slice(length);
         }
 
@@ -204,6 +193,11 @@ export default class Board {
             const bits = binaryString.slice(0, 5);
             const pinned = binaryString.slice(0, 1) === '1';
             const type = parseInt(binaryString.slice(1, 5), 2);
+
+            if (type < TYPE.UNKNOWN || type > TYPE.HORIZONTAL) {
+                throw new Error('Bad input. Expected type to be a type, got ' + type);
+            }
+
             trim(5);
 
             const maxLength = Math.ceil(Math.log2(width * height + 1));
@@ -217,7 +211,7 @@ export default class Board {
                     i++;
                 }
             } else {
-                state.push(new Ship(type, pinned));
+                state.push(new Ship(type as AnyType, pinned));
             }
         }
 
@@ -229,27 +223,24 @@ export default class Board {
 
     /**
      * Resets the board
-     * @returns {Board} this
      */
-    reset () {
+    reset (): this {
         this.state = createState(this.width, this.height, this.preset);
         return this;
     }
 
     /**
      * Copies the board without pointing to the origial
-     * @returns {Board} A copy of the board
      */
-    copy () {
-        return new Board(this, this.colCounts, this.rowCounts, this.runs);
+    copy (): Board {
+        if (this.colCounts && this.rowCounts && this.runs) return new Board(this, this.colCounts, this.rowCounts, this.runs);
+        else return new Board(this);
     }
 
     /**
      * Compares the states of two boards
-     * @param {Board} comparate The board to compare with
-     * @returns {boolean} true if equal, false if not
      */
-    sameState (comparate) {
+    sameState (comparate: Board): boolean {
         if (!(comparate instanceof Board) || this.height !== comparate.height || this.width !== comparate.width) return false;
 
         for (let i = 0; i < this.width * this.height - 1; i++) {
@@ -267,7 +258,7 @@ export default class Board {
      * @param {Board} board The board to solve
      * @returns {Board} The solved board
      */
-    static solve (board) {
+    static solve (board: Board): Board {
         const ITERATION_LIMIT = 50;
         board = board.copy();
         board.compTypes();
@@ -299,7 +290,7 @@ export default class Board {
                 if (square.isCardinal()) board.setCarShips(i, Ship.typeToRelPos(square.internalType));
                 else if (square.graphicalType === TYPE.SINGLE)
                     board.setCarShips(i); // makes every surrounding square water
-                else if (square.internalType > TYPE.ORTHOGONAL) board.setOrthoShips(i, square.internalType);
+                else if (square.internalType > TYPE.ORTHOGONAL) board.setOrthoShips(i, square.internalType as typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL);
                 else board.floodCorners(i);
             }
 
@@ -310,12 +301,8 @@ export default class Board {
 
                 /**
                  * Counts possibilities and adds them to a list
-                 * @param {Run} run The run to count
-                 * @param {boolean} horizontal True if the run spans horizontally, false if not
-                 * @param {number} i The current loop index
-                 * @returns {[?number[], number]} [possibilities, totalPossibilities]
                  */
-                function countPossibilities (run, horizontal, i) {
+                function countPossibilities (run: Run, horizontal: boolean, i: number): [number[], number] {
                     const possibilities = [];
                     let totalPossibilities = 0;
 
@@ -332,11 +319,11 @@ export default class Board {
                         // check if row ships > it's supposed to be
                         if (horizontal) {
                             const y = tmpBoard.indToCoord(run[0])[1];
-                            const numShips = tmpBoard.countRow(y, tmpBoard)[0];
+                            const numShips = tmpBoard.countRow(y)[0];
                             if (numShips > tmpBoard.rowCounts[y]) continue;
                         } else {
                             const x = tmpBoard.indToCoord(run[0])[0];
-                            const numShips = tmpBoard.countCol(x, tmpBoard)[0];
+                            const numShips = tmpBoard.countCol(x)[0];
 
                             if (numShips > tmpBoard.colCounts[x]) continue;
                         }
@@ -370,7 +357,7 @@ export default class Board {
 
                     if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
 
-                    const possibilities = [];
+                    const possibilities: number[] = [];
                     let totalPossibilities = 0;
 
                     filteredHRuns.forEach(run => {
@@ -407,9 +394,8 @@ export default class Board {
 
     /**
      * Checks if the board is solved
-     * @returns {boolean} if the board is solved
      */
-    isSolved () {
+    isSolved (): boolean {
         for (const square of this.state) {
             if (square.playType === TYPE.UNKNOWN) return false;
         }
@@ -434,14 +420,13 @@ export default class Board {
 
     /**
      * Count unknown and ship squares in a column
-     * @param {number} x The x position of the column
-     * @returns {number[]} [#ships, #unknown]
-     * @throws {RangeError} If x is outside of the board
+     * @returns [#ships, #unknown]
+     * @throws If x is outside of the board
      */
-    countCol (x) {
+    countCol (x: number): [number, number] {
         if (x > this.width - 1 || x < 0) throw new RangeError(`x (${x}) is outside of the board (min: 0, max: ${this.width - 1})`);
 
-        const counts = [0, 0];
+        const counts: [number, number] = [0, 0];
 
         for (let y = 0; y < this.height; y++) {
             const type = this.getShip([x, y]).playType;
@@ -455,14 +440,13 @@ export default class Board {
 
     /**
      * Count unknown and ship squares in a row
-     * @param {number} y The row index (starts at 0)
-     * @returns {number[]} [#ships, #unknown]
-     * @throws {RangeError} If y is outside of the board
+     * @returns [#ships, #unknown]
+     * @throws If y is outside of the board
      */
-    countRow (y) {
+    countRow (y: number): [number, number] {
         if (y > this.height - 1 || y < 0) throw new RangeError(`y (${y}) is outside of the board (min: 0, max: ${this.height - 1})`);
 
-        const counts = [0, 0];
+        const counts: [number, number] = [0, 0];
 
         for (let x = 0; x < this.width; x++) {
             const type = this.getShip([x, y]).playType;
@@ -476,14 +460,14 @@ export default class Board {
 
     /**
      * Counts which runs are left
-     * @param {boolean} [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
-     * @returns {number[]|undefined} The number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
+     * @param onlyCountComplete Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
+     * @returns The number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
      */
-    countRunsLeft (onlyCountComplete = false) {
-        if (!this.runs) return;
+    countRunsLeft (onlyCountComplete = false): number[] {
+        if (!this.runs) return [];
 
         const lengths = this.getRuns(onlyCountComplete).map(run => run.length);
-        const currentRuns = [];
+        const currentRuns: number[] = [];
 
         lengths.forEach(length => {
             const i = length - 1;
@@ -501,14 +485,13 @@ export default class Board {
 
     /**
      * Gets the number, length, and position of all remaining runs.
-     * @param {boolean} [onlyCountComplete=false] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
-     * @returns {number[]} An array with all runs
+     * @param onlyCountComplete Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
      */
-    getRuns (onlyCountComplete) {
+    getRuns (onlyCountComplete = false): Run[] {
         let horizontalRuns = this.getHorRuns(onlyCountComplete, true, true);
         let verticalRuns = this.getVertRuns(onlyCountComplete, true, true);
 
-        const singleRuns = [];
+        const singleRuns: Run[] = [];
 
         // distinguish snippets of vertical runs from solo ships
         horizontalRuns = horizontalRuns.filter(run => {
@@ -522,7 +505,7 @@ export default class Board {
             return run.length > 1;
         });
 
-        const filteredSingleRuns = [];
+        const filteredSingleRuns: Run[] = [];
 
         // filter singleRuns for duplicates
         singleRuns.forEach(run => {
@@ -543,12 +526,11 @@ export default class Board {
 
     /**
      * Counts runs horizontally. Filters one ship runs unless unfiltered is true
-     * @param {boolean} [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
-     * @param {boolean} [onlyCountShips] don't include unknown squares in the count. Defaults to false
-     * @param {boolean} [unfiltered] don't filter the results for one ship runs. Defaults to false
-     * @returns {Run[]} An array with the all horizontal runs
+     * @param [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
+     * @param [onlyCountShips] don't include unknown squares in the count. Defaults to false
+     * @param [unfiltered] don't filter the results for one ship runs. Defaults to false
      */
-    getHorRuns (onlyCountComplete = false, onlyCountShips = false, unfiltered) {
+    getHorRuns (onlyCountComplete = false, onlyCountShips = false, unfiltered = false): Run[] {
         const runs = [];
 
         for (let y = 0; y < this.height; y++) {
@@ -563,13 +545,12 @@ export default class Board {
 
     /**
      * Counts runs in the given row
-     * @param {number} y The index of the row
-     * @param {boolean} [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
-     * @param {boolean} [onlyCountShips] don't include unknown squares in the count. Defaults to false
-     * @returns {Run[]} An array with the all the row's runs
+     * @param y The index of the row
+     * @param [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right). Defaults to false
+     * @param [onlyCountShips] don't include unknown squares in the count. Defaults to false
      * @throws {RangeError} If y is outside of the board
      */
-    getRowRuns (y, onlyCountComplete = false, onlyCountShips = false) {
+    getRowRuns (y: number, onlyCountComplete = false, onlyCountShips = false): Run[] {
         if (y > this.height - 1) throw new RangeError(`y (${y}) is outside of the board (min: 0, max: ${this.height - 1})`);
 
         const runs = [];
@@ -595,12 +576,11 @@ export default class Board {
 
     /**
      * Counts runs vertically. Filters one ship runs unless unfiltered == true
-     * @param {boolean} [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right)
-     * @param {boolean} [onlyCountShips] don't include unknown squares in the count
-     * @param {boolean} [unfiltered] don't filter the results for one ship runs
-     * @returns {Run[]} An array with the all vertical runs
+     * @param [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right)
+     * @param [onlyCountShips] don't include unknown squares in the count
+     * @param [unfiltered] don't filter the results for one ship runs
      */
-    getVertRuns (onlyCountComplete = false, onlyCountShips = false, unfiltered) {
+    getVertRuns (onlyCountComplete = false, onlyCountShips = false, unfiltered = false): Run[] {
         const runs = [];
 
         for (let x = 0; x < this.width; x++) {
@@ -615,13 +595,12 @@ export default class Board {
 
     /**
      * Counts runs in the given column
-     * @param {number} x The index of the column
-     * @param {boolean} [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right)
-     * @param {boolean} [onlyCountShips] don't include unknown squares in the count
-     * @returns {Run[]} An array with the all the column's runs
-     * @throws {RangeError} If x is outside of the board
+     * @param x The index of the column
+     * @param [onlyCountComplete] Only count runs that start and end with an end ship (eg. up, down, left, right)
+     * @param [onlyCountShips] don't include unknown squares in the count
+     * @throws If x is outside of the board
      */
-    getColRuns (x, onlyCountComplete = false, onlyCountShips = false) {
+    getColRuns (x: number, onlyCountComplete = false, onlyCountShips = false): Run[] {
         if (x > this.width - 1) throw new RangeError(`x (${x}) must be within the board (min: 0, max: ${this.width - 1})`);
 
         const runs = [];
@@ -647,9 +626,8 @@ export default class Board {
 
     /**
      * Computes the internal and graphical types based off information available
-     * @returns {Board} this
      */
-    compTypes () {
+    compTypes (): this {
         // for legibility
         const isShip = Ship.isShip;
         const isWater = Ship.isWater;
@@ -682,12 +660,9 @@ export default class Board {
 
     /**
      * Converts a set of coordinates to an index
-     * @param {number[]} coordinates An array starting at 0 as [x, y]
-     * @returns {number} The index
-     * @throws {RangeError} If coordinates are not within the board
-     * @throws {TypeError} If coordinates are not integers
+     * @throws If coordinates are not within the board or are outside of the board
      */
-    coordToInd (coordinates) {
+    coordToInd (coordinates: Coordinates): number {
         const [x, y] = coordinates;
 
         if (!Number.isInteger(x) || !Number.isInteger(y)) {
@@ -704,12 +679,9 @@ export default class Board {
 
     /**
      * Converts an index to a set of coordinates
-     * @param {number} index The index
-     * @returns {number[]} An array starting at 0 as [x, y]
-     * @throws {RangeError} If coordinates are not within the board
-     * @throws {TypeError} If coordinates are not integers
+     * @throws If coordinates are not itegers or are not within the board
      */
-    indToCoord (index) {
+    indToCoord (index: number): Coordinates {
         if (index < 0 || index > this.width * this.height - 1) throw new RangeError(`Index (${index}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
         if (!Number.isInteger(index)) throw new TypeError(`Index (${index}) must be an integer (is ${typeof index})`);
 
@@ -718,12 +690,9 @@ export default class Board {
 
     /**
      * Converts a position (coordinates or index) into an index
-     * @param {number[] | number} position An index or array starting at 0 as [x, y]
-     * @returns {number} The index
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @throws If position is not an index or coordinates or is not within the board
      */
-    posToInd (position) {
+    posToInd (position: Position): number {
         if (typeof position === 'number') {
             if (position < 0 || position > this.width * this.height - 1) throw new RangeError(`Index (${position}) must be within the board (min: 0, max: ${this.width * this.height - 1})`);
             return position;
@@ -737,33 +706,25 @@ export default class Board {
 
     /**
      * Get the ship at a position
-     * @param {number[] | number} position An index or array starting at 0 as [x, y]
-     * @returns {Ship} The ship
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @throws If position is not an index or coordinates or is not within the board
      */
-    getShip (position) {
+    getShip (position: Position): Ship {
         const index = this.posToInd(position);
         return this.state[index];
     }
 
     /**
      * Set the ship at a position
-     * @param {number} position An index or array starting at 0 as [x, y]
-     * @param {Ship|AnyType} value The ship object or type
-     * @param {boolean} [pinned] Should compTypes() ignore the ship (only works if value is a ship type)
-     * @returns {Board} this
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
-     * @throws {TypeError} If value is not a ship nor a graphical or play type
+     * @throws If position is invalid or if value is not a Ship or Ship type
      */
-    setShip (position, value, pinned) {
+    setShip (position: Position, value: Ship | AnyType, pinned = false): this {
         const index = this.posToInd(position);
 
-        let ship = value;
+        let ship;
 
         if (typeof value === 'number') ship = new Ship(value, pinned);
         else if (!(value instanceof Ship)) throw new TypeError('value should be an instance of Ship or a ship type');
+        else ship = value;
 
         if (pinned && typeof pinned !== 'boolean') throw new TypeError('Expected pinned to be boolean, received: ' + typeof pinned);
 
@@ -774,14 +735,13 @@ export default class Board {
 
     /**
      * Sets the ship only if the square is unknown
-     * @param {number[] | number} position An index or array starting at 0 as [x, y]
-     * @param {Ship|AnyType} value The ship object or type
-     * @param {boolean} [pinned] Should compTypes ignore the ship
-     * @returns {boolean} True if the ship was set, false if not
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @param position An index or array starting at 0 as [x, y]
+     * @param value The ship object or type
+     * @param [pinned] Should compTypes ignore the ship
+     * @returns True if the ship was set, false if not
+     * @throws If position is invalid
      */
-    softSetShip (position, value, pinned) {
+    softSetShip (position: Position, value: Ship | AnyType, pinned = false): boolean {
         if (this.getShip(position).playType !== TYPE.UNKNOWN) return false;
 
         this.setShip(position, value, pinned);
@@ -790,20 +750,17 @@ export default class Board {
 
     /**
      * Converts a relative position to an absolute index
-     * @param {number[]|number} position An index or array starting at 0 as [x, y]
-     * @param {REL_POS} relativePosition The relative position
-     * @returns {number|null} The absolute index or null if the square would be outside of the board
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @returns The absolute index or null if the square would be outside of the board
+     * @throws If position is invalid
      */
-    relPosToInd (position, relativePosition) {
+    relPosToInd (position: Position, relativePosition: RelativePosition): number | null {
         const index = this.posToInd(position);
 
         // prevent wrap-around on the sides
         if (index % this.width === 0 && relativePosition % 3 === 0) return null;
         if (index % this.width === this.width - 1 && relativePosition % 3 === 2) return null;
 
-        //               base      vertical offset                                         horizontal offset
+        //               base     vertical offset                                        horizontal offset
         const absIndex = index + (Math.floor(relativePosition / 3) - 1) * this.width + ((relativePosition % 3) - 1);
 
         // check absIndex is within the board
@@ -814,46 +771,37 @@ export default class Board {
 
     /**
      * Get a square adjacent to the base square
-     * @param {number[] | number} basePosition An index or array starting at 0 as [x, y]
-     * @param {REL_POS} relativePosition The relative position
-     * @returns {Ship|null} The relative ship or null if the relative ship is outside the board
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @returns The relative ship or null if the relative ship is outside the board
+     * @throws If position is invalid
      */
-    getRelShip (basePosition, relativePosition) {
-        const index = this.relPosToInd(basePosition, relativePosition);
+    getRelShip (position: Position, relativePosition: RelativePosition): Ship | null {
+        const index = this.relPosToInd(position, relativePosition);
         return index !== null ? this.state[index] : null;
     }
 
     /**
      * Set a square adjacent to the base square if not already set
-     * @param {number[]|number} position An index or array starting at 0 as [x, y]
-     * @param {REL_POS} relativePosition The relative position
-     * @param {Ship|AnyType} value The ship object or type
-     * @param {boolean} [pinned] Should compTypes ignore the ship
-     * @returns {Board|null} this or null if the relative ship is outside the board
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @returns this or null if the relative ship is outside the board
+     * @throws If position is invalid
      */
-    setRelShip (position, relativePosition, value, pinned) {
+    setRelShip (position: Position, relativePosition: RelativePosition, value: Ship | AnyType, pinned = false): this | null {
         const index = this.relPosToInd(position, relativePosition);
 
         if (index === null) return null;
 
-        return this.softSetShip(index, value, pinned);
+        this.softSetShip(index, value, pinned);
+        return this;
     }
 
     /**
      * Sets all surrounding squares to water
-     * @param {number | number[]} position An index or array starting at 0 as [x, y]
-     * @param {REL_POS} [except] A relative position to set to a ship instead of water
-     * @returns {Board} this
-     * @throws {RangeError} If position is not within the board
-     * @throws {TypeError} If position is not an index (integer) or array of coordinates
+     * @param position
+     * @param except The relative position to set to a ship instead of water
+     * @throws If position is invalid
      */
-    setCarShips (position, except) {
-        for (const relativePosition in REL_POS) {
-            const value = REL_POS[relativePosition];
+    setCarShips (position: Position, except?: RelativePosition): this {
+        for (const key in REL_POS) {
+            const value: RelativePosition = REL_POS[key as keyof typeof REL_POS];
 
             this.setRelShip(position, value, except === value ? TYPE.SHIP : TYPE.WATER);
         }
@@ -863,18 +811,17 @@ export default class Board {
 
     /**
      * Sets ships on the sides of a ship to water
-     * @param {number[] | number} position An index or array starting at 0 as [x, y]
-     * @param {InternalType} orientation TYPE.HORIZONTAL or .VERTICAL
-     * @returns {Board} this
+     * @param position
+     * @param orientation TYPE.HORIZONTAL or .VERTICAL
      */
-    setOrthoShips (position, orientation) {
-        const shipDirections = orientation === TYPE.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
+    setOrthoShips (position: Position, orientation: typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL): this {
+        const shipDirections: AnyType[] = orientation === TYPE.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
 
         for (const key in REL_POS) {
-            const relativePosition = REL_POS[key];
+            const relativePosition = REL_POS[key as keyof typeof REL_POS];
 
             if (!shipDirections.includes(relativePosition)) this.setRelShip(position, relativePosition, TYPE.WATER);
-            else if (this.getRelShip(relativePosition)?.playType !== TYPE.SHIP) this.setRelShip(position, relativePosition, TYPE.SHIP);
+            else this.setRelShip(position, relativePosition, TYPE.SHIP);
         }
 
         return this;
@@ -882,13 +829,10 @@ export default class Board {
 
     /**
      * Flood the column with the given type or water, only setting unknown ships
-     * @param {number} column The target column's index
-     * @param {AnyType} [type] What to flood it with (defaults to water)
-     * @returns {Board} this
      */
-    softFloodCol (column, type) {
+    softFloodCol (column: number, type: AnyType = TYPE.WATER): this {
         for (let y = 0; y < this.height; y++) {
-            this.softSetShip([column, y], type ?? TYPE.WATER);
+            this.softSetShip([column, y], type);
         }
 
         return this;
@@ -896,13 +840,10 @@ export default class Board {
 
     /**
      * Flood the row with the given type or water, only setting unknown ships
-     * @param {number} row The target row's index
-     * @param {AnyType} [type] What to flood it with (defaults to water)
-     * @returns {Board} this
      */
-    softFloodRow (row, type) {
+    softFloodRow (row: number, type: AnyType = TYPE.WATER): this {
         for (let x = 0; x < this.width; x++) {
-            this.softSetShip([x, row], type ?? TYPE.WATER);
+            this.softSetShip([x, row], type);
         }
 
         return this;
@@ -910,10 +851,8 @@ export default class Board {
 
     /**
      * Places water in all corners around a square
-     * @param {number | number[]} position An index or array starting at 0 as [x, y]
-     * @returns {Board} this
      */
-    floodCorners (position) {
+    floodCorners (position: Position): this {
         this.setRelShip(position, REL_POS.TOP_LEFT, TYPE.WATER);
         this.setRelShip(position, REL_POS.TOP_RIGHT, TYPE.WATER);
         this.setRelShip(position, REL_POS.BOTTOM_LEFT, TYPE.WATER);
@@ -922,14 +861,7 @@ export default class Board {
     }
 }
 
-/**
- * Creates the state array
- * @param {number} width The width of the board
- * @param {number} height The height of the board
- * @param {Board} [preset] The board to copy
- * @returns {Ship[]} The board state
- */
-function createState (width, height, preset) {
+function createState (width: number, height: number, preset?: Board): Ship[] {
     const out = [];
 
     for (let i = 0; i < width * height; i++) {
@@ -946,27 +878,34 @@ function createState (width, height, preset) {
 
 /**
  * Postions around a square
- * @readonly
- * @enum {number}
  */
-export const REL_POS = Object.freeze({
-    /** @type {0} */
+export const REL_POS = {
     TOP_LEFT: 0,
-    /** @type {1} */
     TOP: 1,
-    /** @type {2} */
     TOP_RIGHT: 2,
-    /** @type {3} */
     LEFT: 3,
 
     // CENTER: 4, (this)
 
-    /** @type {5} */
     RIGHT: 5,
-    /** @type {6} */
     BOTTOM_LEFT: 6,
-    /** @type {7} */
     BOTTOM: 7,
-    /** @type {8} */
     BOTTOM_RIGHT: 8,
-});
+} as const;
+
+export type RelativePosition = typeof REL_POS[keyof typeof REL_POS];
+
+/**
+ * An array of indicies representing squares in a run
+ */
+type Run = number[];
+
+/**
+ * [x, y] starting at 0
+ */
+type Coordinates = [number, number];
+
+/**
+ * Coordinates or index
+ */
+type Position = Coordinates | number;

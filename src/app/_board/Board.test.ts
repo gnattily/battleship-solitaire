@@ -246,7 +246,7 @@ test('countRow', () => {
 });
 
 test('countRunsLeft', () => {
-    expect(new Board(4, 4).countRunsLeft()).toBeUndefined();
+    expect(new Board(4, 4).countRunsLeft()).toEqual([]);
 
     expect(board1.countRunsLeft()).toEqual([2, 2, 1]);
     expect(board1.countRunsLeft(true)).toEqual([2, 2, 1]);
@@ -405,7 +405,6 @@ test('compTypes', () => {
 test('coordToInd', () => {
     const board = new Board(4, 4);
     expect(() => { board.coordToInd([4, 4]); }).toThrow('must be within board');
-    expect(() => { board.coordToInd([3, 'e']); }).toThrow('must be integers');
 
     expect(board.coordToInd([3, 3])).toBe(15);
 });
@@ -424,7 +423,6 @@ test('posToInd', () => {
     expect(() => { board.posToInd(16); }).toThrow('must be within the board');
     expect(() => { board.posToInd([-1, 0]); }).toThrow('must be within the board');
     expect(() => { board.posToInd([4, 3]); }).toThrow('must be within the board');
-    expect(() => { board.posToInd('e'); }).toThrow('must be an index or array of coordinates');
 
     expect(board.posToInd(4)).toBe(4);
     expect(board.posToInd([0, 1])).toBe(4);
@@ -443,9 +441,6 @@ test('setShip', () => {
     board.setShip(0, TYPE.DOWN);
     board.setShip(15, new Ship(TYPE.RIGHT));
     board.setShip([1, 0], TYPE.HORIZONTAL);
-
-    expect(() => { board.setShip(8, 'ship'); }).toThrow('should be an instance of Ship or a ship type');
-    expect(() => { board.setShip(8, TYPE.SHIP, 'yes'); }).toThrow('Expected pinned to be boolean');
 
     expect(board.getShip(0).graphicalType).toBe(TYPE.DOWN);
     expect(board.state[15].graphicalType).toBe(TYPE.RIGHT);
@@ -476,9 +471,9 @@ test('getRelShip', () => {
     board.setShip(1, TYPE.WATER);
     board.setShip(4, TYPE.VERTICAL);
 
-    expect(board.getRelShip(0, REL_POS.BOTTOM).internalType).toBe(TYPE.VERTICAL);
+    expect(board.getRelShip(0, REL_POS.BOTTOM)?.internalType).toBe(TYPE.VERTICAL);
     expect(board.getRelShip(0, REL_POS.LEFT)).toBeNull();
-    expect(board.getRelShip(0, REL_POS.RIGHT).playType).toBe(TYPE.WATER);
+    expect(board.getRelShip(0, REL_POS.RIGHT)?.playType).toBe(TYPE.WATER);
 });
 
 test('setRelShip', () => {
@@ -580,7 +575,7 @@ test('base64 export/import', () => {
     expect(importedBoard2.sameState(board2)).toBeTruthy();
     expect(importedBoard2.colCounts).toEqual([0, 0]);
     expect(importedBoard2.rowCounts).toEqual([0, 0]);
-    expect(importedBoard2.runs).toEqual([0]);
+    expect(importedBoard2.runs).toEqual([]);
 
     const board3 = new Board(16, 16)
         .setShip([2, 0], TYPE.SINGLE, true)
