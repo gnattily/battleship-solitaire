@@ -1,10 +1,31 @@
 'use client';
 
-import React from 'react';
-import './BoardUI.css';
+import type { ReactElement, ReactNode } from 'react';
+import type { AnyType, GraphicalType, PlayType } from '../Ship';
+
+import React, { Component } from 'react';
+import Image from 'next/image';
+
 import Board from '../Board';
 import { TYPE } from '../Ship';
-import Image from 'next/image';
+
+import './BoardUI.css';
+
+interface Props {
+    board?: string;
+    width?: number;
+    height?: number;
+    preset?: Board;
+    colCounts?: number[];
+    rowCounts?: number[];
+    runs?: number[];
+}
+
+interface State {
+    board: Board;
+    solved: boolean;
+    draggedType: AnyType | undefined;
+}
 
 /**
  * The visible board
@@ -14,17 +35,28 @@ import Image from 'next/image';
  * @param {Board} [preset] Pre-existing ships
  * @param {number[]} [colCounts] Number of ships in each column (left to right)
  * @param {number[]} [rowCounts] Number of ships in each row (top to bottom)
- * @param {number[]} [shipsLeft] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
+ * @param {number[]} [runs] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
  */
-export default class BoardUI extends React.Component {
-    constructor (props) {
+export default class BoardUI extends Component<Props, State> {
+    constructor (props: Props) {
         super(props);
 
         let board;
 
         if (this.props.board) board = Board.from(this.props.board);
-        else if (this.props.width && this.props.height) board = new Board(this.props.width, this.props.height, this.props.colCounts, this.props.rowCounts, this.props.runs);
-        else if (this.props.preset instanceof Board) board = new Board(this.props.preset, this.props.colCounts, this.props.rowCounts, this.props.runs);
+        else if (this.props.width && this.props.height) {
+            if (this.props.colCounts && this.props.rowCounts && this.props.runs) {
+                board = new Board(this.props.width, this.props.height, this.props.colCounts, this.props.rowCounts, this.props.runs);
+            } else {
+                board = new Board(this.props.width, this.props.height);
+            }
+        } else if (this.props.preset instanceof Board) {
+            if (this.props.colCounts && this.props.rowCounts && this.props.runs) {
+                board = new Board(this.props.preset, this.props.colCounts, this.props.rowCounts, this.props.runs);
+            } else {
+                board = new Board(this.props.preset);
+            }
+        } else throw new Error('Invalid props');
 
         this.state = {
             board: board,
@@ -33,73 +65,75 @@ export default class BoardUI extends React.Component {
         };
     }
 
-    solveBoard () {
+    solveBoard (): void {
         const newBoard = Board.solve(this.state.board);
         this.setState({ board: newBoard });
         this.setState({ solved: newBoard.isSolved() });
     }
 
-    reset () {
+    reset (): void {
         this.setState({ board: this.state.board.reset() });
     }
 
-    onMouseDown (event, index) {
+    onMouseDown (event: React.MouseEvent, index: number): void {
         const ship = this.state.board.getShip(index);
 
         if (ship.pinned) return;
         if (event.button !== 0 && event.button !== 2) return;
 
         // this makes it +1 for left click and +2 for right click (which basically works as -1, but without making it negative)
-        const newType = (ship.playType + 1 + event.button / 2) % 3;
+        const newType = (ship.playType + 1 + event.button / 2) % 3 as PlayType;
         const board = this.state.board.setShip(index, newType).compTypes();
 
         this.setState({ board: board, solved: board.isSolved(), draggedType: newType });
     }
 
-    onMouseEnter (index) {
+    onMouseEnter (index: number): void {
         if (this.state.board.getShip(index).pinned || !this.state.draggedType) return;
 
         const board = this.state.board.setShip(index, this.state.draggedType).compTypes();
         this.setState({ board: board, solved: board.isSolved() });
     }
 
-    onMouseUp () {
+    onMouseUp (): void {
         this.setState({ draggedType: undefined });
     }
 
-    typeToImg (type, key, size) {
+    typeToImg (type: GraphicalType, key: number, size?: number): ReactElement | undefined {
         switch (type) {
+            case TYPE.UNKNOWN:
+                return;
             case TYPE.SINGLE:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/single.svg" alt="Single" />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/single.svg' alt='Single' />;
             case TYPE.UP:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Up" style={{ transform: 'rotate(90deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Up' style={{ transform: 'rotate(90deg)' }} />;
             case TYPE.RIGHT:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Right" style={{ transform: 'rotate(180deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Right' style={{ transform: 'rotate(180deg)' }} />;
             case TYPE.LEFT:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Left" />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Left' />;
             case TYPE.DOWN:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/end.svg" alt="Down" style={{ transform: 'rotate(-90deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Down' style={{ transform: 'rotate(-90deg)' }} />;
             case TYPE.SHIP:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/ship.svg" alt="Ship" />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/ship.svg' alt='Ship' />;
             case TYPE.ORTHOGONAL:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/vertical-horizontal.svg" alt="Vertical/Horizontal" />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/vertical-horizontal.svg' alt='Vertical/Horizontal' />;
             case TYPE.WATER:
-                return <Image className="Ship" key={key} fill={!size} width={size} height={size} src="./ships/water.svg" alt="Water" />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/water.svg' alt='Water' />;
         }
     }
 
-    displayBoard () {
+    displayBoard (): ReactElement[] {
         return this.state.board.state.map((ship, index) => {
             return (
                 <div
-                    className="Square nohighlight"
+                    className='Square nohighlight'
                     key={index}
                     onMouseDown={event => this.onMouseDown(event, index)}
                     onMouseEnter={() => this.onMouseEnter(index)}
                     onMouseUp={() => this.onMouseUp()}
                     onContextMenu={e => e.preventDefault()}
                 >
-                    {this.typeToImg(this.state.solved && ship.playType === TYPE.WATER ? TYPE.UNKNOWN : ship.graphicalType)}
+                    {this.typeToImg(this.state.solved && ship.playType === TYPE.WATER ? TYPE.UNKNOWN : ship.graphicalType, index)}
                 </div>
             );
         });
@@ -107,10 +141,9 @@ export default class BoardUI extends React.Component {
 
     /**
      * displays counts for columns and rows
-     * @param {boolean} rows true if it should return row counts instead of column counts
-     * @returns {React.JSX.Element[]} the counts
+     * @param rows true if it should return row counts instead of column counts
      */
-    displayCounts (rows) {
+    displayCounts (rows: boolean): ReactElement[] {
         return (rows ? this.state.board.rowCounts : this.state.board.colCounts).map((count, index) => (
             <p
                 key={index}
@@ -125,9 +158,8 @@ export default class BoardUI extends React.Component {
 
     /**
      * displays a visual representation of the number of runs left
-     * @returns {React.JSX.Element[]} all runs
      */
-    displayRuns () {
+    displayRuns (): ReactElement[] {
         // create all runs from this.state.board.runs
         // all ships should be grayed out by default
         // runsDiff[i] of them should be not grayed out
@@ -148,37 +180,35 @@ export default class BoardUI extends React.Component {
     }
 
     /**
-     * converts a length into a jsx
-     * @param {number} length the length of the run
-     * @returns {React.JSX[]} the run
+     * Converts a length into a jsx
      */
-    renderRun (length) {
-        const SIZE = '25';// px
+    renderRun (length: number): (ReactElement | undefined)[] {
+        const SIZE = 25;// px
 
         if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0, SIZE)];
 
         const out = [this.typeToImg(TYPE.RIGHT, 0, SIZE)];
 
         for (let i = 0; i < length - 2; i++) {
-            out.push(this.typeToImg(TYPE.HORIZONTAL, i + 1, SIZE));
+            out.push(this.typeToImg(TYPE.ORTHOGONAL, i + 1, SIZE));
         }
 
         return [...out, this.typeToImg(TYPE.LEFT, out.length, SIZE)];
     }
 
-    render () {
+    render (): ReactNode {
         return (
             <>
-                <div className="Board">
-                    <div className="Runs">
+                <div className='Board'>
+                    <div className='Runs'>
                         {this.displayRuns()}
                     </div>
-                    <div className="Inner">
+                    <div className='Inner'>
                         <span />
-                        <div className="Column Counts" style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}>
+                        <div className='Column Counts' style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}>
                             {this.displayCounts(false) /* false = columns */}
                         </div>
-                        <div className="Row Counts" style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}>
+                        <div className='Row Counts' style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}>
                             {this.displayCounts(true) /* true = rows */}
                         </div>
                         <div className={'Ships' + (this.state.solved ? ' Solved' : '')} style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}>

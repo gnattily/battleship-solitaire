@@ -5,6 +5,7 @@ import stylistic from '@stylistic/eslint-plugin';
 import jsoncParser from 'jsonc-eslint-parser';
 import pluginJsonc from 'eslint-plugin-jsonc';
 import jsdoc from 'eslint-plugin-jsdoc';
+import tseslint from 'typescript-eslint';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,7 +26,31 @@ const stylisticConfig = stylistic.configs.customize({
 
 const eslintConfig = [
     ...compat.extends('next/core-web-vitals'),
-    jsdoc.configs['flat/recommended'],
+
+    {
+        files: ['**/*.ts', '**/*.tsx'],
+        languageOptions: {
+            parser: tseslint.parser,
+            parserOptions: {
+                project: './tsconfig.json',
+            },
+        },
+        plugins: {
+            '@typescript-eslint': tseslint.plugin,
+        },
+        rules: {
+            '@typescript-eslint/no-floating-promises': 'error',
+            '@typescript-eslint/no-misused-promises': 'error',
+            '@typescript-eslint/switch-exhaustiveness-check': 'error',
+            '@typescript-eslint/prefer-readonly': 'warn',
+            '@typescript-eslint/consistent-type-imports': 'warn',
+            '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+            '@typescript-eslint/explicit-function-return-type': 'warn',
+
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+        },
+    },
 
     {
         files: allScripts,
@@ -35,6 +60,7 @@ const eslintConfig = [
             '@stylistic/max-statements-per-line': 'off',
             '@stylistic/space-before-function-paren': ['error', 'always'],
             '@stylistic/arrow-parens': ['error', 'as-needed', { requireForBlockBody: false }],
+            '@stylistic/jsx-quotes': ['error', 'prefer-single'],
         },
     },
 
@@ -46,10 +72,9 @@ const eslintConfig = [
         rules: {
             'jsdoc/sort-tags': 'warn',
             'jsdoc/require-jsdoc': 'off',
-            'jsdoc/require-hyphen-before-param-description': 'warn',
+            'jsdoc/require-hyphen-before-param-description': ['warn', 'never'],
             'jsdoc/no-defaults': 'off',
             'jsdoc/require-property-description': 'off',
-            'jsdoc/require-hyphen-before-param-description': ['warn', 'never'],
         },
     },
 

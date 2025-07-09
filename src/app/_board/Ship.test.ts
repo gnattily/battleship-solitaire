@@ -28,10 +28,6 @@ test('setters/getters', () => {
     ship.internalType = TYPE.WATER;
     expect(ship.playType).toBe(TYPE.WATER);
     expect(ship.graphicalType).toBe(TYPE.WATER);
-
-    expect(() => { ship.playType = TYPE.LEFT; }).toThrow('Expected type to be a PlayType');
-    expect(() => { ship.graphicalType = TYPE.VERTICAL; }).toThrow('Expected type to be a GraphicalType');
-    expect(() => { ship.internalType = 11; }).toThrow('Expected type to be an InternalType');
 });
 
 test('equals', () => {
@@ -98,8 +94,6 @@ test('isPlayType', () => {
     expect(Ship.isPlayType(comparate3, ...combo2)).toBeFalsy();
     expect(Ship.isPlayType(comparate2, ...combo3)).toBeFalsy();
     expect(Ship.isPlayType(comparate3, ...combo3)).toBeFalsy();
-
-    expect(() => { Ship.isPlayType(TYPE.LEFT, null); }).toThrow('Expected type to be a PlayType');
 });
 
 test('isWater', () => {

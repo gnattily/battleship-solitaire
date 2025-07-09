@@ -18,16 +18,16 @@ const YELLOW = '\x1b[33m';
 const BRIGHT = '\x1b[1m';
 const DIM = '\x1b[2m';
 
-import Board from './Board';
+import type Board from './Board';
 import { TYPE } from './Ship';
 
 /**
  * Prints out a representation of the board to the console
- * @param {Board} board The board to display
- * @param {boolean} showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
- * @param {number} [gridType] 0 for no grid, 1 for minimal, 2 for full
+ * @param board The board to display
+ * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
+ * @param [gridType] 0 for no grid, 1 for minimal, 2 for full
  */
-export function displayBoard (board, showInternal, gridType = GRID_TYPES.FULL) {
+export function displayBoard (board: Board, showInternal: boolean, gridType: GridType = GRID_TYPES.FULL): void {
     switch (gridType) {
         case (GRID_TYPES.NONE):
             for (let y = 0; y < board.height; y++) {
@@ -78,7 +78,7 @@ export function displayBoard (board, showInternal, gridType = GRID_TYPES.FULL) {
     }
 }
 
-function printEnd (width, gridType, top) {
+function printEnd (width: number, gridType: GridType, top: boolean): void {
     let out = GRAY + (top ? '┌' : '└');
 
     for (let i = 0; i < width; i++) {
@@ -89,7 +89,7 @@ function printEnd (width, gridType, top) {
     console.log(out.slice(0, -1) + (top ? '┐' : '┘') + RESET);
 }
 
-function printBar (width, gridType) {
+function printBar (width: number, gridType: GridType): void {
     let out = GRAY + '├';
 
     for (let i = 0; i < width; i++) {
@@ -99,12 +99,10 @@ function printBar (width, gridType) {
     console.log(out.slice(0, -1) + '┤' + RESET);
 }
 
-/**
- * @readonly
- * @enum
- */
-export const GRID_TYPES = Object.freeze({
+export const GRID_TYPES = {
     NONE: 0,
     MINIMAL: 1,
     FULL: 2,
-});
+} as const;
+
+type GridType = typeof GRID_TYPES[keyof typeof GRID_TYPES];
