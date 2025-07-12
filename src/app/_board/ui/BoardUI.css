@@ -36,6 +36,7 @@
 .Ships {
     display: grid;
     position: relative;
+    width: fit-content;
 }
 
 .Ship {

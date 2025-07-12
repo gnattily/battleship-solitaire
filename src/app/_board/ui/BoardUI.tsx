@@ -25,6 +25,7 @@ interface State {
     board: Board;
     solved: boolean;
     draggedType: AnyType | undefined;
+    draggedButton: number;
 }
 
 /**
@@ -62,17 +63,25 @@ export default class BoardUI extends Component<Props, State> {
             board: board,
             solved: false,
             draggedType: undefined,
+            draggedButton: 0,
         };
     }
 
     solveBoard (): void {
         const newBoard = Board.solve(this.state.board);
-        this.setState({ board: newBoard });
-        this.setState({ solved: newBoard.isSolved() });
+        this.setState({
+            board: newBoard,
+            solved: newBoard.isSolved(),
+        });
     }
 
     reset (): void {
-        this.setState({ board: this.state.board.reset() });
+        const board = this.state.board.reset();
+
+        this.setState({
+            board: board,
+            solved: board.isSolved(),
+        });
     }
 
     onMouseDown (event: React.MouseEvent, index: number): void {
@@ -85,14 +94,29 @@ export default class BoardUI extends Component<Props, State> {
         const newType = (ship.playType + 1 + event.button / 2) % 3 as PlayType;
         const board = this.state.board.setShip(index, newType).compTypes();
 
-        this.setState({ board: board, solved: board.isSolved(), draggedType: newType });
+        this.setState({
+            board: board,
+            solved: board.isSolved(),
+            draggedType: newType,
+            draggedButton: event.buttons === 1 || event.buttons === 2 ? event.buttons : 0,
+        });
     }
 
     onMouseEnter (index: number): void {
-        if (this.state.board.getShip(index).pinned || !this.state.draggedType) return;
+        if (this.state.draggedType === undefined || this.state.board.getShip(index).pinned) return;
 
         const board = this.state.board.setShip(index, this.state.draggedType).compTypes();
         this.setState({ board: board, solved: board.isSolved() });
+    }
+
+    onEnterBoard (event: React.MouseEvent): void {
+        if (!this.state.draggedButton || this.state.draggedButton !== event.buttons) {
+            this.setState({
+                draggedType: undefined,
+                draggedButton: 0,
+            });
+            event.stopPropagation();
+        }
     }
 
     onMouseUp (): void {
@@ -171,7 +195,11 @@ export default class BoardUI extends Component<Props, State> {
         for (let i = 0; i < this.state.board.runs.length; i++) {
             for (let j = 0; j < this.state.board.runs[i]; j++) {
                 const classes = 'Run' + (counts[i] < 0 ? ' over' : '') + ((j < counts[i]) ? '' : ' desaturated');
-                out.push(<span className={classes} key={key}>{this.renderRun(i + 1)}</span>);
+                out.push(
+                    <span className={classes} key={key}>
+                        {this.renderRun(i + 1)}
+                    </span>,
+                );
                 key++;
             }
         }
@@ -205,13 +233,23 @@ export default class BoardUI extends Component<Props, State> {
                     </div>
                     <div className='Inner'>
                         <span />
-                        <div className='Column Counts' style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}>
+                        <div
+                            className='Column Counts'
+                            style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}
+                        >
                             {this.displayCounts(false) /* false = columns */}
                         </div>
-                        <div className='Row Counts' style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}>
+                        <div
+                            className='Row Counts'
+                            style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}
+                        >
                             {this.displayCounts(true) /* true = rows */}
                         </div>
-                        <div className={'Ships' + (this.state.solved ? ' Solved' : '')} style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}>
+                        <div
+                            className={'Ships' + (this.state.solved ? ' Solved' : '')}
+                            style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}
+                            onMouseEnter={e => this.onEnterBoard(e)}
+                        >
                             {this.displayBoard()}
                         </div>
                     </div>
