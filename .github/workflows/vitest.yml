@@ -14,12 +14,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24.3.0'
-          cache: 'pnpm'
-
       - name: Enable Corepack and pnpm
         run: corepack enable && corepack prepare pnpm@latest --activate
 
