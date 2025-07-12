@@ -25,10 +25,22 @@ const stylisticConfig = stylistic.configs.customize({
 });
 
 const eslintConfig = [
+    {
+        // copied from .gitignore
+        ignores: [
+            '.next/**',
+            'node_modules/**',
+            'coverage/**',
+            'out/**',
+            'build/**',
+            '.pnp/**',
+        ],
+    },
+
     ...compat.extends('next/core-web-vitals'),
 
     {
-        files: ['**/*.ts', '**/*.tsx'],
+        files: ['**/*.ts', '**/*.tsx', '**/*.mts'],
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {
