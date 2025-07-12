@@ -20,18 +20,6 @@ importers:
       '@mui/material':
         specifier: ^7.2.0
         version: 7.2.0(@emotion/react@11.14.0(@types/react@19.1.8)(react@19.1.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.1.8)(react@19.1.0))(@types/react@19.1.8)(react@19.1.0))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@stylistic/eslint-plugin':
-        specifier: ^5.1.0
-        version: 5.1.0(eslint@9.30.1)
-      eslint-plugin-jsdoc:
-        specifier: ^51.3.4
-        version: 51.3.4(eslint@9.30.1)
-      eslint-plugin-jsonc:
-        specifier: ^2.20.1
-        version: 2.20.1(eslint@9.30.1)
-      jsonc-eslint-parser:
-        specifier: ^2.4.0
-        version: 2.4.0
       next:
         specifier: 15.3.5
         version: 15.3.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -45,6 +33,9 @@ importers:
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.3.1
+      '@stylistic/eslint-plugin':
+        specifier: ^5.1.0
+        version: 5.1.0(eslint@9.30.1)
       '@types/node':
         specifier: ^20
         version: 20.19.5
@@ -60,6 +51,15 @@ importers:
       eslint-config-next:
         specifier: 15.3.5
         version: 15.3.5(eslint@9.30.1)(typescript@5.8.3)
+      eslint-plugin-jsdoc:
+        specifier: ^51.3.4
+        version: 51.3.4(eslint@9.30.1)
+      eslint-plugin-jsonc:
+        specifier: ^2.20.1
+        version: 2.20.1(eslint@9.30.1)
+      jsonc-eslint-parser:
+        specifier: ^2.4.0
+        version: 2.4.0
       typescript:
         specifier: ^5
         version: 5.8.3
