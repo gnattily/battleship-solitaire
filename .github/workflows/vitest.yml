@@ -17,8 +17,11 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '24.3.0' # or whatever version you're using
+          node-version: '24.3.0'
           cache: 'pnpm'
+
+      - name: Enable Corepack and pnpm
+        run: corepack enable && corepack prepare pnpm@latest --activate
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile # acts like npm ci
