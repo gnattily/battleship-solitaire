@@ -4,7 +4,6 @@ import { FlatCompat } from '@eslint/eslintrc';
 import stylistic from '@stylistic/eslint-plugin';
 import jsoncParser from 'jsonc-eslint-parser';
 import pluginJsonc from 'eslint-plugin-jsonc';
-import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -73,20 +72,6 @@ const eslintConfig = [
             '@stylistic/space-before-function-paren': ['error', 'always'],
             '@stylistic/arrow-parens': ['error', 'as-needed', { requireForBlockBody: false }],
             '@stylistic/jsx-quotes': ['error', 'prefer-single'],
-        },
-    },
-
-    {
-        files: allScripts,
-        plugins: {
-            jsdoc,
-        },
-        rules: {
-            'jsdoc/sort-tags': 'warn',
-            'jsdoc/require-jsdoc': 'off',
-            'jsdoc/require-hyphen-before-param-description': ['warn', 'never'],
-            'jsdoc/no-defaults': 'off',
-            'jsdoc/require-property-description': 'off',
         },
     },
 
