@@ -811,11 +811,9 @@ export default class Board {
 
     /**
      * Sets ships on the sides of a ship to water
-     * @param position
-     * @param orientation TYPE.HORIZONTAL or .VERTICAL
      */
     setOrthoShips (position: Position, orientation: typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL): this {
-        const shipDirections: AnyType[] = orientation === TYPE.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
+        const shipDirections: RelativePosition[] = orientation === TYPE.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
 
         for (const key in REL_POS) {
             const relativePosition = REL_POS[key as keyof typeof REL_POS];

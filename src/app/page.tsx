@@ -49,13 +49,33 @@ const board = new Board(15, 15,
     .setShip([6, 13], TYPE.WATER, true)
     .setShip([3, 14], TYPE.WATER, true)
     .setShip([14, 14], TYPE.SINGLE, true)
-    .compTypes()
+    .export();
+
+const board2 = new Board(15, 15,
+    [4, 0, 4, 1, 3, 6, 2, 0, 6, 1, 1, 1, 2, 2, 1],
+    [1, 2, 5, 2, 3, 2, 4, 2, 2, 0, 5, 0, 1, 3, 2],
+    [4, 4, 3, 2, 1])
+    .setShip([0, 1], TYPE.DOWN, true)
+    .setShip([0, 3], TYPE.ORTHOGONAL, true)
+    .setShip([2, 5], TYPE.DOWN, true)
+    .setShip([3, 10], TYPE.ORTHOGONAL, true)
+    .setShip([6, 13], TYPE.UP, true)
+    .setShip([8, 5], TYPE.UP, true)
+    .setShip([8, 14], TYPE.WATER, true)
+    .setShip([9, 2], TYPE.ORTHOGONAL, true)
+    .setShip([12, 6], TYPE.ORTHOGONAL, true)
+    .setShip([12, 13], TYPE.SINGLE, true)
     .export();
 
 export default function Page (): JSX.Element {
     return (
-        <BoardUI
-            board={board}
-        />
+        <>
+            <BoardUI
+                board={board}
+            />
+            <BoardUI
+                board={board2}
+            />
+        </>
     );
 }
