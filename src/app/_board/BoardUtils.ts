@@ -1,10 +1,10 @@
 /*
 
-┌───┬───┐
-│   │   │
-├───┼───┤
-│   │   │
-└───┴───┘
+┌────┬────┐
+│    │    │
+├────┼────┤
+│    │    │
+└────┴────┘
 
 */
 
@@ -27,7 +27,7 @@ import { TYPE } from './Ship';
  * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
  * @param [gridType] 0 for no grid, 1 for minimal, 2 for full
  */
-export function displayBoard (board: Board, showInternal: boolean, gridType: GridType = GRID_TYPES.FULL): void {
+export function displayBoard (board: Board, showInternal = false, gridType: GridType = GRID_TYPES.FULL): void {
     switch (gridType) {
         case (GRID_TYPES.NONE):
             for (let y = 0; y < board.height; y++) {
@@ -62,8 +62,8 @@ export function displayBoard (board: Board, showInternal: boolean, gridType: Gri
                         if (ship.internalType === TYPE.HORIZONTAL) out += RED;
                         if (ship.internalType === TYPE.VERTICAL) out += YELLOW;
                     }
-                    out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship} `);
-                    out += `${GRAY}│${RESET}`;
+                    out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship}  `);
+                    out += `${RESET}${GRAY}│${RESET}`;
                 }
 
                 console.log(out);
@@ -82,7 +82,7 @@ function printEnd (width: number, gridType: GridType, top: boolean): void {
     let out = GRAY + (top ? '┌' : '└');
 
     for (let i = 0; i < width; i++) {
-        out += gridType === GRID_TYPES.MINIMAL ? '─' : '───';
+        out += gridType === GRID_TYPES.MINIMAL ? '─' : '────';
         out += top ? '┬' : '┴';
     }
 
@@ -93,7 +93,7 @@ function printBar (width: number, gridType: GridType): void {
     let out = GRAY + '├';
 
     for (let i = 0; i < width; i++) {
-        out += gridType === GRID_TYPES.MINIMAL ? '─┼' : '───┼';
+        out += gridType === GRID_TYPES.MINIMAL ? '─┼' : '────┼';
     }
 
     console.log(out.slice(0, -1) + '┤' + RESET);

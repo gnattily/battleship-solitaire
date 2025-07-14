@@ -634,7 +634,8 @@ export default class Board {
 
         for (let i = 0; i < this.state.length; i++) {
             const ship = this.getShip(i);
-            if (ship.pinned && ship.internalType > TYPE.SHIP) continue;
+            // will be added back in while solving #87
+            // if (ship.pinned && ship.internalType > TYPE.SHIP) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
@@ -647,7 +648,11 @@ export default class Board {
             if (isWater(left, top, right, bottom)) ship.internalType = TYPE.SINGLE;
             else if (isShip(left, right)) ship.internalType = TYPE.HORIZONTAL;
             else if (isShip(top, bottom)) ship.internalType = TYPE.VERTICAL;
-            else if (isShip(left) && isWater(right)) ship.internalType = TYPE.LEFT;
+            else if (ship.graphicalType === TYPE.ORTHOGONAL) {
+                console.log('hit');
+                if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPE.HORIZONTAL;
+                else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPE.VERTICAL;
+            } else if (isShip(left) && isWater(right)) ship.internalType = TYPE.LEFT;
             else if (isShip(top) && isWater(bottom)) ship.internalType = TYPE.UP;
             else if (isShip(right) && isWater(left)) ship.internalType = TYPE.RIGHT;
             else if (isShip(bottom) && isWater(top)) ship.internalType = TYPE.DOWN;
