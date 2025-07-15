@@ -1,3 +1,4 @@
+import { boardToString } from './BoardUtils';
 import Ship, { TYPE } from './Ship';
 import type { AnyType } from './Ship';
 
@@ -55,6 +56,10 @@ export default class Board {
         } else {
             throw new TypeError('Types of arguments incorrect');
         }
+    }
+
+    toString (): string {
+        return boardToString(this);
     }
 
     /**
@@ -255,15 +260,12 @@ export default class Board {
 
     /**
      * Solves the board
-     * @param {Board} board The board to solve
-     * @returns {Board} The solved board
      */
-    static solve (board: Board): Board {
-        const ITERATION_LIMIT = 50;
+    static solve (board: Board, iterationLimit = 50): Board {
         board = board.copy();
         board.compTypes();
 
-        for (let i = 0; i < ITERATION_LIMIT; i++) {
+        for (let i = 0; i < iterationLimit; i++) {
             const old = board.copy();
 
             for (let y = 0; y < board.height; y++) {
@@ -360,16 +362,14 @@ export default class Board {
                     const possibilities: number[] = [];
                     let totalPossibilities = 0;
 
-                    filteredHRuns.forEach(run => {
-                        const [hPossibilities, totalHPossibilities] = countPossibilities(run, true, i);
-                        hPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
-                        totalPossibilities += totalHPossibilities;
-                    });
-                    filteredVRuns.forEach(run => {
-                        const [vPossibilities, totalVPossibilities] = countPossibilities(run, false, i);
-                        vPossibilities.forEach((val, ind) => { possibilities[ind] = (possibilities[ind] ?? 0) + val; });
-                        totalPossibilities += totalVPossibilities;
-                    });
+                    function count (run: Run, horizontal = false): void {
+                        const [poss, totalPoss] = countPossibilities(run, horizontal, i);
+                        poss.forEach((val, ind) => possibilities[ind] = (possibilities[ind] ?? 0) + val);
+                        totalPossibilities += totalPoss;
+                    }
+
+                    filteredHRuns.forEach(run => count(run, true));
+                    filteredVRuns.forEach(run => count(run, false));
 
                     let set = false;
 
@@ -563,6 +563,8 @@ export default class Board {
                 // run ended, record it
                 runs.push(run);
                 run = [];
+            } else {
+                run = [];
             }
         }
 
@@ -613,6 +615,8 @@ export default class Board {
                 // run ended, record it
                 runs.push(run);
                 run = [];
+            } else {
+                run = [];
             }
         }
 
@@ -634,8 +638,7 @@ export default class Board {
 
         for (let i = 0; i < this.state.length; i++) {
             const ship = this.getShip(i);
-            // will be added back in while solving #87
-            // if (ship.pinned && ship.internalType > TYPE.SHIP) continue;
+            if (ship.pinned && (ship.initialType > TYPE.SHIP || ship.initialType > TYPE.ORTHOGONAL) && ship.initialType !== TYPE.ORTHOGONAL) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
@@ -648,8 +651,7 @@ export default class Board {
             if (isWater(left, top, right, bottom)) ship.internalType = TYPE.SINGLE;
             else if (isShip(left, right)) ship.internalType = TYPE.HORIZONTAL;
             else if (isShip(top, bottom)) ship.internalType = TYPE.VERTICAL;
-            else if (ship.graphicalType === TYPE.ORTHOGONAL) {
-                console.log('hit');
+            else if (ship.initialType === TYPE.ORTHOGONAL) {
                 if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPE.HORIZONTAL;
                 else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPE.VERTICAL;
             } else if (isShip(left) && isWater(right)) ship.internalType = TYPE.LEFT;
@@ -657,6 +659,7 @@ export default class Board {
             else if (isShip(right) && isWater(left)) ship.internalType = TYPE.RIGHT;
             else if (isShip(bottom) && isWater(top)) ship.internalType = TYPE.DOWN;
             // if surrounded by nothing, set unknown ship
+            else if (ship.pinned) ship.internalType = ship.initialType;
             else ship.internalType = TYPE.SHIP;
         }
 

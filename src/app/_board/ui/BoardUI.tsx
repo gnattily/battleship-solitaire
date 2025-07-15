@@ -172,7 +172,9 @@ export default class BoardUI extends Component<Props, State> {
             <p
                 key={index}
                 onClick={() => {
-                    this.setState({ board: rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodCol(index) });
+                    const board = rows ? this.state.board.softFloodRow(index) : this.state.board.softFloodCol(index);
+                    board.compTypes();
+                    this.setState({ board: board, solved: board.isSolved() });
                 }}
             >
                 {count}

@@ -3,7 +3,6 @@ import BoardUI from './_board/ui/BoardUI';
 import Board from './_board/Board';
 import { TYPE } from './_board/Ship';
 import type { JSX } from 'react';
-import { displayBoard } from './_board/BoardUtils';
 
 // https://www.brainbashers.com/showbattleships.asp?date=0227&size=6&puzz=A
 // const preset = new Board(6, 6)
@@ -66,8 +65,6 @@ const board2 = new Board(15, 15,
     .setShip([9, 2], TYPE.ORTHOGONAL, true)
     .setShip([12, 6], TYPE.ORTHOGONAL, true)
     .setShip([12, 13], TYPE.SINGLE, true);
-
-displayBoard(Board.solve(board2), true);
 
 export default function Page (): JSX.Element {
     return (

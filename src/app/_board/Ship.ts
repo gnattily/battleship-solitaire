@@ -9,10 +9,12 @@ import type { RelativePosition } from './Board';
  * @property {boolean} pinned Should the ship's type change (useful for presets)
  */
 export default class Ship {
+    readonly #initialType: AnyType;
     #type: AnyType = 0;
     pinned: boolean;
 
-    constructor (type: AnyType = TYPE.UNKNOWN, pinned = false) {
+    constructor (type: AnyType, pinned = false) {
+        this.#initialType = type;
         this.internalType = type;
         this.pinned = pinned;
     }
@@ -44,6 +46,10 @@ export default class Ship {
 
     get internalType (): InternalType {
         return this.#type;
+    }
+
+    get initialType (): AnyType {
+        return this.#initialType;
     }
 
     // I want the string literals without effort

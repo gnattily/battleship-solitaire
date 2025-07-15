@@ -2,7 +2,6 @@ import { expect, test } from 'vitest';
 
 import Board, { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
-import { displayBoard } from './BoardUtils';
 
 test('constructor', () => {
     // will do after migrating to ts
@@ -174,23 +173,6 @@ test('solve', () => {
         .softFloodRow(12)
         .softFloodRow(13)
         .softFloodRow(14);
-
-    const board3 = new Board(15, 15,
-        [4, 0, 4, 1, 3, 6, 2, 0, 6, 1, 1, 1, 2, 2, 1],
-        [1, 2, 5, 2, 3, 2, 4, 2, 2, 0, 5, 0, 1, 3, 2],
-        [4, 4, 3, 2, 1])
-        .setShip([0, 1], TYPE.DOWN, true)
-        .setShip([0, 3], TYPE.ORTHOGONAL, true)
-        .setShip([2, 5], TYPE.DOWN, true)
-        .setShip([3, 10], TYPE.ORTHOGONAL, true)
-        .setShip([6, 13], TYPE.UP, true)
-        .setShip([8, 5], TYPE.UP, true)
-        .setShip([8, 14], TYPE.WATER, true)
-        .setShip([9, 2], TYPE.ORTHOGONAL, true)
-        .setShip([12, 6], TYPE.ORTHOGONAL, true)
-        .setShip([12, 13], TYPE.SINGLE, true);
-
-    displayBoard(Board.solve(board3), true);
 
     expect(Board.solve(board1).sameState(solution1)).toBeTruthy();
     expect(Board.solve(board2).sameState(solution2)).toBeTruthy();
