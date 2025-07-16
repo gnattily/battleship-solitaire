@@ -262,6 +262,8 @@ export default class Board {
      * Solves the board
      */
     static solve (board: Board, iterationLimit = 50): Board {
+        if (!board.colCounts || !board.rowCounts || !board.runs) return board;
+
         board = board.copy();
         board.compTypes();
 
@@ -282,6 +284,8 @@ export default class Board {
                 if (counts[0] + counts[1] === expected) board.softFloodCol(x, TYPE.SHIP);
             }
 
+            board.compTypes();
+
             // place water/ships around ships
 
             for (let i = 0; i < board.state.length; i++) {
@@ -297,89 +301,90 @@ export default class Board {
             }
 
             if (old.sameState(board)) {
-                const shipsLeft = board.countRunsLeft(true);
-                const horizontalRuns = board.getHorRuns();
-                const verticalRuns = board.getVertRuns();
-
-                /**
-                 * Counts possibilities and adds them to a list
-                 */
-                function countPossibilities (run: Run, horizontal: boolean, i: number): [number[], number] {
-                    const possibilities = [];
-                    let totalPossibilities = 0;
-
-                    for (let j = 0; j + i <= run.length; j++) {
-                        const tmpBoard = board.copy();
-                        let changed = false;
-
-                        for (let k = 0; k < i; k++) {
-                            if (tmpBoard.softSetShip(run[k + j], TYPE.SHIP)) changed = true;
-                        }
-
-                        if (!changed) continue;
-
-                        // check if row ships > it's supposed to be
-                        if (horizontal) {
-                            const y = tmpBoard.indToCoord(run[0])[1];
-                            const numShips = tmpBoard.countRow(y)[0];
-                            if (numShips > tmpBoard.rowCounts[y]) continue;
-                        } else {
-                            const x = tmpBoard.indToCoord(run[0])[0];
-                            const numShips = tmpBoard.countCol(x)[0];
-
-                            if (numShips > tmpBoard.colCounts[x]) continue;
-                        }
-
-                        // check the ends of the run to see if it's really i long
-                        if (tmpBoard.getRelShip(run[0], horizontal ? REL_POS.LEFT : REL_POS.TOP)?.playType === TYPE.SHIP) continue;
-                        if (tmpBoard.getRelShip(run[run.length - 1], horizontal ? REL_POS.RIGHT : REL_POS.BOTTOM)?.playType === TYPE.SHIP) continue;
-
-                        for (let k = 0; k < run.length; k++) {
-                            if (possibilities[run[k + j]]) {
-                                possibilities[run[k + j]]++;
-                            } else {
-                                possibilities[run[k + j]] = 1;
-                            }
-                        }
-
-                        totalPossibilities++;
+                function filterComplete (run: Run): boolean {
+                    for (let i = 0; i < run.length; i++) {
+                        if (board.getShip(run[i]).playType === TYPE.UNKNOWN) return true;
                     }
 
-                    return [possibilities, totalPossibilities];
+                    return false;
                 }
 
-                // loop through each length of ship
-                for (let i = shipsLeft.length; i > 1; i--) {
-                    const shipCount = shipsLeft[i - 1];
+                const horizontalRuns = board.getHorRuns()
+                    .filter(run => filterComplete(run));
+                const verticalRuns = board.getVertRuns()
+                    .filter(run => filterComplete(run));
 
-                    if (shipCount <= 0) continue;
+                const shipsLeft = board.countRunsLeft(true);
 
-                    const filteredHRuns = horizontalRuns.filter(run => run.length >= i);
-                    const filteredVRuns = verticalRuns.filter(run => run.length >= i);
+                let i = shipsLeft.length - 1;
+                while (i >= 0 && shipsLeft[i] <= 0) i--;
+                shipsLeft.length = i + 1;
 
-                    if (filteredHRuns.length === 0 && filteredVRuns.length === 0) continue;
+                let didSomething = false;
 
-                    const possibilities: number[] = [];
-                    let totalPossibilities = 0;
-
-                    function count (run: Run, horizontal = false): void {
-                        const [poss, totalPoss] = countPossibilities(run, horizontal, i);
-                        poss.forEach((val, ind) => possibilities[ind] = (possibilities[ind] ?? 0) + val);
-                        totalPossibilities += totalPoss;
+                for (let i = shipsLeft.length; i > 1 && !didSomething; i--) {
+                    function countDiff (run: Run, horizontal: boolean): number {
+                        const pos = board.indToCoord(run[0])[Number(horizontal)];
+                        let counts = board[horizontal ? 'countRow' : 'countCol'](pos)[0];
+                        // remove any ships in the run so we dont double count:
+                        run.forEach(index => { if (board.getShip(index).playType === TYPE.SHIP) counts--; });
+                        return board[horizontal ? 'rowCounts' : 'colCounts'][pos] - (counts + i);
                     }
 
-                    filteredHRuns.forEach(run => count(run, true));
-                    filteredVRuns.forEach(run => count(run, false));
+                    const hRuns = horizontalRuns
+                        .filter(run => run.length >= i)
+                        .filter(run => countDiff(run, true) >= 0);
+                    const vRuns = verticalRuns
+                        .filter(run => run.length >= i)
+                        .filter(run => countDiff(run, false) >= 0);
 
-                    let set = false;
+                    const allRuns = hRuns.concat(vRuns);
 
-                    for (const ind in possibilities) {
-                        if (possibilities[ind] === totalPossibilities) {
-                            set = board.softSetShip(Number(ind), TYPE.SHIP) || set;
+                    // Realistically this should check if allRuns.length === the number of
+                    // ships of that length are left. It usually is one, but not always.
+                    // TODO
+                    if (allRuns.length === 1) {
+                        if (allRuns[0].length === i) {
+                            for (const index of hRuns.concat(vRuns)[0]) {
+                                board.softSetShip(index, TYPE.SHIP);
+                            }
+
+                            didSomething = true;
+                        } else {
+                            const horizontal = hRuns.length > 0;
+                            const run = horizontal ? hRuns[0] : vRuns[0];
+
+                            if (countDiff(run, horizontal) === 0) {
+                                if (board.getShip(run[0]).playType === TYPE.SHIP) {
+                                    for (let j = 0; j < i; j++) {
+                                        board.softSetShip(run[j], TYPE.SHIP);
+                                    }
+
+                                    didSomething = true;
+                                } else if (board.getShip(run[run.length - 1]).playType === TYPE.SHIP) {
+                                    for (let j = 0; j < i; j++) {
+                                        board.softSetShip(run[run.length - 1 - j], TYPE.SHIP);
+                                    }
+                                } else {
+                                    // It's somewhere in the middle. This is unlikely to be much of a help
+                                    // while solving and would take substantial effort to implement. Until
+                                    // an issue is created or I'm no longer lazy, I won't implement it.
+                                    // TODO
+                                }
+                            } else {
+                                // Like the previous one, this is unlikely to occur. If it does,
+                                // again like the other one it should find everywhere the ship
+                                // could go and find common squares between all possibilities.
+                                // Those are the squares that have to have something
+                            }
                         }
+                    } else {
+                        // It's again very rare that anything could be determined from this,
+                        // but this case is even more unlikely to be useful. There would have
+                        // to be two possible runs intersecting. I cannot find an example to
+                        // test with, so if I did this it would basically be a shot in the
+                        // dark.
                     }
-
-                    if (set) break;
                 }
             }
 

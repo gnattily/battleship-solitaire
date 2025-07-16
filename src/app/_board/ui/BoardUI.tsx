@@ -146,7 +146,7 @@ export default class BoardUI extends Component<Props, State> {
         }
     }
 
-    displayBoard (): ReactElement[] {
+    renderBoard (): ReactElement[] {
         return this.state.board.state.map((ship, index) => {
             return (
                 <div
@@ -252,7 +252,7 @@ export default class BoardUI extends Component<Props, State> {
                             style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}
                             onMouseEnter={e => this.onEnterBoard(e)}
                         >
-                            {this.displayBoard()}
+                            {this.renderBoard()}
                         </div>
                     </div>
                 </div>

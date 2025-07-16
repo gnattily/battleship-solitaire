@@ -45,10 +45,10 @@ export function boardToString (board: Board, showInternal = true, gridType: Grid
                         if (ship.internalType === TYPE.HORIZONTAL) out += RED;
                         if (ship.internalType === TYPE.VERTICAL) out += YELLOW;
                     }
-                    out += ship + RESET + '\n';
+                    out += ship + RESET;
                 }
 
-                final += out;
+                final += out + '\n';
             }
 
             return final;
