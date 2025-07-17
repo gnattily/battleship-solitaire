@@ -1,10 +1,10 @@
 /*
 
-┌───┬───┐
-│   │   │
-├───┼───┤
-│   │   │
-└───┴───┘
+┌────┬────┐
+│    │    │
+├────┼────┤
+│    │    │
+└────┴────┘
 
 */
 
@@ -21,13 +21,18 @@ const DIM = '\x1b[2m';
 import type Board from './Board';
 import { TYPE } from './Ship';
 
+export function displayBoard (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): void {
+    console.log(boardToString(board, showInternal, gridType));
+}
+
 /**
  * Prints out a representation of the board to the console
  * @param board The board to display
  * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
  * @param [gridType] 0 for no grid, 1 for minimal, 2 for full
  */
-export function displayBoard (board: Board, showInternal: boolean, gridType: GridType = GRID_TYPES.FULL): void {
+export function boardToString (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): string {
+    let final = '';
     switch (gridType) {
         case (GRID_TYPES.NONE):
             for (let y = 0; y < board.height; y++) {
@@ -43,13 +48,13 @@ export function displayBoard (board: Board, showInternal: boolean, gridType: Gri
                     out += ship + RESET;
                 }
 
-                console.log(out);
+                final += out + '\n';
             }
 
-            break;
+            return final;
         case (GRID_TYPES.MINIMAL):
         case (GRID_TYPES.FULL):
-            printEnd(board.width, gridType, true);
+            final = endString(board.width, gridType, true);
 
             for (let y = 0; y < board.height; y++) {
                 let out = GRAY + '│' + RESET;
@@ -62,41 +67,40 @@ export function displayBoard (board: Board, showInternal: boolean, gridType: Gri
                         if (ship.internalType === TYPE.HORIZONTAL) out += RED;
                         if (ship.internalType === TYPE.VERTICAL) out += YELLOW;
                     }
-                    out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship} `);
-                    out += `${GRAY}│${RESET}`;
+                    out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship}  `);
+                    out += `${RESET}${GRAY}│${RESET}`;
                 }
 
-                console.log(out);
+                final += out + '\n';
 
-                if (y < board.height - 1) printBar(board.width, gridType);
+                if (y < board.height - 1) final += barString(board.width, gridType);
             }
 
-            printEnd(board.width, gridType, false);
-            break;
+            return final + endString(board.width, gridType, false);
         default:
             throw new RangeError('gridType should be an integer 0-2, received: ' + gridType);
     }
 }
 
-function printEnd (width: number, gridType: GridType, top: boolean): void {
+function endString (width: number, gridType: GridType, top: boolean): string {
     let out = GRAY + (top ? '┌' : '└');
 
     for (let i = 0; i < width; i++) {
-        out += gridType === GRID_TYPES.MINIMAL ? '─' : '───';
+        out += gridType === GRID_TYPES.MINIMAL ? '─' : '────';
         out += top ? '┬' : '┴';
     }
 
-    console.log(out.slice(0, -1) + (top ? '┐' : '┘') + RESET);
+    return out.slice(0, -1) + (top ? '┐' : '┘') + RESET + '\n';
 }
 
-function printBar (width: number, gridType: GridType): void {
+function barString (width: number, gridType: GridType): string {
     let out = GRAY + '├';
 
     for (let i = 0; i < width; i++) {
-        out += gridType === GRID_TYPES.MINIMAL ? '─┼' : '───┼';
+        out += gridType === GRID_TYPES.MINIMAL ? '─┼' : '────┼';
     }
 
-    console.log(out.slice(0, -1) + '┤' + RESET);
+    return out.slice(0, -1) + '┤' + RESET + '\n';
 }
 
 export const GRID_TYPES = {

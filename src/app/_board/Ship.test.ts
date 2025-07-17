@@ -11,7 +11,7 @@ test('toString', () => {
 });
 
 test('setters/getters', () => {
-    const ship = new Ship();
+    const ship = new Ship(TYPE.UNKNOWN);
 
     ship.playType = TYPE.SHIP;
     expect(ship.graphicalType).toBe(TYPE.SHIP);
@@ -28,6 +28,8 @@ test('setters/getters', () => {
     ship.internalType = TYPE.WATER;
     expect(ship.playType).toBe(TYPE.WATER);
     expect(ship.graphicalType).toBe(TYPE.WATER);
+
+    expect(ship.initialType).toBe(TYPE.UNKNOWN);
 });
 
 test('equals', () => {

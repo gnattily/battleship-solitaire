@@ -5,6 +5,7 @@ import Ship, { TYPE } from './Ship';
 
 test('constructor', () => {
     // will do after migrating to ts
+    // i didn't forget you buddy
 });
 
 test('createState', () => {
@@ -174,8 +175,59 @@ test('solve', () => {
         .softFloodRow(13)
         .softFloodRow(14);
 
+    const board3 = new Board(15, 15,
+        [4, 0, 4, 1, 3, 6, 2, 0, 6, 1, 1, 1, 2, 2, 1],
+        [1, 2, 5, 2, 3, 2, 4, 2, 2, 0, 5, 0, 1, 3, 2],
+        [4, 4, 3, 2, 1])
+        .setShip([0, 1], TYPE.DOWN, true)
+        .setShip([0, 3], TYPE.ORTHOGONAL, true)
+        .setShip([2, 5], TYPE.DOWN, true)
+        .setShip([3, 10], TYPE.ORTHOGONAL, true)
+        .setShip([6, 13], TYPE.UP, true)
+        .setShip([8, 5], TYPE.UP, true)
+        .setShip([8, 14], TYPE.WATER, true)
+        .setShip([9, 2], TYPE.ORTHOGONAL, true)
+        .setShip([12, 6], TYPE.ORTHOGONAL, true)
+        .setShip([12, 13], TYPE.SINGLE, true);
+
+    const solution3 = board3.copy()
+        .setShip([0, 2], TYPE.VERTICAL)
+        .setShip([0, 3], TYPE.VERTICAL)
+        .setShip([0, 4], TYPE.UP)
+        .setShip([2, 6], TYPE.VERTICAL)
+        .setShip([2, 7], TYPE.UP)
+        .setShip([2, 10], TYPE.RIGHT)
+        .setShip([3, 10], TYPE.HORIZONTAL)
+        .setShip([4, 10], TYPE.HORIZONTAL)
+        .setShip([5, 10], TYPE.LEFT)
+        .setShip([5, 0], TYPE.DOWN)
+        .setShip([5, 1], TYPE.VERTICAL)
+        .setShip([5, 2], TYPE.VERTICAL)
+        .setShip([5, 3], TYPE.VERTICAL)
+        .setShip([5, 4], TYPE.UP)
+        .setShip([4, 13], TYPE.DOWN)
+        .setShip([4, 14], TYPE.UP)
+        .setShip([6, 12], TYPE.DOWN)
+        .setShip([8, 2], TYPE.RIGHT)
+        .setShip([9, 2], TYPE.HORIZONTAL)
+        .setShip([10, 2], TYPE.LEFT)
+        .setShip([8, 4], TYPE.DOWN)
+        .setShip([8, 7], TYPE.DOWN)
+        .setShip([8, 8], TYPE.UP)
+        .setShip([8, 10], TYPE.SINGLE)
+        .setShip([11, 6], TYPE.RIGHT)
+        .setShip([12, 6], TYPE.HORIZONTAL)
+        .setShip([13, 6], TYPE.LEFT)
+        .setShip([13, 8], TYPE.SINGLE)
+        .setShip([14, 14], TYPE.SINGLE);
+
+    for (let x = 0; x < solution3.width; x++) {
+        solution3.softFloodCol(x);
+    }
+
     expect(Board.solve(board1).sameState(solution1)).toBeTruthy();
     expect(Board.solve(board2).sameState(solution2)).toBeTruthy();
+    expect(Board.solve(board3).sameState(solution3)).toBeTruthy();
 });
 
 test('isSolved', () => {

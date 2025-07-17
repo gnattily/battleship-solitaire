@@ -64,8 +64,7 @@ const board2 = new Board(15, 15,
     .setShip([8, 14], TYPE.WATER, true)
     .setShip([9, 2], TYPE.ORTHOGONAL, true)
     .setShip([12, 6], TYPE.ORTHOGONAL, true)
-    .setShip([12, 13], TYPE.SINGLE, true)
-    .export();
+    .setShip([12, 13], TYPE.SINGLE, true);
 
 export default function Page (): JSX.Element {
     return (
@@ -74,7 +73,7 @@ export default function Page (): JSX.Element {
                 board={board}
             />
             <BoardUI
-                board={board2}
+                board={board2.export()}
             />
         </>
     );
