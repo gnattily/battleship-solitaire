@@ -270,6 +270,7 @@ export default class Board {
         for (let i = 0; i < iterationLimit; i++) {
             const old = board.copy();
 
+            // fill full rows with water and rows that would be full with ships
             for (let y = 0; y < board.height; y++) {
                 const counts = board.countRow(y);
                 const expected = board.rowCounts[y];
@@ -277,6 +278,7 @@ export default class Board {
                 if (counts[0] + counts[1] === expected) board.softFloodRow(y, TYPE.SHIP);
             }
 
+            // do the same but with columns
             for (let x = 0; x < board.width; x++) {
                 const counts = board.countCol(x);
                 const expected = board.colCounts[x];
@@ -284,10 +286,10 @@ export default class Board {
                 if (counts[0] + counts[1] === expected) board.softFloodCol(x, TYPE.SHIP);
             }
 
+            // something's probably changed by now, so recompute types before this next part
             board.compTypes();
 
             // place water/ships around ships
-
             for (let i = 0; i < board.state.length; i++) {
                 const square = board.getShip(i);
 
@@ -300,7 +302,8 @@ export default class Board {
                 else board.floodCorners(i);
             }
 
-            if (old.sameState(board)) {
+            // "there's only one place the ship could go"
+            if (board.sameState(old)) {
                 function filterComplete (run: Run): boolean {
                     for (let i = 0; i < run.length; i++) {
                         if (board.getShip(run[i]).playType === TYPE.UNKNOWN) return true;
@@ -385,6 +388,86 @@ export default class Board {
                         // test with, so if I did this it would basically be a shot in the
                         // dark.
                     }
+                }
+            }
+
+            // there's only one way to fill this col/row without going over the ship limit
+            if (board.sameState(old)) {
+                function setOverlappingPossibilities (horizontal: boolean, pos: number): void {
+                    const positions: number[] = [];
+
+                    for (let i = 0; i < board[horizontal ? 'width' : 'height']; i++) {
+                        const index = board.coordToInd(horizontal ? [i, pos] : [pos, i]);
+                        if (board.getShip(index).playType === TYPE.UNKNOWN) {
+                            positions.push(index);
+                        }
+                    }
+
+                    const possibilities: number[][] = [];
+                    const needed = board[horizontal ? 'rowCounts' : 'colCounts'][pos]
+                        - board[horizontal ? 'countRow' : 'countCol'](pos)[0];
+
+                    if (needed <= 0) return;
+
+                    // find every combination of positions
+                    const indicies = Array.from({ length: needed }, (_, i) => i);
+
+                    while (true) {
+                        // check if the current possibility satisfies the rules
+                        const possibility = indicies.map(i => positions[i]);
+
+                        // this is terribly inefficient since it has to instantiate
+                        // a whole new board, but it works for now. maybe we could
+                        // modify the actual board instead then revert things????
+                        // TODO improve efficiency
+                        const tmpBoard = board.copy();
+
+                        for (const index of possibility) {
+                            tmpBoard.softSetShip(index, TYPE.SHIP);
+                        }
+
+                        let over = false;
+                        tmpBoard.countRunsLeft().forEach(count => {
+                            if (count < 0) over = true;
+                        });
+
+                        if (!over) possibilities.push(possibility);
+
+                        let i = needed - 1;
+                        while (i >= 0 && indicies[i] === positions.length - needed + i) {
+                            i--;
+                        }
+
+                        if (i < 0) break;
+
+                        indicies[i]++;
+
+                        for (let j = i + 1; j < needed; j++) {
+                            indicies[j] = indicies[j - 1] + 1;
+                        }
+                    }
+
+                    const occurances = new Map<number, number>();
+
+                    possibilities.forEach(possibility => {
+                        possibility.forEach(pos => {
+                            occurances.set(pos, (occurances.get(pos) ?? 0) + 1);
+                        });
+                    });
+
+                    for (const [pos, numOccurances] of occurances) {
+                        if (numOccurances === possibilities.length) {
+                            board.softSetShip(pos, TYPE.SHIP);
+                        }
+                    }
+                }
+
+                for (let y = 0; y < board.height; y++) {
+                    setOverlappingPossibilities(true, y);
+                }
+
+                for (let x = 0; x < board.width; x++) {
+                    setOverlappingPossibilities(false, x);
                 }
             }
 

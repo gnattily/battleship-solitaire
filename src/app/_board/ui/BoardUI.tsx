@@ -61,7 +61,7 @@ export default class BoardUI extends Component<Props, State> {
 
         this.state = {
             board: board,
-            solved: false,
+            solved: board.isSolved(),
             draggedType: undefined,
             draggedButton: 0,
         };
