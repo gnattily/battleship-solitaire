@@ -75,26 +75,34 @@ export default class Board {
         out += (this.width - 1).toString(2).padStart(8, '0');
         out += (this.height - 1).toString(2).padStart(8, '0');
 
-        const colCounts = this.colCounts?.length === this.width ? this.colCounts : Array(this.width).fill(0);
-        for (let i = 0; i < this.width; i++) {
-            out += colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
+        const hasCounts = this.colCounts.length === this.width && this.rowCounts.length === this.height;
+        const hasRuns = this.runs.length > 0;
+
+        out += Number(hasCounts);
+        out += Number(hasRuns);
+
+        if (hasCounts) {
+            for (let i = 0; i < this.width; i++) {
+                out += this.colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
+            }
+
+            for (let i = 0; i < this.height; i++) {
+                out += this.rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
+            }
         }
 
-        const rowCounts = this.rowCounts?.length === this.height ? this.rowCounts : Array(this.height).fill(0);
-        for (let i = 0; i < this.height; i++) {
-            out += rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
+        if (hasRuns) {
+            let runsBytes = '';
+            const runs = this.runs;
+            const runBuffer = Math.max(Math.ceil(Math.log2(this.width)), Math.ceil(Math.log2(this.height)) + 1);
+            runs.forEach((count, size) => {
+                runsBytes += size.toString(2).padStart(runBuffer, '0');
+                runsBytes += count.toString(2).padStart(runBuffer, '0');
+            });
+
+            out += runs.length.toString(2).padStart(8, '0');
+            out += runsBytes;
         }
-
-        let runsBytes = '';
-        const runs = this.runs || [0];
-        const runBuffer = Math.max(Math.ceil(Math.log2(this.width)), Math.ceil(Math.log2(this.height)) + 1);
-        runs.forEach((count, size) => {
-            runsBytes += size.toString(2).padStart(runBuffer, '0');
-            runsBytes += count.toString(2).padStart(runBuffer, '0');
-        });
-
-        out += runs.length.toString(2).padStart(8, '0');
-        out += runsBytes;
 
         let currentUnknowns = 0;
         let currentWaters = 0;
@@ -118,19 +126,19 @@ export default class Board {
             }
         }
 
-        for (let i = 0; i < this.width * this.height; i++) {
+        for (let i = 0; i < this.state.length; i++) {
+            if (!currentWaters && this.state[i].playType === TYPE.UNKNOWN) {
+                currentUnknowns++;
+                continue;
+            } else if (!currentUnknowns && this.state[i].playType === TYPE.WATER) {
+                currentWaters++;
+                continue;
+            }
+
             if (currentUnknowns !== 0 || currentWaters !== 0) {
                 addMultipleShips();
                 currentUnknowns = 0;
                 currentWaters = 0;
-            }
-
-            if (this.state[i].playType === TYPE.UNKNOWN) {
-                currentUnknowns++;
-                continue;
-            } else if (this.state[i].playType === TYPE.WATER) {
-                currentWaters++;
-                continue;
             }
 
             out += this.state[i].pinned ? '1' : '0';
@@ -139,11 +147,9 @@ export default class Board {
 
         addMultipleShips();
 
-        const paddedString = out.length % 8 === 0 ? out : out + '0'.repeat(8 - (out.length % 8));
-
         const byteArray = [];
         for (let i = 0; i < out.length; i += 8) {
-            byteArray.push(parseInt(paddedString.slice(i, i + 8), 2));
+            byteArray.push(parseInt(out.slice(i, i + 8), 2));
         }
 
         return btoa(String.fromCharCode(...byteArray));
