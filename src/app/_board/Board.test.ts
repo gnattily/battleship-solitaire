@@ -4,8 +4,16 @@ import Board, { REL_POS } from './Board';
 import Ship, { TYPE } from './Ship';
 
 test('constructor', () => {
-    // will do after migrating to ts
-    // i didn't forget you buddy
+    expect(() => { new Board(-1, 14); }).toThrow('outside expected range');
+
+    const board = new Board(15, 7);
+
+    expect(board.width).toBe(15);
+    expect(board.height).toBe(7);
+    expect(board.state.length).toBe(15 * 7);
+
+    // the constructor is used extensively throughout testing
+    // so I don't see much of a use in too extensive of tests
 });
 
 test('createState', () => {
