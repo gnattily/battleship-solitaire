@@ -34,13 +34,20 @@ test('reset', () => {
 
 test('copy', () => {
     const board1 = new Board(4, 4);
-    const board2 = board1.copy();
+    const board1Copy = board1.copy();
 
-    expect(board1.sameState(board2)).toBeTruthy();
+    expect(board1.sameState(board1Copy)).toBeTruthy();
 
-    board2.setShip([2, 3], TYPE.LEFT);
+    board1Copy.setShip([1, 3], TYPE.LEFT);
 
-    expect(board1.sameState(board2)).toBeFalsy();
+    expect(board1.sameState(board1Copy)).toBeFalsy();
+
+    const board2 = new Board(board1Copy)
+        .setShip([3, 3], TYPE.SINGLE);
+    const board2Copy = board2.copy()
+        .setShip([3, 3], TYPE.UP);
+
+    expect(board2.preset?.sameState(board2Copy.preset as Board));
 });
 
 test('sameState', () => {
@@ -225,9 +232,9 @@ test('solve', () => {
         solution3.softFloodCol(x);
     }
 
-    expect(Board.solve(board1).sameState(solution1)).toBeTruthy();
-    expect(Board.solve(board2).sameState(solution2)).toBeTruthy();
-    expect(Board.solve(board3).sameState(solution3)).toBeTruthy();
+    expect(board1.copy().solve().sameState(solution1)).toBeTruthy();
+    expect(board2.copy().solve().sameState(solution2)).toBeTruthy();
+    expect(board3.copy().solve().sameState(solution3)).toBeTruthy();
 });
 
 test('isSolved', () => {

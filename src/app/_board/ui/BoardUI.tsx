@@ -39,6 +39,8 @@ interface State {
  * @param {number[]} [runs] Number of each type of ship left (eg. 3 solos and 1 double = [3, 1])
  */
 export default class BoardUI extends Component<Props, State> {
+    readonly #initialBoard: Board;
+
     constructor (props: Props) {
         super(props);
 
@@ -59,6 +61,8 @@ export default class BoardUI extends Component<Props, State> {
             }
         } else throw new Error('Invalid props');
 
+        this.#initialBoard = board.copy();
+
         this.state = {
             board: board,
             solved: board.isSolved(),
@@ -68,7 +72,7 @@ export default class BoardUI extends Component<Props, State> {
     }
 
     solveBoard (): void {
-        const newBoard = Board.solve(this.state.board);
+        const newBoard = this.state.board.solve();
         this.setState({
             board: newBoard,
             solved: newBoard.isSolved(),
@@ -76,11 +80,11 @@ export default class BoardUI extends Component<Props, State> {
     }
 
     reset (): void {
-        const board = this.state.board.reset();
+        console.log(this.#initialBoard);
 
         this.setState({
-            board: board,
-            solved: board.isSolved(),
+            board: this.#initialBoard,
+            solved: this.#initialBoard.isSolved(),
         });
     }
 
