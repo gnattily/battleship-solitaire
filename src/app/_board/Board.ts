@@ -28,9 +28,11 @@ export default class Board {
         if (typeof args[0] === 'number' && typeof args[1] === 'number') {
             const [width, height, colCounts, rowCounts, runs] = args;
 
-            if (!Number.isInteger(height) || !Number.isInteger(width)) {
+            if (!Number.isInteger(height) || !Number.isInteger(width))
                 throw new TypeError(`Expected width and height to be integers, got ${width} and ${height}`);
-            }
+
+            if (height <= 0 || width <= 0 || height >= 256 || width >= 256)
+                throw new RangeError('Width or height outside expected range (0 - 255)');
 
             this.width = width;
             this.height = height;
