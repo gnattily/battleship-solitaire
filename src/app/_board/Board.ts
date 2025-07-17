@@ -12,7 +12,7 @@ export default class Board {
     colCounts: number[];
     rowCounts: number[];
     runs: number[];
-    preset: Board | undefined;
+    readonly preset: Board | undefined;
     state: Ship[];
 
     constructor (width: number, height: number);
@@ -40,7 +40,8 @@ export default class Board {
             this.state = createState(this.width, this.height);
         } else if (
             (args[0] instanceof Board || typeof args[0] === 'string')
-            && typeof args[1] !== 'number') {
+            && typeof args[1] !== 'number'
+        ) {
             let preset = args[0];
             const [, colCounts, rowCounts, runs] = args;
 
@@ -261,63 +262,62 @@ export default class Board {
     /**
      * Solves the board
      */
-    static solve (board: Board, iterationLimit = 50): Board {
-        if (!board.colCounts || !board.rowCounts || !board.runs) return board;
+    solve (iterationLimit = 50): this {
+        if (!this.colCounts || !this.rowCounts || !this.runs) return this;
 
-        board = board.copy();
-        board.compTypes();
+        this.compTypes();
 
         for (let i = 0; i < iterationLimit; i++) {
-            const old = board.copy();
+            const old = this.copy();
 
             // fill full rows with water and rows that would be full with ships
-            for (let y = 0; y < board.height; y++) {
-                const counts = board.countRow(y);
-                const expected = board.rowCounts[y];
-                if (counts[0] === expected) board.softFloodRow(y);
-                if (counts[0] + counts[1] === expected) board.softFloodRow(y, TYPE.SHIP);
+            for (let y = 0; y < this.height; y++) {
+                const counts = this.countRow(y);
+                const expected = this.rowCounts[y];
+                if (counts[0] === expected) this.softFloodRow(y);
+                if (counts[0] + counts[1] === expected) this.softFloodRow(y, TYPE.SHIP);
             }
 
             // do the same but with columns
-            for (let x = 0; x < board.width; x++) {
-                const counts = board.countCol(x);
-                const expected = board.colCounts[x];
-                if (counts[0] === expected) board.softFloodCol(x);
-                if (counts[0] + counts[1] === expected) board.softFloodCol(x, TYPE.SHIP);
+            for (let x = 0; x < this.width; x++) {
+                const counts = this.countCol(x);
+                const expected = this.colCounts[x];
+                if (counts[0] === expected) this.softFloodCol(x);
+                if (counts[0] + counts[1] === expected) this.softFloodCol(x, TYPE.SHIP);
             }
 
             // something's probably changed by now, so recompute types before this next part
-            board.compTypes();
+            this.compTypes();
 
             // place water/ships around ships
-            for (let i = 0; i < board.state.length; i++) {
-                const square = board.getShip(i);
+            for (let i = 0; i < this.state.length; i++) {
+                const square = this.getShip(i);
 
                 if (square.playType !== TYPE.SHIP) continue;
 
-                if (square.isCardinal()) board.setCarShips(i, Ship.typeToRelPos(square.internalType));
+                if (square.isCardinal()) this.setCarShips(i, Ship.typeToRelPos(square.internalType));
                 else if (square.graphicalType === TYPE.SINGLE)
-                    board.setCarShips(i); // makes every surrounding square water
-                else if (square.internalType > TYPE.ORTHOGONAL) board.setOrthoShips(i, square.internalType as typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL);
-                else board.floodCorners(i);
+                    this.setCarShips(i); // makes every surrounding square water
+                else if (square.internalType > TYPE.ORTHOGONAL) this.setOrthoShips(i, square.internalType as typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL);
+                else this.floodCorners(i);
             }
 
             // "there's only one place the ship could go"
-            if (board.sameState(old)) {
-                function filterComplete (run: Run): boolean {
+            if (this.sameState(old)) {
+                const filterComplete = (run: Run): boolean => {
                     for (let i = 0; i < run.length; i++) {
-                        if (board.getShip(run[i]).playType === TYPE.UNKNOWN) return true;
+                        if (this.getShip(run[i]).playType === TYPE.UNKNOWN) return true;
                     }
 
                     return false;
-                }
+                };
 
-                const horizontalRuns = board.getHorRuns()
+                const horizontalRuns = this.getHorRuns()
                     .filter(run => filterComplete(run));
-                const verticalRuns = board.getVertRuns()
+                const verticalRuns = this.getVertRuns()
                     .filter(run => filterComplete(run));
 
-                const shipsLeft = board.countRunsLeft(true);
+                const shipsLeft = this.countRunsLeft(true);
 
                 let i = shipsLeft.length - 1;
                 while (i >= 0 && shipsLeft[i] <= 0) i--;
@@ -326,13 +326,13 @@ export default class Board {
                 let didSomething = false;
 
                 for (let i = shipsLeft.length; i > 1 && !didSomething; i--) {
-                    function countDiff (run: Run, horizontal: boolean): number {
-                        const pos = board.indToCoord(run[0])[Number(horizontal)];
-                        let counts = board[horizontal ? 'countRow' : 'countCol'](pos)[0];
+                    const countDiff = (run: Run, horizontal: boolean): number => {
+                        const pos = this.indToCoord(run[0])[Number(horizontal)];
+                        let counts = this[horizontal ? 'countRow' : 'countCol'](pos)[0];
                         // remove any ships in the run so we dont double count:
-                        run.forEach(index => { if (board.getShip(index).playType === TYPE.SHIP) counts--; });
-                        return board[horizontal ? 'rowCounts' : 'colCounts'][pos] - (counts + i);
-                    }
+                        run.forEach(index => { if (this.getShip(index).playType === TYPE.SHIP) counts--; });
+                        return this[horizontal ? 'rowCounts' : 'colCounts'][pos] - (counts + i);
+                    };
 
                     const hRuns = horizontalRuns
                         .filter(run => run.length >= i)
@@ -349,7 +349,7 @@ export default class Board {
                     if (allRuns.length === 1) {
                         if (allRuns[0].length === i) {
                             for (const index of hRuns.concat(vRuns)[0]) {
-                                board.softSetShip(index, TYPE.SHIP);
+                                this.softSetShip(index, TYPE.SHIP);
                             }
 
                             didSomething = true;
@@ -358,15 +358,15 @@ export default class Board {
                             const run = horizontal ? hRuns[0] : vRuns[0];
 
                             if (countDiff(run, horizontal) === 0) {
-                                if (board.getShip(run[0]).playType === TYPE.SHIP) {
+                                if (this.getShip(run[0]).playType === TYPE.SHIP) {
                                     for (let j = 0; j < i; j++) {
-                                        board.softSetShip(run[j], TYPE.SHIP);
+                                        this.softSetShip(run[j], TYPE.SHIP);
                                     }
 
                                     didSomething = true;
-                                } else if (board.getShip(run[run.length - 1]).playType === TYPE.SHIP) {
+                                } else if (this.getShip(run[run.length - 1]).playType === TYPE.SHIP) {
                                     for (let j = 0; j < i; j++) {
-                                        board.softSetShip(run[run.length - 1 - j], TYPE.SHIP);
+                                        this.softSetShip(run[run.length - 1 - j], TYPE.SHIP);
                                     }
                                 } else {
                                     // It's somewhere in the middle. This is unlikely to be much of a help
@@ -392,20 +392,20 @@ export default class Board {
             }
 
             // there's only one way to fill this col/row without going over the ship limit
-            if (board.sameState(old)) {
-                function setOverlappingPossibilities (horizontal: boolean, pos: number): void {
+            if (this.sameState(old)) {
+                const setOverlappingPossibilities = (horizontal: boolean, pos: number): void => {
                     const positions: number[] = [];
 
-                    for (let i = 0; i < board[horizontal ? 'width' : 'height']; i++) {
-                        const index = board.coordToInd(horizontal ? [i, pos] : [pos, i]);
-                        if (board.getShip(index).playType === TYPE.UNKNOWN) {
+                    for (let i = 0; i < this[horizontal ? 'width' : 'height']; i++) {
+                        const index = this.coordToInd(horizontal ? [i, pos] : [pos, i]);
+                        if (this.getShip(index).playType === TYPE.UNKNOWN) {
                             positions.push(index);
                         }
                     }
 
                     const possibilities: number[][] = [];
-                    const needed = board[horizontal ? 'rowCounts' : 'colCounts'][pos]
-                        - board[horizontal ? 'countRow' : 'countCol'](pos)[0];
+                    const needed = this[horizontal ? 'rowCounts' : 'colCounts'][pos]
+                        - this[horizontal ? 'countRow' : 'countCol'](pos)[0];
 
                     if (needed <= 0) return;
 
@@ -420,7 +420,7 @@ export default class Board {
                         // a whole new board, but it works for now. maybe we could
                         // modify the actual board instead then revert things????
                         // TODO improve efficiency
-                        const tmpBoard = board.copy();
+                        const tmpBoard = this.copy();
 
                         for (const index of possibility) {
                             tmpBoard.softSetShip(index, TYPE.SHIP);
@@ -457,27 +457,27 @@ export default class Board {
 
                     for (const [pos, numOccurances] of occurances) {
                         if (numOccurances === possibilities.length) {
-                            board.softSetShip(pos, TYPE.SHIP);
+                            this.softSetShip(pos, TYPE.SHIP);
                         }
                     }
-                }
+                };
 
-                for (let y = 0; y < board.height; y++) {
+                for (let y = 0; y < this.height; y++) {
                     setOverlappingPossibilities(true, y);
                 }
 
-                for (let x = 0; x < board.width; x++) {
+                for (let x = 0; x < this.width; x++) {
                     setOverlappingPossibilities(false, x);
                 }
             }
 
-            board.compTypes();
+            this.compTypes();
 
-            if (board.sameState(old)) return board;
-            if (board.isSolved()) return board;
+            if (this.sameState(old)) return this;
+            if (this.isSolved()) return this;
         }
 
-        return board;
+        return this;
     }
 
     /**

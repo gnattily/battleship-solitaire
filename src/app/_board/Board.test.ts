@@ -225,9 +225,9 @@ test('solve', () => {
         solution3.softFloodCol(x);
     }
 
-    expect(Board.solve(board1).sameState(solution1)).toBeTruthy();
-    expect(Board.solve(board2).sameState(solution2)).toBeTruthy();
-    expect(Board.solve(board3).sameState(solution3)).toBeTruthy();
+    expect(board1.copy().solve().sameState(solution1)).toBeTruthy();
+    expect(board2.copy().solve().sameState(solution2)).toBeTruthy();
+    expect(board3.copy().solve().sameState(solution3)).toBeTruthy();
 });
 
 test('isSolved', () => {

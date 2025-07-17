@@ -68,7 +68,7 @@ export default class BoardUI extends Component<Props, State> {
     }
 
     solveBoard (): void {
-        const newBoard = Board.solve(this.state.board);
+        const newBoard = this.state.board.solve();
         this.setState({
             board: newBoard,
             solved: newBoard.isSolved(),
