@@ -239,8 +239,24 @@ export default class Board {
      * Copies the board without pointing to the origial
      */
     copy (): Board {
-        if (this.colCounts && this.rowCounts && this.runs) return new Board(this, this.colCounts, this.rowCounts, this.runs);
-        else return new Board(this);
+        const hasSolvingInfo = this.colCounts && this.rowCounts && this.runs;
+        let board;
+
+        if (this.preset) {
+            if (hasSolvingInfo)
+                board = new Board(this.preset, this.colCounts, this.rowCounts, this.runs);
+            else
+                board = new Board(this.preset);
+        } else {
+            if (hasSolvingInfo)
+                board = new Board(this.width, this.height, this.colCounts, this.rowCounts, this.runs);
+            else
+                board = new Board(this.width, this.height);
+        }
+
+        board.state = createState(this.width, this.height, this);
+
+        return board;
     }
 
     /**
