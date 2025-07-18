@@ -1,82 +1,90 @@
 # Battleship solitaire
 
-[![Vitest CI](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml) [![ESLint](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml/badge.svg)](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml) [![CodeQL](https://github.com/gnattily/battleship-solitaire/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/github-code-scanning/codeql)
+[![Vitest CI](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml)
+[![ESLint](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml/badge.svg)](https://github.com/lgrom/battleship-solitaire/actions/workflows/eslint.yml)
+[![CodeQL](https://github.com/gnattily/battleship-solitaire/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/github-code-scanning/codeql)
 
-TODO:
+Battleship solitaire is a Japanese-style logic puzzle in which one deduces the positions of ships
+based on the number in each row and column, the number of each length of ship, and some basic [rules](#Rules).
+This is a [Next.js](https://nextjs.org) rendition of that puzzle meant to automatically solve any*
+puzzle you throw at it.
 
-- [X] functions to get surrounding ships
-- [X] make it playable (left/right click functions)
-- [X] add support for pre-existing ships
-- [X] make setShip accept playtypes as well as ship objects
-- [X] make graphical types auto-compute
-- [X] add testing for pinned ships
-- [X] make an automatic solver
-- [ ] add styling to webpage
-- [ ] make a solvable board generator with with options for difficulty and guess and check
-- [ ] add dev documentation
-- [X] rename functions to be more consistent and concise
-- [X] improve overall code consistency
-- [X] migrate to Next.js
-- [ ] use containers with Docker
+> \*_Cannot solve hardmode puzzles like those on [lukerissacher.com](https://lukerissacher.com/battleships),
+> see [about](#about)_
 
-more specific things
+## About
+This repository served primarily as a vessel through which I learned [React.js](https://react.dev).
+This was a logic puzzle that I did extensively in elementary school. The idea of creating a tool to
+automatically solve these simple puzzles seemed like a great small project, and thus was this
+repository born. It's grown to become my largest project, with full unit testing (on the main logic
+files) and over 1000 lines of code in one file. I've refactored many, many times, inclduing switching
+to Next from [CRA](https://create-react-app.dev/), migrating to TypeScript, and more.
 
-- [X] make the styling automatically adjust for the width and height of the board
-- [X] make position arrays start at 0 instead of 1
-- [ ] ~~make setPlayType not call setGraphical type and update test accordingly~~
-- [ ] ~~make isPlayType use a spread argument instead of an array for ships to compare~~
-- [X] rename graphicalTypeToRelativePosition to something shorter
-- [X] soft flood row/column when the user clicks the number
-- [X] allow for click + drag
-- [ ] ~~consider removing play type~~
-- [X] make jsdoc more consistent (eg. dashes after param names, capitalization)
-- [X] name "uni/bi-directional" variables as "cardinal" and "orthognol" (or however it's spelled)
-- [X] store runs as 2 dimensional arrays where inner arrays = all indexes of squares in that run instead of just storing the start, end, and length of each run.
+Although this solver can solve any puzzle that can be solved through pure logic, some websites like
+[lukerissacher.com](https://lukerissacher.com/battleships) can also create puzzles that can only be
+solved with guess-and-check. Initially this was a planned feature, but I've since limited the scope
+of this project so I can move on to other ones. This tool can still help with these puzzles, but it
+is not designed for them and will require much manual input.
 
-end goal:
+### Rules
+There are only a few rules to this game:
+- Ships cannot touch, not even diagonally.
+- There cannot be more ships in a row/column than specified at the top/side.
+- The number of ships of each length must match that specified by the puzzle.
+- There are only horizontal/vertical ships. They cannot be diagonal.
 
-- hard mode
-  - history + checkpoints
-- game sharing
-  - convert state from and to base64 representation
-- auto-generation
-- auto-solving
-  - hard mode/speculative solving
-- board editor
+## Deploying locally
+Deploying a local server is extremely simple.
 
-development timeline:
+Firstly, install [Node.js](https://nodejs.org/), then run these commands:
+```sh
+npm install -g pnpm@latest-10 # pnpm is like npm, but much faster
+pnpm i # install dependencies
+pnpm build # compile the project
+pnpm start # run the server
+```
+Your new web server should now be accessible on [localhost:3000](http://localhost:3000).
 
-- board editor
-- game sharing
-- auto-generation (easy mode)
-- hard mode
-- auto-solving (hard mode)
-- auto-generation (hard mode)
-- COMPLETE STYLING OVERHAUL + NEXT.JS
+> 💡 **Tip**: for a development server, use `pnpm dev` instead to auto-reload after changes.
 
-board editor:
+## Contributing
+If you would like to contribute to the project, you are more than welcome, so long as you follow our
+[Code of Conduct](./CODE_OF_CONDUCT.md). Here's a couple commands to get you started:
 
-- function to export/import board state from base64
-- seperate react component (based on board)
+```sh
+pnpm dev # start a development server
+pnpm lint # lint your code with ESLint
+pnpm test # run unit tests on your code
+```
 
-## Specification for Base64 Exports
+If you use Visual Studio Code, we also recommend the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint).
+It catches styling errors as you code, drastically speeding up development compared to only using
+`pnpm lint`. Additionally, you can enable ESLint as a formatter in VS Code through its settings menu
+(Eslint > Format: Enable).
 
-Supports up to a 256x256 board.
-Specification:
+## Export Specification
+Boards can be exported to base 64 through the `Board.export` function. Exported boards can be imported
+via `Board.from`, which returns a new Board with the imported data. Here is each property exported with
+the number of bits it uses:
 
-width, 1B
-height, 1B
-column counts, ceil(log base 2 width)b \* width
-row counts, ceil(log base 2 height)b \* height
+| property  |        number of bits         |    type   |
+|-----------|:-----------------------------:|:---------:|
+| width     |              8                |   number  |
+| height    |              8                |   number  |
+| solveData |              1                |  boolean  |
+| colCounts | `a = ceil(log2(width)) + 1`   |  number[] |
+| rowCounts | `b = ceil(log2(height)) + 1`  |  number[] |
+| runs      | `8 + max(a, b) * numRuns * 2` |  number[] |
+| state     | 6 to `width * height * 5`     | see below |
 
-runs:
-  x = max(ceil(log base 2 width), ceil(log base 2 height))
-  header, xb (number of entries)
-  size, xb: count, 1B
+> **Note**: colCounts, rowCounts, and runs are only present if solveData is true.
 
-boardstate:
-  ship: 5b
-    pinned: 1b
-    type: 4b
-  if pinned && type === 1111 or 1110
-    repeat unknown (1111) or water (1110) for parseInt(ceil(log base 2 width*height))
+> **Note**: the runs property is in the format (length of ship, count), both taking the same
+> number of bits.
+
+The state property is a bit more complicated. Normal squares are in the format (pinned: 1b, type:
+4b). For sequences of unknown squares or water, `.export` adds `11111` for unknown squares and
+`11110` for sequences of water. It then appends one less than the number of squares in the sequence
+in `ceil(log2(width * height + 1))` bits.
+
+For more details, directly view the `.export` method in [Board.ts](./src/app/_board/Board.ts)
