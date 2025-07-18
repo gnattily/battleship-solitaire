@@ -622,35 +622,41 @@ test('floodCorners', () => {
 });
 
 test('base64 export/import', () => {
-    // const board = new Board(2, 2, [2, 0], [1, 1], [0, 1])
-    //     .setShip(0, TYPE.DOWN)
-    //     .setShip(2, TYPE.UP);
-    // const b64 = board.export();
-    // const importedBoard = Board.from(b64);
+    // board 1
+    const board1 = new Board(2, 2, [2, 0], [1, 1], [0, 1])
+        .setShip(0, TYPE.DOWN)
+        .setShip(2, TYPE.UP);
+    const board1B64 = board1.export();
+    const importedBoard1 = Board.from(board1B64);
 
-    // expect(importedBoard.sameState(board)).toBeTruthy();
-    // expect(importedBoard.colCounts).toEqual(board.colCounts);
-    // expect(importedBoard.rowCounts).toEqual(board.rowCounts);
-    // expect(importedBoard.runs).toEqual(board.runs);
+    expect(importedBoard1.sameState(board1)).toBeTruthy();
+    expect(importedBoard1.colCounts).toEqual(board1.colCounts);
+    expect(importedBoard1.rowCounts).toEqual(board1.rowCounts);
+    expect(importedBoard1.runs).toEqual(board1.runs);
 
-    // const board2 = new Board(2, 2)
-    //     .setShip(0, TYPE.DOWN)
-    //     .setShip(2, TYPE.UP);
-    // const board2B64 = board2.export();
-    // const importedBoard2 = Board.from(board2B64);
+    // board 2
+    const board2 = new Board(2, 2)
+        .setShip(0, TYPE.DOWN)
+        .setShip(2, TYPE.UP);
+    const board2B64 = board2.export();
+    const importedBoard2 = Board.from(board2B64);
 
-    // expect(importedBoard2.sameState(board2)).toBeTruthy();
-    // expect(importedBoard2.colCounts).toEqual([0, 0]);
-    // expect(importedBoard2.rowCounts).toEqual([0, 0]);
-    // expect(importedBoard2.runs).toEqual([]);
+    expect(importedBoard2.sameState(board2)).toBeTruthy();
+    expect(importedBoard2.colCounts).toEqual([]);
+    expect(importedBoard2.rowCounts).toEqual([]);
+    expect(importedBoard2.runs).toEqual([]);
 
+    // board 3
     const board3 = new Board(16, 16)
         .setShip([2, 0], TYPE.SINGLE, true)
         .setShip([6, 4], TYPE.WATER);
     const board3B64 = board3.export();
     const importedBoard3 = Board.from(board3B64);
 
-    console.log(board3B64);
-
     expect(importedBoard3.sameState(board3)).toBeTruthy();
+
+    // check none are too long (implies repeat functionality is broken)
+    expect(board1B64.length).toBeLessThan(20);
+    expect(board2B64.length).toBeLessThan(20);
+    expect(board3B64.length).toBeLessThan(20);
 });
