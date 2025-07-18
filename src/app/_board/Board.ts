@@ -13,7 +13,7 @@ export default class Board {
     rowCounts: number[];
     runs: number[];
     readonly preset: Board | undefined;
-    state: Ship[];
+    #state: Ship[];
 
     constructor (width: number, height: number);
     constructor (width: number, height: number, colCounts: number[], rowCounts: number[], runs: number[]);
@@ -39,7 +39,7 @@ export default class Board {
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
-            this.state = createState(this.width, this.height);
+            this.#state = createState(this.width, this.height);
         } else if (
             (args[0] instanceof Board || typeof args[0] === 'string')
             && typeof args[1] !== 'number'
@@ -55,10 +55,23 @@ export default class Board {
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
-            this.state = createState(this.width, this.height, preset);
+            this.#state = createState(this.width, this.height, preset);
         } else {
             throw new TypeError('Types of arguments incorrect');
         }
+    }
+
+    set state (newState: Ship[]) {
+        if (newState.length !== this.width * this.height) {
+            const diff = this.width * this.height - newState.length;
+            throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}),${
+                ' '}got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
+        } else
+            this.#state = newState;
+    }
+
+    get state (): Ship[] {
+        return this.#state;
     }
 
     toString (): string {
@@ -75,26 +88,46 @@ export default class Board {
         out += (this.width - 1).toString(2).padStart(8, '0');
         out += (this.height - 1).toString(2).padStart(8, '0');
 
-        const colCounts = this.colCounts?.length === this.width ? this.colCounts : Array(this.width).fill(0);
-        for (let i = 0; i < this.width; i++) {
-            out += colCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.width)) + 1, '0');
+        const hasSolveData = true
+            && this.colCounts.length === this.width
+            && this.rowCounts.length === this.height
+            && this.runs.length > 0;
+
+        out += Number(hasSolveData);
+
+        if (hasSolveData) {
+            for (let i = 0; i < this.width; i++) {
+                out += this.colCounts[i]
+                    .toString(2)
+                    .padStart(
+                        Math.ceil(Math.log2(this.width)) + 1,
+                        '0',
+                    );
+            }
+
+            for (let i = 0; i < this.height; i++) {
+                out += this.rowCounts[i]
+                    .toString(2)
+                    .padStart(
+                        Math.ceil(Math.log2(this.height)) + 1,
+                        '0',
+                    );
+            }
+
+            let runsBytes = '';
+            const runBuffer = Math.max(
+                Math.ceil(Math.log2(this.width)) + 1,
+                Math.ceil(Math.log2(this.height)) + 1,
+            );
+
+            this.runs.forEach((count, size) => {
+                runsBytes += size.toString(2).padStart(runBuffer, '0');
+                runsBytes += count.toString(2).padStart(runBuffer, '0');
+            });
+
+            out += this.runs.length.toString(2).padStart(8, '0');
+            out += runsBytes;
         }
-
-        const rowCounts = this.rowCounts?.length === this.height ? this.rowCounts : Array(this.height).fill(0);
-        for (let i = 0; i < this.height; i++) {
-            out += rowCounts[i].toString(2).padStart(Math.ceil(Math.log2(this.height)) + 1, '0');
-        }
-
-        let runsBytes = '';
-        const runs = this.runs || [0];
-        const runBuffer = Math.max(Math.ceil(Math.log2(this.width)), Math.ceil(Math.log2(this.height)) + 1);
-        runs.forEach((count, size) => {
-            runsBytes += size.toString(2).padStart(runBuffer, '0');
-            runsBytes += count.toString(2).padStart(runBuffer, '0');
-        });
-
-        out += runs.length.toString(2).padStart(8, '0');
-        out += runsBytes;
 
         let currentUnknowns = 0;
         let currentWaters = 0;
@@ -118,10 +151,12 @@ export default class Board {
             }
         }
 
-        for (let i = 0; i < this.width * this.height; i++) {
-            if (currentUnknowns !== 0 || currentWaters !== 0) {
+        for (let i = 0; i < this.state.length; i++) {
+            if (currentUnknowns && this.state[i].playType !== TYPE.UNKNOWN) {
                 addMultipleShips();
                 currentUnknowns = 0;
+            } else if (currentWaters && this.state[i].playType !== TYPE.WATER) {
+                addMultipleShips();
                 currentWaters = 0;
             }
 
@@ -133,17 +168,15 @@ export default class Board {
                 continue;
             }
 
-            out += this.state[i].pinned ? '1' : '0';
+            out += Number(this.state[i].pinned);
             out += this.state[i].internalType.toString(2).padStart(4, '0');
         }
 
-        addMultipleShips();
-
-        const paddedString = out.length % 8 === 0 ? out : out + '0'.repeat(8 - (out.length % 8));
+        if (currentUnknowns || currentWaters) addMultipleShips();
 
         const byteArray = [];
         for (let i = 0; i < out.length; i += 8) {
-            byteArray.push(parseInt(paddedString.slice(i, i + 8), 2));
+            byteArray.push(parseInt(out.slice(i, i + 8).padEnd(8, '0'), 2));
         }
 
         return btoa(String.fromCharCode(...byteArray));
@@ -160,67 +193,77 @@ export default class Board {
             binaryString += string.charCodeAt(i).toString(2).padStart(8, '0');
         }
 
-        function trim (length: number): void {
+        function getAndTrim (length: number): number {
+            const val = parseInt(binaryString.slice(0, length), 2);
+
             binaryString = binaryString.slice(length);
+
+            return val;
         }
 
-        const width = parseInt(binaryString.slice(0, 8), 2) + 1;
-        const height = parseInt(binaryString.slice(8, 16), 2) + 1;
+        const width = getAndTrim(8) + 1;
+        const height = getAndTrim(8) + 1;
 
-        trim(16);
+        const hasSolveData = !!getAndTrim(1);
 
         const colCounts = [];
-        for (let i = 0; i < width; i++) {
-            colCounts.push(parseInt(binaryString.slice(0, Math.ceil(Math.log2(width)) + 1), 2));
-            trim(Math.ceil(Math.log2(width)) + 1);
-        }
-
         const rowCounts = [];
-        for (let i = 0; i < height; i++) {
-            rowCounts.push(parseInt(binaryString.slice(0, Math.ceil(Math.log2(height)) + 1), 2));
-            trim(Math.ceil(Math.log2(height)) + 1);
-        }
-
-        const runBits = Math.max(Math.ceil(Math.log2(width)), Math.ceil(Math.log2(height)) + 1);
-        const runEntries = parseInt(binaryString.slice(0, 8), 2);
-        trim(8);
-
         const runs = [];
-        for (let i = 0; i < runEntries; i++) {
-            const size = parseInt(binaryString.slice(0, runBits), 2);
-            trim(runBits);
-            const count = parseInt(binaryString.slice(0, runBits), 2);
-            trim(runBits);
 
-            runs[size] = count;
+        if (hasSolveData) {
+            for (let i = 0; i < width; i++) {
+                colCounts.push(
+                    getAndTrim(Math.ceil(Math.log2(width)) + 1),
+                );
+            }
+
+            for (let i = 0; i < height; i++) {
+                rowCounts.push(
+                    getAndTrim(Math.ceil(Math.log2(height)) + 1),
+                );
+            }
+
+            const runBits = Math.max(
+                Math.ceil(Math.log2(width)) + 1,
+                Math.ceil(Math.log2(height)) + 1,
+            );
+            const runEntries = getAndTrim(8);
+
+            for (let i = 0; i < runEntries; i++) {
+                const size = getAndTrim(runBits);
+                const count = getAndTrim(runBits);
+
+                runs[size] = count;
+            }
         }
 
         const state = [];
-        let i = 0;
-        while (i < width * height && binaryString.length >= 5) {
-            const bits = binaryString.slice(0, 5);
-            const pinned = binaryString.slice(0, 1) === '1';
-            const type = parseInt(binaryString.slice(1, 5), 2);
+        for (let i = 0; i < width * height; i++) {
+            const pinned = !!getAndTrim(1);
+            const type = getAndTrim(4);
 
-            if (type < TYPE.UNKNOWN || type > TYPE.HORIZONTAL) {
-                throw new Error('Bad input. Expected type to be a type, got ' + type);
-            }
-
-            trim(5);
-
-            const maxLength = Math.ceil(Math.log2(width * height + 1));
-
-            if (bits === '11111' || bits === '11110') {
-                const repeats = parseInt(binaryString.slice(0, maxLength), 2) + 1;
-                trim(maxLength);
+            if (pinned && (type === 15 || type === 14)) {
+                const maxLength = Math.ceil(Math.log2(width * height + 1));
+                const repeats = getAndTrim(maxLength) + 1;
 
                 for (let j = 0; j < repeats; j++) {
-                    state.push(new Ship(bits === '11111' ? TYPE.UNKNOWN : TYPE.WATER));
+                    state.push(new Ship(type === 15 ? TYPE.UNKNOWN : TYPE.WATER));
                     i++;
                 }
+
+                // make sure we don't double increment with the for loop and the above
+                i--;
+            } else if (type < TYPE.UNKNOWN || type > TYPE.HORIZONTAL) {
+                throw new Error('Bad input. Expected type to be a type, got ' + type);
             } else {
                 state.push(new Ship(type as AnyType, pinned));
             }
+        }
+
+        if (state.length !== width * height) {
+            const diff = width * height - state.length;
+            throw new Error(`Expected state.length to equal width (${width}) * height (${height}),${
+                ' '}got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
         }
 
         const board = new Board(width, height, colCounts, rowCounts, runs);
