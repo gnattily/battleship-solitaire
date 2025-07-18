@@ -64,7 +64,8 @@ export default class Board {
     set state (newState: Ship[]) {
         if (newState.length !== this.width * this.height) {
             const diff = this.width * this.height - newState.length;
-            throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}), got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'})`);
+            throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}),${
+                ' '}got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
         } else
             this.#state = newState;
     }
@@ -151,29 +152,31 @@ export default class Board {
         }
 
         for (let i = 0; i < this.state.length; i++) {
-            if (!currentWaters && this.state[i].playType === TYPE.UNKNOWN) {
+            if (currentUnknowns && this.state[i].playType !== TYPE.UNKNOWN) {
+                addMultipleShips();
+                currentUnknowns = 0;
+            } else if (currentWaters && this.state[i].playType !== TYPE.WATER) {
+                addMultipleShips();
+                currentWaters = 0;
+            }
+
+            if (this.state[i].playType === TYPE.UNKNOWN) {
                 currentUnknowns++;
                 continue;
-            } else if (!currentUnknowns && this.state[i].playType === TYPE.WATER) {
+            } else if (this.state[i].playType === TYPE.WATER) {
                 currentWaters++;
                 continue;
             }
 
-            if (currentUnknowns !== 0 || currentWaters !== 0) {
-                addMultipleShips();
-                currentUnknowns = 0;
-                currentWaters = 0;
-            }
-
-            out += this.state[i].pinned ? '1' : '0';
+            out += Number(this.state[i].pinned);
             out += this.state[i].internalType.toString(2).padStart(4, '0');
         }
 
-        addMultipleShips();
+        if (currentUnknowns || currentWaters) addMultipleShips();
 
         const byteArray = [];
         for (let i = 0; i < out.length; i += 8) {
-            byteArray.push(parseInt(out.slice(i, i + 8), 2));
+            byteArray.push(parseInt(out.slice(i, i + 8).padEnd(8, '0'), 2));
         }
 
         return btoa(String.fromCharCode(...byteArray));
@@ -235,25 +238,32 @@ export default class Board {
         }
 
         const state = [];
-        let i = 0;
-        while (i < width * height && binaryString.length >= 5) {
-            const pinned = getAndTrim(1) === 1;
+        for (let i = 0; i < width * height; i++) {
+            const pinned = !!getAndTrim(1);
             const type = getAndTrim(4);
 
-            const maxLength = Math.ceil(Math.log2(width * height + 1));
-
             if (pinned && (type === 15 || type === 14)) {
+                const maxLength = Math.ceil(Math.log2(width * height + 1));
                 const repeats = getAndTrim(maxLength) + 1;
 
                 for (let j = 0; j < repeats; j++) {
                     state.push(new Ship(type === 15 ? TYPE.UNKNOWN : TYPE.WATER));
                     i++;
                 }
+
+                // make sure we don't double increment with the for loop and the above
+                i--;
             } else if (type < TYPE.UNKNOWN || type > TYPE.HORIZONTAL) {
                 throw new Error('Bad input. Expected type to be a type, got ' + type);
             } else {
                 state.push(new Ship(type as AnyType, pinned));
             }
+        }
+
+        if (state.length !== width * height) {
+            const diff = width * height - state.length;
+            throw new Error(`Expected state.length to equal width (${width}) * height (${height}),${
+                ' '}got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
         }
 
         const board = new Board(width, height, colCounts, rowCounts, runs);
