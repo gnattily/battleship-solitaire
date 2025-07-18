@@ -13,7 +13,7 @@ export default class Board {
     rowCounts: number[];
     runs: number[];
     readonly preset: Board | undefined;
-    state: Ship[];
+    #state: Ship[];
 
     constructor (width: number, height: number);
     constructor (width: number, height: number, colCounts: number[], rowCounts: number[], runs: number[]);
@@ -39,7 +39,7 @@ export default class Board {
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
-            this.state = createState(this.width, this.height);
+            this.#state = createState(this.width, this.height);
         } else if (
             (args[0] instanceof Board || typeof args[0] === 'string')
             && typeof args[1] !== 'number'
@@ -55,10 +55,22 @@ export default class Board {
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
-            this.state = createState(this.width, this.height, preset);
+            this.#state = createState(this.width, this.height, preset);
         } else {
             throw new TypeError('Types of arguments incorrect');
         }
+    }
+
+    set state (newState: Ship[]) {
+        if (newState.length !== this.width * this.height) {
+            const diff = this.width * this.height - newState.length;
+            throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}), got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'})`);
+        } else
+            this.#state = newState;
+    }
+
+    get state (): Ship[] {
+        return this.#state;
     }
 
     toString (): string {
@@ -103,8 +115,8 @@ export default class Board {
 
             let runsBytes = '';
             const runBuffer = Math.max(
-                Math.ceil(Math.log2(this.width) + 1),
-                Math.ceil(Math.log2(this.height) + 1),
+                Math.ceil(Math.log2(this.width)) + 1,
+                Math.ceil(Math.log2(this.height)) + 1,
             );
 
             this.runs.forEach((count, size) => {
@@ -189,7 +201,7 @@ export default class Board {
         const width = getAndTrim(8) + 1;
         const height = getAndTrim(8) + 1;
 
-        const hasSolveData = getAndTrim(1);
+        const hasSolveData = !!getAndTrim(1);
 
         const colCounts = [];
         const rowCounts = [];
@@ -212,14 +224,11 @@ export default class Board {
                 Math.ceil(Math.log2(width)) + 1,
                 Math.ceil(Math.log2(height)) + 1,
             );
-            const runEntries = parseInt(binaryString.slice(0, 8), 2);
-            getAndTrim(8);
+            const runEntries = getAndTrim(8);
 
             for (let i = 0; i < runEntries; i++) {
-                const size = parseInt(binaryString.slice(0, runBits), 2);
-                getAndTrim(runBits);
-                const count = parseInt(binaryString.slice(0, runBits), 2);
-                getAndTrim(runBits);
+                const size = getAndTrim(runBits);
+                const count = getAndTrim(runBits);
 
                 runs[size] = count;
             }
@@ -234,8 +243,7 @@ export default class Board {
             const maxLength = Math.ceil(Math.log2(width * height + 1));
 
             if (pinned && (type === 15 || type === 14)) {
-                const repeats = parseInt(binaryString.slice(0, maxLength), 2) + 1;
-                getAndTrim(maxLength);
+                const repeats = getAndTrim(maxLength) + 1;
 
                 for (let j = 0; j < repeats; j++) {
                     state.push(new Ship(type === 15 ? TYPE.UNKNOWN : TYPE.WATER));
