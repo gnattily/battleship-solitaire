@@ -80,11 +80,11 @@ export default class BoardUI extends Component<Props, State> {
     }
 
     reset (): void {
-        console.log(this.#initialBoard);
+        const board = this.#initialBoard.copy();
 
         this.setState({
-            board: this.#initialBoard,
-            solved: this.#initialBoard.isSolved(),
+            board: board,
+            solved: board.isSolved(),
         });
     }
 

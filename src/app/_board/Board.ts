@@ -34,6 +34,9 @@ export default class Board {
             if (height <= 0 || width <= 0 || height >= 256 || width >= 256)
                 throw new RangeError('Width or height outside expected range (0 - 255)');
 
+            if (args.length === 5 && (colCounts?.length !== width || rowCounts?.length !== height))
+                throw new Error('colCounts and rowCounts\' lengths must match the width and height of the board respectively');
+
             this.width = width;
             this.height = height;
             this.colCounts = colCounts || [];
