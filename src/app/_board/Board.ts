@@ -34,7 +34,8 @@ export default class Board {
             if (height <= 0 || width <= 0 || height >= 256 || width >= 256)
                 throw new RangeError('Width or height outside expected range (0 - 255)');
 
-            if (args.length === 5 && (colCounts?.length !== width || rowCounts?.length !== height))
+            if ((colCounts && colCounts.length !== 0 && colCounts.length !== width)
+                || (rowCounts && rowCounts.length !== 0 && rowCounts.length !== height))
                 throw new Error('colCounts and rowCounts\' lengths must match the width and height of the board respectively');
 
             this.width = width;
@@ -327,7 +328,14 @@ export default class Board {
      * Solves the board
      */
     solve (iterationLimit = 50): this {
-        if (!this.colCounts || !this.rowCounts || !this.runs) return this;
+        if (false
+            || !this.colCounts
+            || !this.rowCounts
+            || !this.runs
+            || this.colCounts.length === 0
+            || this.rowCounts.length === 0
+            || this.runs.length === 0
+        ) return this;
 
         this.compTypes();
 

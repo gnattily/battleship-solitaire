@@ -641,7 +641,7 @@ test('base64 export/import', () => {
     expect(importedBoard1.runs).toEqual(board1.runs);
 
     // board 2
-    const board2 = new Board(4, 4, [2, 0, 0, 0], [1, 1, 0, 0], [0, 1, 0, 0])
+    const board2 = new Board(4, 4, [2, 0, 0, 0], [1, 1, 0, 0], [4, 3, 2, 1])
         .setShip(0, TYPE.DOWN)
         .setShip(2, TYPE.UP);
     const board2B64 = board2.export();
