@@ -15,7 +15,7 @@ import type { JSX } from 'react';
 // colCounts={[0, 3, 1, 3, 1, 1, 5, 2, 2, 3, 3, 3]} rowCounts={[2, 5, 1, 5, 1, 1, 3, 4, 1, 0, 3, 1]}
 
 // https://www.brainbashers.com/showbattleships.asp?date=0607&size=15&puzz=A
-const board = new Board(15, 15,
+const board1 = new Board(15, 15,
     [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
     [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
     [5, 4, 3, 2, 1])
@@ -67,15 +67,40 @@ const board2 = new Board(15, 15,
     .setShip([12, 13], TYPE.SINGLE, true)
     .export();
 
-export default function Page (): JSX.Element {
+export default async function Page ({ searchParams }: { searchParams: { [key: string]: string | undefined } }): Promise<JSX.Element> {
+    let { data } = await searchParams;
+    let board: Board | undefined;
+
+    if (typeof data === 'string') {
+        data = data
+            .replaceAll('-', '+')
+            .replaceAll('_', '/')
+            .padEnd(data.length + (4 - (data.length % 4)) % 4, '=');
+
+        try {
+            board = Board.from(data);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     return (
         <>
             <BoardUI
-                board={board}
+                board={board1}
             />
             <BoardUI
                 board={board2}
             />
+            {((): JSX.Element | undefined => {
+                if (board) {
+                    return (
+                        <BoardUI
+                            board={board.export()}
+                        />
+                    );
+                }
+            })()}
         </>
     );
 }

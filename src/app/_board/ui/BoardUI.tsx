@@ -88,6 +88,21 @@ export default class BoardUI extends Component<Props, State> {
         });
     }
 
+    share (): void {
+        const url = `${window.location.origin}/?data=${
+            this.state.board.export()
+                .replaceAll('+', '-')
+                .replaceAll('/', '_')
+                .replaceAll('=', '')
+        }`;
+
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Link copied to clipboard!');
+        }).catch(() => {
+            alert('Failed to copy link. Copy manually: ' + url);
+        });
+    }
+
     onMouseDown (event: React.MouseEvent, index: number): void {
         const ship = this.state.board.getShip(index);
 
@@ -265,6 +280,9 @@ export default class BoardUI extends Component<Props, State> {
                 </button>
                 <button onClick={() => { this.reset(); }}>
                     Reset
+                </button>
+                <button onClick={() => { this.share(); }}>
+                    Share
                 </button>
             </>
         );
