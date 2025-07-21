@@ -1,16 +1,33 @@
 .Board {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.Content {
     display: grid;
+    grid-template: 20px auto / 20px auto 50px;
+    margin-bottom: 5px;
+
+    &>span:nth-child(3) {
+        width: fit-content;
+        max-width: 100%;
+    }
 }
 
 .Runs {
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    transform: rotate(-90deg) scaleX(-100%);
+    transform-origin: top left;
+    width: 750px;
+    height: fit-content
 }
 
 .Run {
     padding: 3px;
-    display: inline-block;
     position: relative;
-    height: auto;
 
     & .Ship {
         width: 25px;
@@ -18,18 +35,23 @@
     }
 }
 
-.Inner {
-    display: grid;
-    grid-template: 40px auto / 30px auto;
-}
-
 .Counts {
     display: grid;
     justify-items: center;
 
-    & p:hover {
-        cursor: pointer;
-        text-decoration: underline;
+    &.Column p {
+        margin: 0;
+    }
+
+    & p {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
     }
 }
 

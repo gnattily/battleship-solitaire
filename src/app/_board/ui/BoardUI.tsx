@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 import Image from 'next/image';
 
 import Board from '../Board';
-import { TYPE } from '../Ship';
+import Ship, { TYPE } from '../Ship';
 
 import './BoardUI.css';
 
@@ -143,25 +143,26 @@ export default class BoardUI extends Component<Props, State> {
     }
 
     typeToImg (type: GraphicalType, key: number, size?: number): ReactElement | undefined {
+        const ship = new Ship(type);
         switch (type) {
             case TYPE.UNKNOWN:
                 return;
             case TYPE.SINGLE:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/single.svg' alt='Single' />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/single.svg' alt={ship.toString()} />;
             case TYPE.UP:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Up' style={{ transform: 'rotate(90deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(90deg)' }} />;
             case TYPE.RIGHT:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Right' style={{ transform: 'rotate(180deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(180deg)' }} />;
             case TYPE.LEFT:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Left' />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} />;
             case TYPE.DOWN:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt='Down' style={{ transform: 'rotate(-90deg)' }} />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(-90deg)' }} />;
             case TYPE.SHIP:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/ship.svg' alt='Ship' />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/ship.svg' alt={ship.toString()} />;
             case TYPE.ORTHOGONAL:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/vertical-horizontal.svg' alt='Vertical/Horizontal' />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/vertical-horizontal.svg' alt={ship.toString()} />;
             case TYPE.WATER:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/water.svg' alt='Water' />;
+                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/water.svg' alt={ship.toString()} />;
         }
     }
 
@@ -213,7 +214,7 @@ export default class BoardUI extends Component<Props, State> {
         const counts = this.state.board.countRunsLeft(true);
 
         let key = 0;
-        for (let i = 0; i < this.state.board.runs.length; i++) {
+        for (let i = this.state.board.runs.length - 1; i >= 0; i--) {
             for (let j = 0; j < this.state.board.runs[i]; j++) {
                 const classes = 'Run' + (counts[i] < 0 ? ' over' : '') + ((j < counts[i]) ? '' : ' desaturated');
                 out.push(
@@ -232,7 +233,7 @@ export default class BoardUI extends Component<Props, State> {
      * Converts a length into a jsx
      */
     renderRun (length: number): (ReactElement | undefined)[] {
-        const SIZE = 25;// px
+        const SIZE = 25; // px
 
         if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0, SIZE)];
 
@@ -247,44 +248,39 @@ export default class BoardUI extends Component<Props, State> {
 
     render (): ReactNode {
         return (
-            <>
-                <div className='Board'>
+            <div className='Board'>
+                <div className='Content'>
+                    <span />
+                    <div
+                        className='Column Counts'
+                        style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}
+                    >
+                        {this.displayCounts(false) /* false = columns */}
+                    </div>
+                    <span />
+
+                    <div
+                        className='Row Counts'
+                        style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}
+                    >
+                        {this.displayCounts(true) /* true = rows */}
+                    </div>
+                    <div
+                        className={'Ships' + (this.state.solved ? ' Solved' : '')}
+                        style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}
+                        onMouseEnter={e => this.onEnterBoard(e)}
+                    >
+                        {this.renderBoard()}
+                    </div>
                     <div className='Runs'>
                         {this.displayRuns()}
                     </div>
-                    <div className='Inner'>
-                        <span />
-                        <div
-                            className='Column Counts'
-                            style={{ gridTemplate: `auto / repeat(${this.state.board.height}, 50px)` }}
-                        >
-                            {this.displayCounts(false) /* false = columns */}
-                        </div>
-                        <div
-                            className='Row Counts'
-                            style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / auto` }}
-                        >
-                            {this.displayCounts(true) /* true = rows */}
-                        </div>
-                        <div
-                            className={'Ships' + (this.state.solved ? ' Solved' : '')}
-                            style={{ gridTemplate: `repeat(${this.state.board.width}, 50px) / repeat(${this.state.board.height}, 50px)` }}
-                            onMouseEnter={e => this.onEnterBoard(e)}
-                        >
-                            {this.renderBoard()}
-                        </div>
-                    </div>
                 </div>
-                <button onClick={() => { this.solveBoard(); }}>
-                    Solve
-                </button>
-                <button onClick={() => { this.reset(); }}>
-                    Reset
-                </button>
-                <button onClick={() => { this.share(); }}>
-                    Share
-                </button>
-            </>
+
+                <button onClick={() => { this.solveBoard(); }}> Solve </button>
+                <button onClick={() => { this.reset(); }}> Reset </button>
+                <button onClick={() => { this.share(); }}> Share </button>
+            </div>
         );
     }
 }
