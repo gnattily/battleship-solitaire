@@ -1,0 +1,23 @@
+.nohighlight {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    margin: 0;
+
+    width: 100dvw;
+    height: 100dvh;
+    background-color: white;
+    color: black;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.BoardUI {
+    width: fit-content;
+    display: flex;
+}
