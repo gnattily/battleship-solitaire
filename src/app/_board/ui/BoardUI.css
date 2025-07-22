@@ -6,6 +6,7 @@
 .Content {
     display: grid;
     grid-template: 20px auto / 20px auto 50px;
+
     margin-bottom: 5px;
 
     &>span:nth-child(3) {
@@ -38,6 +39,7 @@
 .Counts {
     display: grid;
     justify-items: center;
+    gap: 1px;
 
     &.Column p {
         margin: 0;
@@ -59,6 +61,10 @@
     display: grid;
     position: relative;
     width: fit-content;
+
+    gap: 1px;
+    background: var(--border-col);
+    border: 1px solid var(--border-col);
 }
 
 .Ship {
@@ -68,23 +74,38 @@
     height: auto;
 }
 
+.Solved div {
+    background: var(--solve-col);
+}
+
 .Square {
-    border: 1px solid gray;
+    background-color: var(--square-col);
+
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+
+    padding: 1px;
+
+    & div {
+        background: var(--ship-col);
+        width: 100%;
+        height: 100%;
+
+        border-radius: 5%;
+    }
 
     &:hover {
         cursor: pointer;
     }
 }
 
-.Solved div {
-    background: hsl(145, 69%, 60%);
+.Solved .Square {
+    padding: 0;
 
-    & .Ship {
-        width: 100%;
+    & div {
+        border-radius: 0;
     }
 }
 
@@ -106,7 +127,7 @@
         transform: translate(-50%, -50%);
         font-size: 2rem;
         font-weight: bold;
-        color: red;
+        color: var(--x-col);
         pointer-events: none;
         font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     }

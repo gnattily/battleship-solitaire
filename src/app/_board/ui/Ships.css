@@ -1,0 +1,33 @@
+@import url(../../page.css);
+
+.Single {
+    border-radius: 50% !important;
+}
+
+.Up {
+    border-bottom-left-radius: 50% !important;
+    border-bottom-right-radius: 50% !important;
+}
+
+.Right {
+    border-top-left-radius: 50% !important;
+    border-bottom-left-radius: 50% !important;
+}
+
+.Left {
+    border-top-right-radius: 50% !important;
+    border-bottom-right-radius: 50% !important;
+}
+
+.Down {
+    border-top-left-radius: 50% !important;
+    border-top-right-radius: 50% !important;
+}
+
+.Ship {
+    border-radius: 30% !important;
+}
+
+.Water {
+    background: var(--water-col) !important;
+}

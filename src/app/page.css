@@ -1,3 +1,14 @@
+:root {
+    --ship-col: black;
+    --water-col: rgb(115, 205, 231);
+    --background: white;
+    --text-col: var(--ship-color);
+    --border-col: grey;
+    --x-col: red;
+    --solve-col: hsl(145, 69%, 60%);
+    --square-col: white;
+}
+
 .nohighlight {
     user-select: none;
     -moz-user-select: none;

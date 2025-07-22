@@ -4,12 +4,12 @@ import type { ReactElement, ReactNode } from 'react';
 import type { AnyType, GraphicalType, PlayType } from '../Ship';
 
 import React, { Component } from 'react';
-import Image from 'next/image';
 
 import Board from '../Board';
-import Ship, { TYPE } from '../Ship';
+import { TYPE } from '../Ship';
 
 import './BoardUI.css';
+import './Ships.css';
 
 interface Props {
     board?: string;
@@ -142,27 +142,26 @@ export default class BoardUI extends Component<Props, State> {
         this.setState({ draggedType: undefined });
     }
 
-    typeToImg (type: GraphicalType, key: number, size?: number): ReactElement | undefined {
-        const ship = new Ship(type);
+    typeToImg (type: GraphicalType, key: number): ReactElement | undefined {
         switch (type) {
             case TYPE.UNKNOWN:
                 return;
             case TYPE.SINGLE:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/single.svg' alt={ship.toString()} />;
+                return <div className='Single' key={key} />;
             case TYPE.UP:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(90deg)' }} />;
+                return <div className='Up' key={key} />;
             case TYPE.RIGHT:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(180deg)' }} />;
+                return <div className='Right' key={key} />;
             case TYPE.LEFT:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} />;
+                return <div className='Left' key={key} />;
             case TYPE.DOWN:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/end.svg' alt={ship.toString()} style={{ transform: 'rotate(-90deg)' }} />;
+                return <div className='Down' key={key} />;
             case TYPE.SHIP:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/ship.svg' alt={ship.toString()} />;
+                return <div className='Ship' key={key} />;
             case TYPE.ORTHOGONAL:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/vertical-horizontal.svg' alt={ship.toString()} />;
+                return <div className='Orthogonal' key={key} />;
             case TYPE.WATER:
-                return <Image className='Ship' key={key} fill={!size} width={size} height={size} src='./ships/water.svg' alt={ship.toString()} />;
+                return <div className='Water' key={key} />;
         }
     }
 
@@ -233,17 +232,15 @@ export default class BoardUI extends Component<Props, State> {
      * Converts a length into a jsx
      */
     renderRun (length: number): (ReactElement | undefined)[] {
-        const SIZE = 25; // px
+        if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0)];
 
-        if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0, SIZE)];
-
-        const out = [this.typeToImg(TYPE.RIGHT, 0, SIZE)];
+        const out = [this.typeToImg(TYPE.RIGHT, 0)];
 
         for (let i = 0; i < length - 2; i++) {
-            out.push(this.typeToImg(TYPE.ORTHOGONAL, i + 1, SIZE));
+            out.push(this.typeToImg(TYPE.ORTHOGONAL, i + 1));
         }
 
-        return [...out, this.typeToImg(TYPE.LEFT, out.length, SIZE)];
+        return [...out, this.typeToImg(TYPE.LEFT, out.length)];
     }
 
     render (): ReactNode {
