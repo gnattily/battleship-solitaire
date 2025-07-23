@@ -234,13 +234,13 @@ export default class BoardUI extends Component<Props, State> {
     renderRun (length: number): (ReactElement | undefined)[] {
         if (length === 1) return [this.typeToImg(TYPE.SINGLE, 0)];
 
-        const out = [this.typeToImg(TYPE.RIGHT, 0)];
+        const out = [this.typeToImg(TYPE.DOWN, 0)];
 
         for (let i = 0; i < length - 2; i++) {
             out.push(this.typeToImg(TYPE.ORTHOGONAL, i + 1));
         }
 
-        return [...out, this.typeToImg(TYPE.LEFT, out.length)];
+        return [...out, this.typeToImg(TYPE.UP, out.length)];
     }
 
     render (): ReactNode {

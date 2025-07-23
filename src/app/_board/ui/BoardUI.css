@@ -26,36 +26,39 @@
 
 .Content {
     display: grid;
-    grid-template: 20px auto auto / 20px auto 50px;
+    grid-template: 20px auto auto / 20px auto auto;
 
     margin-bottom: 5px;
 
     &>span:nth-child(3) {
         width: fit-content;
-        max-width: 100%;
+        max-width: 0%;
     }
 }
 
 .Runs {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
+    writing-mode: vertical-rl;
+
     justify-content: center;
-    transform: rotate(-90deg) scaleX(-100%);
-    transform-origin: top left;
-    width: 750px;
-    height: fit-content
+    align-items: center;
+
+    height: 766px;
+    width: fit-content;
+
+    transform: scaleX(-100%);
 }
 
 .Run {
-    padding: 3px;
     display: flex;
+    padding: 3px;
 
     & .Ship {
         background: var(--ship-col);
         width: 25px;
         height: 25px;
-        margin-right: 1px;
+        margin-bottom: 1px;
     }
 }
 
