@@ -33,7 +33,7 @@ There are only a few rules to this game:
 - The number of ships of each length must match that specified by the puzzle.
 - There are only horizontal/vertical ships. They cannot be diagonal.
 
-## Deploying locally
+## Deploying Locally
 Deploying a local server is extremely simple.
 
 Install [Node.js](https://nodejs.org), then run these commands:
