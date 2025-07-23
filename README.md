@@ -1,4 +1,4 @@
-# Battleship solitaire
+# Battleship Solitaire
 
 [![Vitest CI](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/vitest.yml)
 [![ESLint](https://github.com/gnattily/battleship-solitaire/actions/workflows/eslint.yml/badge.svg)](https://github.com/gnattily/battleship-solitaire/actions/workflows/eslint.yml)
