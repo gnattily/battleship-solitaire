@@ -1,12 +1,14 @@
 :root {
-    --ship-col: black;
-    --water-col: rgb(115, 205, 231);
-    --background: white;
+    --ship-col: #000000;
+    --water-col: #6288f1;
+    --background: #ffffff;
     --text-col: var(--ship-color);
-    --border-col: grey;
-    --x-col: red;
+    --border-col: #808080;
+    --x-col: #ff0000;
     --solve-col: hsl(145, 69%, 60%);
-    --square-col: white;
+    --square-col: #ffffff;
+    --button-col: #d3d3d3;
+    --button-hover-col: #a9a9a9;
 }
 
 .nohighlight {

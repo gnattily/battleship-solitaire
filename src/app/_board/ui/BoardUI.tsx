@@ -147,21 +147,21 @@ export default class BoardUI extends Component<Props, State> {
             case TYPE.UNKNOWN:
                 return;
             case TYPE.SINGLE:
-                return <div className='Single' key={key} />;
+                return <div className='Ship Single' key={key} />;
             case TYPE.UP:
-                return <div className='Up' key={key} />;
+                return <div className='Ship Up' key={key} />;
             case TYPE.RIGHT:
-                return <div className='Right' key={key} />;
+                return <div className='Ship Right' key={key} />;
             case TYPE.LEFT:
-                return <div className='Left' key={key} />;
+                return <div className='Ship Left' key={key} />;
             case TYPE.DOWN:
-                return <div className='Down' key={key} />;
+                return <div className='Ship Down' key={key} />;
             case TYPE.SHIP:
-                return <div className='Ship' key={key} />;
+                return <div className='Ship UnknownShip' key={key} />;
             case TYPE.ORTHOGONAL:
-                return <div className='Orthogonal' key={key} />;
+                return <div className='Ship Orthogonal' key={key} />;
             case TYPE.WATER:
-                return <div className='Water' key={key} />;
+                return <div className='Ship Water' key={key} />;
         }
     }
 
@@ -272,11 +272,14 @@ export default class BoardUI extends Component<Props, State> {
                     <div className='Runs'>
                         {this.displayRuns()}
                     </div>
+                    <span />
+                    <div className='Buttons'>
+                        <button onClick={() => { this.solveBoard(); }}> Solve </button>
+                        <button onClick={() => { this.reset(); }}> Reset </button>
+                        <button onClick={() => { this.share(); }}> Share </button>
+                    </div>
+                    <span />
                 </div>
-
-                <button onClick={() => { this.solveBoard(); }}> Solve </button>
-                <button onClick={() => { this.reset(); }}> Reset </button>
-                <button onClick={() => { this.share(); }}> Share </button>
             </div>
         );
     }

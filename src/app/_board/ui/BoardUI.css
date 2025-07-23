@@ -3,9 +3,30 @@
     max-width: 100%;
 }
 
+.Buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+
+    & button {
+        width: 50px;
+        margin-left: 3px;
+        margin-right: 3px;
+
+        border: 1px solid var(--border-col);
+        border-radius: 50px;
+        background: var(--button-col);
+
+        &:hover {
+            cursor: pointer;
+            background: var(--button-hover-col);
+        }
+    }
+}
+
 .Content {
     display: grid;
-    grid-template: 20px auto / 20px auto 50px;
+    grid-template: 20px auto auto / 20px auto 50px;
 
     margin-bottom: 5px;
 
@@ -28,11 +49,13 @@
 
 .Run {
     padding: 3px;
-    position: relative;
+    display: flex;
 
     & .Ship {
+        background: var(--ship-col);
         width: 25px;
-        padding: 1px;
+        height: 25px;
+        margin-right: 1px;
     }
 }
 
