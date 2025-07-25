@@ -2,7 +2,7 @@
     --ship-col: #000000;
     --water-col: #6288f1;
     --background: #ffffff;
-    --text-col: var(--ship-color);
+    --text-col: var(--ship-col);
     --border-col: #808080;
     --x-col: #ff0000;
     --solve-col: hsl(145, 69%, 60%);

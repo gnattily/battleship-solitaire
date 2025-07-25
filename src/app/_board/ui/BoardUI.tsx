@@ -40,6 +40,7 @@ interface State {
  */
 export default class BoardUI extends Component<Props, State> {
     readonly #initialBoard: Board;
+    readonly SIZE = 50; // px
 
     constructor (props: Props) {
         super(props);
@@ -269,9 +270,13 @@ export default class BoardUI extends Component<Props, State> {
                     >
                         {this.renderBoard()}
                     </div>
-                    <div className='Runs'>
+                    <div
+                        className='Runs'
+                        style={{ height: this.state.board.height * this.SIZE + this.state.board.height + 1 + 'px' }}
+                    >
                         {this.displayRuns()}
                     </div>
+
                     <span />
                     <div className='Buttons'>
                         <button onClick={() => { this.solveBoard(); }}> Solve </button>

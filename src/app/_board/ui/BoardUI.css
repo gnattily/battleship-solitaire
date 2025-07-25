@@ -26,7 +26,7 @@
 
 .Content {
     display: grid;
-    grid-template: 20px auto auto / 20px auto auto;
+    grid-template: repeat(3, auto) / repeat(3, auto);
 
     margin-bottom: 5px;
 
@@ -87,6 +87,7 @@
     display: grid;
     position: relative;
     width: fit-content;
+    height: fit-content;
 
     gap: 1px;
     background: var(--border-col);

@@ -29,7 +29,7 @@ export default async function Page ({ searchParams }: { searchParams: { [key: st
                             board={board.export()}
                         />
                     );
-                } else return <BoardUI width={15} height={15} />;
+                } else return <BoardUI width={4} height={4} />;
             })()}
         </div>
     );
