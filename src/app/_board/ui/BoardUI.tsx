@@ -281,7 +281,8 @@ export default class BoardUI extends Component<Props, State> {
                     <div className='Buttons'>
                         <button onClick={() => { this.solveBoard(); }}> Solve </button>
                         <button onClick={() => { this.reset(); }}> Reset </button>
-                        <button onClick={() => { this.share(); }}> Share </button>
+                        <button onClick={() => { this.share(); }}> Share</button>
+                        <button onClick={() => { /* this.edit(); */ }}> Edit </button>
                     </div>
                     <span />
                 </div>

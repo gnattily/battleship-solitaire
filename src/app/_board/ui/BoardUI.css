@@ -10,16 +10,22 @@
 
     & button {
         width: 50px;
+        position: relative;
         margin-left: 3px;
         margin-right: 3px;
 
-        border: 1px solid var(--border-col);
-        border-radius: 50px;
-        background: var(--button-col);
+        border: none;
+        background: none;
+
+        &:not(:last-child)::after {
+            content: '/';
+            position: absolute;
+            right: -10%;
+        }
 
         &:hover {
             cursor: pointer;
-            background: var(--button-hover-col);
+            text-decoration: underline;
         }
     }
 }
