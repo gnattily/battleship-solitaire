@@ -1,6 +1,6 @@
 import './page.css';
 import BoardUI from './_board/ui/BoardUI';
-import Board from './_board/Board';
+import Board from './_board/logic/Board';
 import type { JSX } from 'react';
 
 export default async function Page ({ searchParams }: { searchParams: { [key: string]: string | undefined } }): Promise<JSX.Element> {

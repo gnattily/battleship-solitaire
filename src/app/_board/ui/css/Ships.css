@@ -1,4 +1,4 @@
-@import url(../../page.css);
+@import url(@/app/page.css);
 
 .Single {
     border-radius: 50% !important;

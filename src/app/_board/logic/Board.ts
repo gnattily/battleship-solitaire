@@ -1,5 +1,5 @@
 import { boardToString } from './BoardUtils';
-import Ship, { TYPE } from './Ship';
+import Ship, { TYPES } from './Ship';
 import type { AnyType } from './Ship';
 
 /**
@@ -156,18 +156,18 @@ export default class Board {
         }
 
         for (let i = 0; i < this.state.length; i++) {
-            if (currentUnknowns && this.state[i].playType !== TYPE.UNKNOWN) {
+            if (currentUnknowns && this.state[i].playType !== TYPES.UNKNOWN) {
                 addMultipleShips();
                 currentUnknowns = 0;
-            } else if (currentWaters && this.state[i].playType !== TYPE.WATER) {
+            } else if (currentWaters && this.state[i].playType !== TYPES.WATER) {
                 addMultipleShips();
                 currentWaters = 0;
             }
 
-            if (this.state[i].playType === TYPE.UNKNOWN) {
+            if (this.state[i].playType === TYPES.UNKNOWN) {
                 currentUnknowns++;
                 continue;
-            } else if (this.state[i].playType === TYPE.WATER) {
+            } else if (this.state[i].playType === TYPES.WATER) {
                 currentWaters++;
                 continue;
             }
@@ -251,13 +251,13 @@ export default class Board {
                 const repeats = getAndTrim(maxLength) + 1;
 
                 for (let j = 0; j < repeats; j++) {
-                    state.push(new Ship(type === 15 ? TYPE.UNKNOWN : TYPE.WATER));
+                    state.push(new Ship(type === 15 ? TYPES.UNKNOWN : TYPES.WATER));
                     i++;
                 }
 
                 // make sure we don't double increment with the for loop and the above
                 i--;
-            } else if (type < TYPE.UNKNOWN || type > TYPE.HORIZONTAL) {
+            } else if (type < TYPES.UNKNOWN || type > TYPES.HORIZONTAL) {
                 throw new Error('Bad input. Expected type to be a type, got ' + type);
             } else {
                 state.push(new Ship(type as AnyType, pinned));
@@ -347,7 +347,7 @@ export default class Board {
                 const counts = this.countRow(y);
                 const expected = this.rowCounts[y];
                 if (counts[0] === expected) this.softFloodRow(y);
-                if (counts[0] + counts[1] === expected) this.softFloodRow(y, TYPE.SHIP);
+                if (counts[0] + counts[1] === expected) this.softFloodRow(y, TYPES.SHIP);
             }
 
             // do the same but with columns
@@ -355,7 +355,7 @@ export default class Board {
                 const counts = this.countCol(x);
                 const expected = this.colCounts[x];
                 if (counts[0] === expected) this.softFloodCol(x);
-                if (counts[0] + counts[1] === expected) this.softFloodCol(x, TYPE.SHIP);
+                if (counts[0] + counts[1] === expected) this.softFloodCol(x, TYPES.SHIP);
             }
 
             // something's probably changed by now, so recompute types before this next part
@@ -365,12 +365,12 @@ export default class Board {
             for (let i = 0; i < this.state.length; i++) {
                 const square = this.getShip(i);
 
-                if (square.playType !== TYPE.SHIP) continue;
+                if (square.playType !== TYPES.SHIP) continue;
 
                 if (square.isCardinal()) this.setCarShips(i, Ship.typeToRelPos(square.internalType));
-                else if (square.graphicalType === TYPE.SINGLE)
+                else if (square.graphicalType === TYPES.SINGLE)
                     this.setCarShips(i); // makes every surrounding square water
-                else if (square.internalType > TYPE.ORTHOGONAL) this.setOrthoShips(i, square.internalType as typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL);
+                else if (square.internalType > TYPES.ORTHOGONAL) this.setOrthoShips(i, square.internalType as typeof TYPES.HORIZONTAL | typeof TYPES.VERTICAL);
                 else this.floodCorners(i);
             }
 
@@ -378,7 +378,7 @@ export default class Board {
             if (this.sameState(old)) {
                 const filterComplete = (run: Run): boolean => {
                     for (let i = 0; i < run.length; i++) {
-                        if (this.getShip(run[i]).playType === TYPE.UNKNOWN) return true;
+                        if (this.getShip(run[i]).playType === TYPES.UNKNOWN) return true;
                     }
 
                     return false;
@@ -402,7 +402,7 @@ export default class Board {
                         const pos = this.indToCoord(run[0])[Number(horizontal)];
                         let counts = this[horizontal ? 'countRow' : 'countCol'](pos)[0];
                         // remove any ships in the run so we dont double count:
-                        run.forEach(index => { if (this.getShip(index).playType === TYPE.SHIP) counts--; });
+                        run.forEach(index => { if (this.getShip(index).playType === TYPES.SHIP) counts--; });
                         return this[horizontal ? 'rowCounts' : 'colCounts'][pos] - (counts + i);
                     };
 
@@ -421,7 +421,7 @@ export default class Board {
                     if (allRuns.length === 1) {
                         if (allRuns[0].length === i) {
                             for (const index of hRuns.concat(vRuns)[0]) {
-                                this.softSetShip(index, TYPE.SHIP);
+                                this.softSetShip(index, TYPES.SHIP);
                             }
 
                             didSomething = true;
@@ -430,15 +430,15 @@ export default class Board {
                             const run = horizontal ? hRuns[0] : vRuns[0];
 
                             if (countDiff(run, horizontal) === 0) {
-                                if (this.getShip(run[0]).playType === TYPE.SHIP) {
+                                if (this.getShip(run[0]).playType === TYPES.SHIP) {
                                     for (let j = 0; j < i; j++) {
-                                        this.softSetShip(run[j], TYPE.SHIP);
+                                        this.softSetShip(run[j], TYPES.SHIP);
                                     }
 
                                     didSomething = true;
-                                } else if (this.getShip(run[run.length - 1]).playType === TYPE.SHIP) {
+                                } else if (this.getShip(run[run.length - 1]).playType === TYPES.SHIP) {
                                     for (let j = 0; j < i; j++) {
-                                        this.softSetShip(run[run.length - 1 - j], TYPE.SHIP);
+                                        this.softSetShip(run[run.length - 1 - j], TYPES.SHIP);
                                     }
                                 } else {
                                     // It's somewhere in the middle. This is unlikely to be much of a help
@@ -470,7 +470,7 @@ export default class Board {
 
                     for (let i = 0; i < this[horizontal ? 'width' : 'height']; i++) {
                         const index = this.coordToInd(horizontal ? [i, pos] : [pos, i]);
-                        if (this.getShip(index).playType === TYPE.UNKNOWN) {
+                        if (this.getShip(index).playType === TYPES.UNKNOWN) {
                             positions.push(index);
                         }
                     }
@@ -495,7 +495,7 @@ export default class Board {
                         const tmpBoard = this.copy();
 
                         for (const index of possibility) {
-                            tmpBoard.softSetShip(index, TYPE.SHIP);
+                            tmpBoard.softSetShip(index, TYPES.SHIP);
                         }
 
                         let over = false;
@@ -529,7 +529,7 @@ export default class Board {
 
                     for (const [pos, numOccurances] of occurances) {
                         if (numOccurances === possibilities.length) {
-                            this.softSetShip(pos, TYPE.SHIP);
+                            this.softSetShip(pos, TYPES.SHIP);
                         }
                     }
                 };
@@ -557,7 +557,7 @@ export default class Board {
      */
     isSolved (): boolean {
         for (const square of this.state) {
-            if (square.playType === TYPE.UNKNOWN) return false;
+            if (square.playType === TYPES.UNKNOWN) return false;
         }
 
         for (let x = 0; x < this.width; x++) {
@@ -591,8 +591,8 @@ export default class Board {
         for (let y = 0; y < this.height; y++) {
             const type = this.getShip([x, y]).playType;
 
-            if (type === TYPE.SHIP) counts[0]++;
-            if (type === TYPE.UNKNOWN) counts[1]++;
+            if (type === TYPES.SHIP) counts[0]++;
+            if (type === TYPES.UNKNOWN) counts[1]++;
         }
 
         return counts;
@@ -611,8 +611,8 @@ export default class Board {
         for (let x = 0; x < this.width; x++) {
             const type = this.getShip([x, y]).playType;
 
-            if (type === TYPE.SHIP) counts[0]++;
-            if (type === TYPE.UNKNOWN) counts[1]++;
+            if (type === TYPES.SHIP) counts[0]++;
+            if (type === TYPES.UNKNOWN) counts[1]++;
         }
 
         return counts;
@@ -655,13 +655,13 @@ export default class Board {
 
         // distinguish snippets of vertical runs from solo ships
         horizontalRuns = horizontalRuns.filter(run => {
-            if (run.length === 1 && this.getRelShip(run[0], REL_POS.TOP)?.playType !== TYPE.SHIP && this.getRelShip(run[0], REL_POS.BOTTOM)?.playType !== TYPE.SHIP) singleRuns.push(run);
+            if (run.length === 1 && this.getRelShip(run[0], REL_POS.TOP)?.playType !== TYPES.SHIP && this.getRelShip(run[0], REL_POS.BOTTOM)?.playType !== TYPES.SHIP) singleRuns.push(run);
             return run.length !== 1;
         });
 
         // distinguish snippets of horizontal runs from solo ships
         verticalRuns = verticalRuns.filter(run => {
-            if (run.length === 1 && this.getRelShip(run[0], REL_POS.LEFT)?.playType !== TYPE.SHIP && this.getRelShip(run[0], REL_POS.RIGHT)?.playType !== TYPE.SHIP) singleRuns.push(run);
+            if (run.length === 1 && this.getRelShip(run[0], REL_POS.LEFT)?.playType !== TYPES.SHIP && this.getRelShip(run[0], REL_POS.RIGHT)?.playType !== TYPES.SHIP) singleRuns.push(run);
             return run.length > 1;
         });
 
@@ -669,7 +669,7 @@ export default class Board {
 
         // filter singleRuns for duplicates
         singleRuns.forEach(run => {
-            if (onlyCountComplete && this.getShip(run[0]).graphicalType !== TYPE.SINGLE) return;
+            if (onlyCountComplete && this.getShip(run[0]).graphicalType !== TYPES.SINGLE) return;
 
             let duplicate = false;
 
@@ -717,7 +717,7 @@ export default class Board {
         let run = [];
 
         for (let x = 0; x < this.width; x++) {
-            if (onlyCountShips ? this.getShip([x, y]).playType === TYPE.SHIP : this.getShip([x, y]).playType !== TYPE.WATER) {
+            if (onlyCountShips ? this.getShip([x, y]).playType === TYPES.SHIP : this.getShip([x, y]).playType !== TYPES.WATER) {
                 run.push(this.posToInd([x, y]));
             } else if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([x - 1, y]).isEnd() : true)) {
                 // run ended, record it
@@ -769,7 +769,7 @@ export default class Board {
         let run = [];
 
         for (let y = 0; y < this.height; y++) {
-            if (onlyCountShips ? this.getShip([x, y]).playType === TYPE.SHIP : this.getShip([x, y]).playType !== TYPE.WATER) {
+            if (onlyCountShips ? this.getShip([x, y]).playType === TYPES.SHIP : this.getShip([x, y]).playType !== TYPES.WATER) {
                 run.push(this.posToInd([x, y]));
             } else if (run[0] !== undefined && (onlyCountComplete && onlyCountShips ? this.getShip(run[0]).isEnd() && this.getShip([x, y - 1]).isEnd() : true)) {
                 // run ended, record it
@@ -798,29 +798,29 @@ export default class Board {
 
         for (let i = 0; i < this.state.length; i++) {
             const ship = this.getShip(i);
-            if (ship.pinned && (ship.initialType > TYPE.SHIP || ship.initialType > TYPE.ORTHOGONAL) && ship.initialType !== TYPE.ORTHOGONAL) continue;
+            if (ship.pinned && (ship.initialType > TYPES.SHIP || ship.initialType > TYPES.ORTHOGONAL) && ship.initialType !== TYPES.ORTHOGONAL) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
-            const left = this.getRelShip(i, REL_POS.LEFT) || new Ship(TYPE.WATER);
-            const top = this.getRelShip(i, REL_POS.TOP) || new Ship(TYPE.WATER);
-            const right = this.getRelShip(i, REL_POS.RIGHT) || new Ship(TYPE.WATER);
-            const bottom = this.getRelShip(i, REL_POS.BOTTOM) || new Ship(TYPE.WATER);
+            const left = this.getRelShip(i, REL_POS.LEFT) || new Ship(TYPES.WATER);
+            const top = this.getRelShip(i, REL_POS.TOP) || new Ship(TYPES.WATER);
+            const right = this.getRelShip(i, REL_POS.RIGHT) || new Ship(TYPES.WATER);
+            const bottom = this.getRelShip(i, REL_POS.BOTTOM) || new Ship(TYPES.WATER);
 
             // now just do all the logic from here and have a grand ol' time
-            if (isWater(left, top, right, bottom)) ship.internalType = TYPE.SINGLE;
-            else if (isShip(left, right)) ship.internalType = TYPE.HORIZONTAL;
-            else if (isShip(top, bottom)) ship.internalType = TYPE.VERTICAL;
-            else if (ship.initialType === TYPE.ORTHOGONAL) {
-                if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPE.HORIZONTAL;
-                else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPE.VERTICAL;
-            } else if (isShip(left) && isWater(right)) ship.internalType = TYPE.LEFT;
-            else if (isShip(top) && isWater(bottom)) ship.internalType = TYPE.UP;
-            else if (isShip(right) && isWater(left)) ship.internalType = TYPE.RIGHT;
-            else if (isShip(bottom) && isWater(top)) ship.internalType = TYPE.DOWN;
+            if (isWater(left, top, right, bottom)) ship.internalType = TYPES.SINGLE;
+            else if (isShip(left, right)) ship.internalType = TYPES.HORIZONTAL;
+            else if (isShip(top, bottom)) ship.internalType = TYPES.VERTICAL;
+            else if (ship.initialType === TYPES.ORTHOGONAL) {
+                if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPES.HORIZONTAL;
+                else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPES.VERTICAL;
+            } else if (isShip(left) && isWater(right)) ship.internalType = TYPES.LEFT;
+            else if (isShip(top) && isWater(bottom)) ship.internalType = TYPES.UP;
+            else if (isShip(right) && isWater(left)) ship.internalType = TYPES.RIGHT;
+            else if (isShip(bottom) && isWater(top)) ship.internalType = TYPES.DOWN;
             // if surrounded by nothing, set unknown ship
             else if (ship.pinned) ship.internalType = ship.initialType;
-            else ship.internalType = TYPE.SHIP;
+            else ship.internalType = TYPES.SHIP;
         }
 
         return this;
@@ -910,7 +910,7 @@ export default class Board {
      * @throws If position is invalid
      */
     softSetShip (position: Position, value: Ship | AnyType, pinned = false): boolean {
-        if (this.getShip(position).playType !== TYPE.UNKNOWN) return false;
+        if (this.getShip(position).playType !== TYPES.UNKNOWN) return false;
 
         this.setShip(position, value, pinned);
         return true;
@@ -971,7 +971,7 @@ export default class Board {
         for (const key in REL_POS) {
             const value: RelativePosition = REL_POS[key as keyof typeof REL_POS];
 
-            this.setRelShip(position, value, except === value ? TYPE.SHIP : TYPE.WATER);
+            this.setRelShip(position, value, except === value ? TYPES.SHIP : TYPES.WATER);
         }
 
         return this;
@@ -980,14 +980,14 @@ export default class Board {
     /**
      * Sets ships on the sides of a ship to water
      */
-    setOrthoShips (position: Position, orientation: typeof TYPE.HORIZONTAL | typeof TYPE.VERTICAL): this {
-        const shipDirections: RelativePosition[] = orientation === TYPE.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
+    setOrthoShips (position: Position, orientation: typeof TYPES.HORIZONTAL | typeof TYPES.VERTICAL): this {
+        const shipDirections: RelativePosition[] = orientation === TYPES.HORIZONTAL ? [REL_POS.LEFT, REL_POS.RIGHT] : [REL_POS.TOP, REL_POS.BOTTOM];
 
         for (const key in REL_POS) {
             const relativePosition = REL_POS[key as keyof typeof REL_POS];
 
-            if (!shipDirections.includes(relativePosition)) this.setRelShip(position, relativePosition, TYPE.WATER);
-            else this.setRelShip(position, relativePosition, TYPE.SHIP);
+            if (!shipDirections.includes(relativePosition)) this.setRelShip(position, relativePosition, TYPES.WATER);
+            else this.setRelShip(position, relativePosition, TYPES.SHIP);
         }
 
         return this;
@@ -996,7 +996,7 @@ export default class Board {
     /**
      * Flood the column with the given type or water, only setting unknown ships
      */
-    softFloodCol (column: number, type: AnyType = TYPE.WATER): this {
+    softFloodCol (column: number, type: AnyType = TYPES.WATER): this {
         for (let y = 0; y < this.height; y++) {
             this.softSetShip([column, y], type);
         }
@@ -1007,7 +1007,7 @@ export default class Board {
     /**
      * Flood the row with the given type or water, only setting unknown ships
      */
-    softFloodRow (row: number, type: AnyType = TYPE.WATER): this {
+    softFloodRow (row: number, type: AnyType = TYPES.WATER): this {
         for (let x = 0; x < this.width; x++) {
             this.softSetShip([x, row], type);
         }
@@ -1019,10 +1019,10 @@ export default class Board {
      * Places water in all corners around a square
      */
     floodCorners (position: Position): this {
-        this.setRelShip(position, REL_POS.TOP_LEFT, TYPE.WATER);
-        this.setRelShip(position, REL_POS.TOP_RIGHT, TYPE.WATER);
-        this.setRelShip(position, REL_POS.BOTTOM_LEFT, TYPE.WATER);
-        this.setRelShip(position, REL_POS.BOTTOM_RIGHT, TYPE.WATER);
+        this.setRelShip(position, REL_POS.TOP_LEFT, TYPES.WATER);
+        this.setRelShip(position, REL_POS.TOP_RIGHT, TYPES.WATER);
+        this.setRelShip(position, REL_POS.BOTTOM_LEFT, TYPES.WATER);
+        this.setRelShip(position, REL_POS.BOTTOM_RIGHT, TYPES.WATER);
         return this;
     }
 }
@@ -1035,7 +1035,7 @@ function createState (width: number, height: number, preset?: Board): Ship[] {
             const ship = preset.getShip(i);
             out.push(new Ship(ship.internalType, ship.pinned));
         } else {
-            out.push(new Ship(TYPE.UNKNOWN));
+            out.push(new Ship(TYPES.UNKNOWN));
         }
     }
 

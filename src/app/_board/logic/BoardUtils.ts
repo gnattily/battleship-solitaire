@@ -19,7 +19,7 @@ const BRIGHT = '\x1b[1m';
 const DIM = '\x1b[2m';
 
 import type Board from './Board';
-import { TYPE } from './Ship';
+import { TYPES } from './Ship';
 
 export function displayBoard (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): void {
     console.log(boardToString(board, showInternal, gridType));
@@ -40,10 +40,10 @@ export function boardToString (board: Board, showInternal = true, gridType: Grid
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
-                    if (ship.playType === TYPE.WATER) out += DIM + CYAN;
+                    if (ship.playType === TYPES.WATER) out += DIM + CYAN;
                     if (showInternal) {
-                        if (ship.internalType === TYPE.HORIZONTAL) out += RED;
-                        if (ship.internalType === TYPE.VERTICAL) out += YELLOW;
+                        if (ship.internalType === TYPES.HORIZONTAL) out += RED;
+                        if (ship.internalType === TYPES.VERTICAL) out += YELLOW;
                     }
                     out += ship + RESET;
                 }
@@ -61,11 +61,11 @@ export function boardToString (board: Board, showInternal = true, gridType: Grid
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
-                    if (ship.playType === TYPE.WATER) out += DIM + CYAN;
+                    if (ship.playType === TYPES.WATER) out += DIM + CYAN;
                     out += BRIGHT + WHITE;
                     if (showInternal) {
-                        if (ship.internalType === TYPE.HORIZONTAL) out += RED;
-                        if (ship.internalType === TYPE.VERTICAL) out += YELLOW;
+                        if (ship.internalType === TYPES.HORIZONTAL) out += RED;
+                        if (ship.internalType === TYPES.VERTICAL) out += YELLOW;
                     }
                     out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship}  `);
                     out += `${RESET}${GRAY}│${RESET}`;

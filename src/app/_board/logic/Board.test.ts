@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
 import Board, { REL_POS } from './Board';
-import Ship, { TYPE } from './Ship';
+import Ship, { TYPES } from './Ship';
 
 test('constructor', () => {
     expect(() => { new Board(-1, 14); }).toThrow('outside expected range');
@@ -19,20 +19,20 @@ test('constructor', () => {
 test('createState', () => {
     const blank = new Board(4, 4);
     const preset = new Board(4, 4)
-        .setShip(0, TYPE.SHIP, true);
+        .setShip(0, TYPES.SHIP, true);
     const fromPreset = new Board(preset);
 
-    expect(blank.state[0].equals(new Ship(TYPE.UNKNOWN))).toBeTruthy();
-    expect(fromPreset.state[0].equals(new Ship(TYPE.SHIP))).toBeTruthy();
+    expect(blank.state[0].equals(new Ship(TYPES.UNKNOWN))).toBeTruthy();
+    expect(fromPreset.state[0].equals(new Ship(TYPES.SHIP))).toBeTruthy();
 });
 
 test('reset', () => {
     const preset = new Board(4, 4)
-        .setShip([1, 3], TYPE.RIGHT)
-        .setShip([0, 0], TYPE.WATER);
+        .setShip([1, 3], TYPES.RIGHT)
+        .setShip([0, 0], TYPES.WATER);
 
     const board = new Board(preset)
-        .setShip([3, 0], TYPE.SHIP);
+        .setShip([3, 0], TYPES.SHIP);
 
     expect(board.sameState(preset)).toBeFalsy();
 
@@ -46,23 +46,23 @@ test('copy', () => {
 
     expect(board1.sameState(board1Copy)).toBeTruthy();
 
-    board1Copy.setShip([1, 3], TYPE.LEFT);
+    board1Copy.setShip([1, 3], TYPES.LEFT);
 
     expect(board1.sameState(board1Copy)).toBeFalsy();
 
     const board2 = new Board(board1Copy)
-        .setShip([3, 3], TYPE.SINGLE);
+        .setShip([3, 3], TYPES.SINGLE);
     const board2Copy = board2.copy()
-        .setShip([3, 3], TYPE.UP);
+        .setShip([3, 3], TYPES.UP);
 
     expect(board2.preset?.sameState(board2Copy.preset as Board));
 });
 
 test('sameState', () => {
     const board1 = new Board(4, 4)
-        .setShip([3, 2], TYPE.UP);
+        .setShip([3, 2], TYPES.UP);
     const board2 = new Board(4, 4)
-        .setShip(11, TYPE.UP);
+        .setShip(11, TYPES.UP);
     const board3 = new Board(4, 4);
     const board4 = new Board(4, 3);
 
@@ -75,23 +75,23 @@ const board1 = new Board(6, 6,
     [2, 1, 0, 4, 0, 3],
     [0, 2, 3, 1, 1, 3],
     [3, 2, 1])
-    .setShip([5, 2], TYPE.SINGLE, true)
-    .setShip([1, 2], TYPE.WATER, true);
+    .setShip([5, 2], TYPES.SINGLE, true)
+    .setShip([1, 2], TYPES.WATER, true);
 
 const solution1 = new Board(6, 6,
     [2, 1, 0, 4, 0, 3],
     [0, 2, 3, 1, 1, 3],
     [3, 2, 1])
-    .setShip([5, 2], TYPE.SINGLE)
-    .setShip([0, 1], TYPE.DOWN)
-    .setShip([0, 2], TYPE.UP)
-    .setShip([3, 1], TYPE.DOWN)
-    .setShip([3, 2], TYPE.VERTICAL)
-    .setShip([3, 3], TYPE.UP)
-    .setShip([1, 5], TYPE.SINGLE)
-    .setShip([3, 5], TYPE.SINGLE)
-    .setShip([5, 4], TYPE.DOWN)
-    .setShip([5, 5], TYPE.UP)
+    .setShip([5, 2], TYPES.SINGLE)
+    .setShip([0, 1], TYPES.DOWN)
+    .setShip([0, 2], TYPES.UP)
+    .setShip([3, 1], TYPES.DOWN)
+    .setShip([3, 2], TYPES.VERTICAL)
+    .setShip([3, 3], TYPES.UP)
+    .setShip([1, 5], TYPES.SINGLE)
+    .setShip([3, 5], TYPES.SINGLE)
+    .setShip([5, 4], TYPES.DOWN)
+    .setShip([5, 5], TYPES.UP)
     .softFloodCol(0)
     .softFloodCol(1)
     .softFloodCol(2)
@@ -104,76 +104,76 @@ test('solve', () => {
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
-        .setShip([3, 0], TYPE.SHIP, true)
-        .setShip([6, 0], TYPE.WATER, true)
-        .setShip([1, 2], TYPE.WATER, true)
-        .setShip([12, 2], TYPE.SINGLE, true)
-        .setShip([2, 3], TYPE.LEFT, true)
-        .setShip([5, 3], TYPE.WATER, true)
-        .setShip([10, 3], TYPE.SHIP, true)
-        .setShip([10, 4], TYPE.VERTICAL, true)
-        .setShip([12, 4], TYPE.SINGLE, true)
-        .setShip([2, 5], TYPE.DOWN, true)
-        .setShip([6, 6], TYPE.SINGLE, true)
-        .setShip([7, 6], TYPE.WATER, true)
-        .setShip([12, 6], TYPE.WATER, true)
-        .setShip([6, 7], TYPE.WATER, true)
-        .setShip([10, 7], TYPE.WATER, true)
-        .setShip([12, 7], TYPE.WATER, true)
-        .setShip([4, 8], TYPE.SHIP, true)
-        .setShip([9, 8], TYPE.WATER, true)
-        .setShip([2, 10], TYPE.WATER, true)
-        .setShip([6, 11], TYPE.SHIP, true)
-        .setShip([9, 11], TYPE.SHIP, true)
-        .setShip([14, 11], TYPE.WATER, true)
-        .setShip([2, 12], TYPE.WATER, true)
-        .setShip([3, 12], TYPE.WATER, true)
-        .setShip([7, 12], TYPE.WATER, true)
-        .setShip([9, 12], TYPE.SHIP, true)
-        .setShip([1, 13], TYPE.UP, true)
-        .setShip([6, 13], TYPE.WATER, true)
-        .setShip([3, 14], TYPE.WATER, true)
-        .setShip([14, 14], TYPE.SINGLE, true);
+        .setShip([3, 0], TYPES.SHIP, true)
+        .setShip([6, 0], TYPES.WATER, true)
+        .setShip([1, 2], TYPES.WATER, true)
+        .setShip([12, 2], TYPES.SINGLE, true)
+        .setShip([2, 3], TYPES.LEFT, true)
+        .setShip([5, 3], TYPES.WATER, true)
+        .setShip([10, 3], TYPES.SHIP, true)
+        .setShip([10, 4], TYPES.VERTICAL, true)
+        .setShip([12, 4], TYPES.SINGLE, true)
+        .setShip([2, 5], TYPES.DOWN, true)
+        .setShip([6, 6], TYPES.SINGLE, true)
+        .setShip([7, 6], TYPES.WATER, true)
+        .setShip([12, 6], TYPES.WATER, true)
+        .setShip([6, 7], TYPES.WATER, true)
+        .setShip([10, 7], TYPES.WATER, true)
+        .setShip([12, 7], TYPES.WATER, true)
+        .setShip([4, 8], TYPES.SHIP, true)
+        .setShip([9, 8], TYPES.WATER, true)
+        .setShip([2, 10], TYPES.WATER, true)
+        .setShip([6, 11], TYPES.SHIP, true)
+        .setShip([9, 11], TYPES.SHIP, true)
+        .setShip([14, 11], TYPES.WATER, true)
+        .setShip([2, 12], TYPES.WATER, true)
+        .setShip([3, 12], TYPES.WATER, true)
+        .setShip([7, 12], TYPES.WATER, true)
+        .setShip([9, 12], TYPES.SHIP, true)
+        .setShip([1, 13], TYPES.UP, true)
+        .setShip([6, 13], TYPES.WATER, true)
+        .setShip([3, 14], TYPES.WATER, true)
+        .setShip([14, 14], TYPES.SINGLE, true);
 
     const solution2 = new Board(15, 15,
         [0, 5, 6, 1, 5, 1, 5, 1, 0, 5, 3, 0, 2, 0, 1],
         [2, 0, 1, 3, 4, 2, 3, 2, 4, 0, 4, 3, 3, 2, 2],
         [5, 4, 3, 2, 1])
-        .setShip([2, 0], TYPE.RIGHT)
-        .setShip([3, 0], TYPE.LEFT)
-        .setShip([12, 2], TYPE.SINGLE)
-        .setShip([1, 3], TYPE.RIGHT)
-        .setShip([2, 3], TYPE.LEFT)
-        .setShip([10, 3], TYPE.DOWN)
-        .setShip([10, 4], TYPE.VERTICAL)
-        .setShip([10, 5], TYPE.UP)
-        .setShip([4, 4], TYPE.RIGHT)
-        .setShip([5, 4], TYPE.LEFT)
-        .setShip([12, 4], TYPE.SINGLE)
-        .setShip([2, 5], TYPE.DOWN)
-        .setShip([2, 6], TYPE.VERTICAL)
-        .setShip([2, 7], TYPE.VERTICAL)
-        .setShip([2, 8], TYPE.UP)
-        .setShip([4, 6], TYPE.DOWN)
-        .setShip([4, 7], TYPE.VERTICAL)
-        .setShip([4, 8], TYPE.UP)
-        .setShip([6, 6], TYPE.SINGLE)
-        .setShip([6, 8], TYPE.RIGHT)
-        .setShip([7, 8], TYPE.LEFT)
-        .setShip([1, 10], TYPE.DOWN)
-        .setShip([1, 11], TYPE.VERTICAL)
-        .setShip([1, 12], TYPE.VERTICAL)
-        .setShip([1, 13], TYPE.UP)
-        .setShip([4, 10], TYPE.SINGLE)
-        .setShip([6, 10], TYPE.DOWN)
-        .setShip([6, 11], TYPE.VERTICAL)
-        .setShip([6, 12], TYPE.UP)
-        .setShip([9, 10], TYPE.DOWN)
-        .setShip([9, 11], TYPE.VERTICAL)
-        .setShip([9, 12], TYPE.VERTICAL)
-        .setShip([9, 13], TYPE.VERTICAL)
-        .setShip([9, 14], TYPE.UP)
-        .setShip([14, 14], TYPE.SINGLE)
+        .setShip([2, 0], TYPES.RIGHT)
+        .setShip([3, 0], TYPES.LEFT)
+        .setShip([12, 2], TYPES.SINGLE)
+        .setShip([1, 3], TYPES.RIGHT)
+        .setShip([2, 3], TYPES.LEFT)
+        .setShip([10, 3], TYPES.DOWN)
+        .setShip([10, 4], TYPES.VERTICAL)
+        .setShip([10, 5], TYPES.UP)
+        .setShip([4, 4], TYPES.RIGHT)
+        .setShip([5, 4], TYPES.LEFT)
+        .setShip([12, 4], TYPES.SINGLE)
+        .setShip([2, 5], TYPES.DOWN)
+        .setShip([2, 6], TYPES.VERTICAL)
+        .setShip([2, 7], TYPES.VERTICAL)
+        .setShip([2, 8], TYPES.UP)
+        .setShip([4, 6], TYPES.DOWN)
+        .setShip([4, 7], TYPES.VERTICAL)
+        .setShip([4, 8], TYPES.UP)
+        .setShip([6, 6], TYPES.SINGLE)
+        .setShip([6, 8], TYPES.RIGHT)
+        .setShip([7, 8], TYPES.LEFT)
+        .setShip([1, 10], TYPES.DOWN)
+        .setShip([1, 11], TYPES.VERTICAL)
+        .setShip([1, 12], TYPES.VERTICAL)
+        .setShip([1, 13], TYPES.UP)
+        .setShip([4, 10], TYPES.SINGLE)
+        .setShip([6, 10], TYPES.DOWN)
+        .setShip([6, 11], TYPES.VERTICAL)
+        .setShip([6, 12], TYPES.UP)
+        .setShip([9, 10], TYPES.DOWN)
+        .setShip([9, 11], TYPES.VERTICAL)
+        .setShip([9, 12], TYPES.VERTICAL)
+        .setShip([9, 13], TYPES.VERTICAL)
+        .setShip([9, 14], TYPES.UP)
+        .setShip([14, 14], TYPES.SINGLE)
         .softFloodRow(0)
         .softFloodRow(1)
         .softFloodRow(2)
@@ -194,47 +194,47 @@ test('solve', () => {
         [4, 0, 4, 1, 3, 6, 2, 0, 6, 1, 1, 1, 2, 2, 1],
         [1, 2, 5, 2, 3, 2, 4, 2, 2, 0, 5, 0, 1, 3, 2],
         [4, 4, 3, 2, 1])
-        .setShip([0, 1], TYPE.DOWN, true)
-        .setShip([0, 3], TYPE.ORTHOGONAL, true)
-        .setShip([2, 5], TYPE.DOWN, true)
-        .setShip([3, 10], TYPE.ORTHOGONAL, true)
-        .setShip([6, 13], TYPE.UP, true)
-        .setShip([8, 5], TYPE.UP, true)
-        .setShip([8, 14], TYPE.WATER, true)
-        .setShip([9, 2], TYPE.ORTHOGONAL, true)
-        .setShip([12, 6], TYPE.ORTHOGONAL, true)
-        .setShip([12, 13], TYPE.SINGLE, true);
+        .setShip([0, 1], TYPES.DOWN, true)
+        .setShip([0, 3], TYPES.ORTHOGONAL, true)
+        .setShip([2, 5], TYPES.DOWN, true)
+        .setShip([3, 10], TYPES.ORTHOGONAL, true)
+        .setShip([6, 13], TYPES.UP, true)
+        .setShip([8, 5], TYPES.UP, true)
+        .setShip([8, 14], TYPES.WATER, true)
+        .setShip([9, 2], TYPES.ORTHOGONAL, true)
+        .setShip([12, 6], TYPES.ORTHOGONAL, true)
+        .setShip([12, 13], TYPES.SINGLE, true);
 
     const solution3 = board3.copy()
-        .setShip([0, 2], TYPE.VERTICAL)
-        .setShip([0, 3], TYPE.VERTICAL)
-        .setShip([0, 4], TYPE.UP)
-        .setShip([2, 6], TYPE.VERTICAL)
-        .setShip([2, 7], TYPE.UP)
-        .setShip([2, 10], TYPE.RIGHT)
-        .setShip([3, 10], TYPE.HORIZONTAL)
-        .setShip([4, 10], TYPE.HORIZONTAL)
-        .setShip([5, 10], TYPE.LEFT)
-        .setShip([5, 0], TYPE.DOWN)
-        .setShip([5, 1], TYPE.VERTICAL)
-        .setShip([5, 2], TYPE.VERTICAL)
-        .setShip([5, 3], TYPE.VERTICAL)
-        .setShip([5, 4], TYPE.UP)
-        .setShip([4, 13], TYPE.DOWN)
-        .setShip([4, 14], TYPE.UP)
-        .setShip([6, 12], TYPE.DOWN)
-        .setShip([8, 2], TYPE.RIGHT)
-        .setShip([9, 2], TYPE.HORIZONTAL)
-        .setShip([10, 2], TYPE.LEFT)
-        .setShip([8, 4], TYPE.DOWN)
-        .setShip([8, 7], TYPE.DOWN)
-        .setShip([8, 8], TYPE.UP)
-        .setShip([8, 10], TYPE.SINGLE)
-        .setShip([11, 6], TYPE.RIGHT)
-        .setShip([12, 6], TYPE.HORIZONTAL)
-        .setShip([13, 6], TYPE.LEFT)
-        .setShip([13, 8], TYPE.SINGLE)
-        .setShip([14, 14], TYPE.SINGLE);
+        .setShip([0, 2], TYPES.VERTICAL)
+        .setShip([0, 3], TYPES.VERTICAL)
+        .setShip([0, 4], TYPES.UP)
+        .setShip([2, 6], TYPES.VERTICAL)
+        .setShip([2, 7], TYPES.UP)
+        .setShip([2, 10], TYPES.RIGHT)
+        .setShip([3, 10], TYPES.HORIZONTAL)
+        .setShip([4, 10], TYPES.HORIZONTAL)
+        .setShip([5, 10], TYPES.LEFT)
+        .setShip([5, 0], TYPES.DOWN)
+        .setShip([5, 1], TYPES.VERTICAL)
+        .setShip([5, 2], TYPES.VERTICAL)
+        .setShip([5, 3], TYPES.VERTICAL)
+        .setShip([5, 4], TYPES.UP)
+        .setShip([4, 13], TYPES.DOWN)
+        .setShip([4, 14], TYPES.UP)
+        .setShip([6, 12], TYPES.DOWN)
+        .setShip([8, 2], TYPES.RIGHT)
+        .setShip([9, 2], TYPES.HORIZONTAL)
+        .setShip([10, 2], TYPES.LEFT)
+        .setShip([8, 4], TYPES.DOWN)
+        .setShip([8, 7], TYPES.DOWN)
+        .setShip([8, 8], TYPES.UP)
+        .setShip([8, 10], TYPES.SINGLE)
+        .setShip([11, 6], TYPES.RIGHT)
+        .setShip([12, 6], TYPES.HORIZONTAL)
+        .setShip([13, 6], TYPES.LEFT)
+        .setShip([13, 8], TYPES.SINGLE)
+        .setShip([14, 14], TYPES.SINGLE);
 
     for (let x = 0; x < solution3.width; x++) {
         solution3.softFloodCol(x);
@@ -250,27 +250,27 @@ test('isSolved', () => {
         .softFloodCol(1)
         .softFloodCol(2)
         .softFloodRow(3)
-        .softFloodCol(0, TYPE.SHIP);
+        .softFloodCol(0, TYPES.SHIP);
 
     // test unknown
     expect(board.isSolved()).toBeFalsy();
 
     // test rows
-    board.softFloodCol(3, TYPE.SHIP);
+    board.softFloodCol(3, TYPES.SHIP);
     expect(board.isSolved()).toBeFalsy();
 
     // test columns
-    board.setShip([0, 2], TYPE.WATER);
+    board.setShip([0, 2], TYPES.WATER);
     expect(board.isSolved()).toBeFalsy();
 
     // test multiple solutions
-    board.setShip([0, 3], TYPE.SHIP);
+    board.setShip([0, 3], TYPES.SHIP);
     expect(board.isSolved()).toBeTruthy();
 
-    board.setShip([3, 2], TYPE.WATER);
-    board.setShip([3, 3], TYPE.SHIP);
-    board.setShip([0, 2], TYPE.SHIP);
-    board.setShip([0, 3], TYPE.WATER);
+    board.setShip([3, 2], TYPES.WATER);
+    board.setShip([3, 3], TYPES.SHIP);
+    board.setShip([0, 2], TYPES.SHIP);
+    board.setShip([0, 3], TYPES.WATER);
     expect(board.isSolved()).toBeTruthy();
 
     // test runs (this board is impossible to solve by the way)
@@ -319,13 +319,13 @@ test('countRunsLeft', () => {
     expect(board1.countRunsLeft(true)).toEqual([2, 2, 1]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.RIGHT)
-        .setShip([1, 0], TYPE.HORIZONTAL);
+        .setShip([0, 0], TYPES.RIGHT)
+        .setShip([1, 0], TYPES.HORIZONTAL);
 
     expect(tempBoard.countRunsLeft()).toEqual([2, 1, 1]);
     expect(tempBoard.countRunsLeft(true)).toEqual([2, 2, 1]);
 
-    tempBoard.setShip([2, 0], TYPE.LEFT);
+    tempBoard.setShip([2, 0], TYPES.LEFT);
 
     expect(tempBoard.countRunsLeft()).toEqual([2, 2, 0]);
     expect(tempBoard.countRunsLeft(true)).toEqual([2, 2, 0]);
@@ -336,13 +336,13 @@ test('getRuns', () => {
     expect(board1.getRuns(true)).toEqual([[17]]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.RIGHT)
-        .setShip([1, 0], TYPE.HORIZONTAL);
+        .setShip([0, 0], TYPES.RIGHT)
+        .setShip([1, 0], TYPES.HORIZONTAL);
 
     expect(tempBoard.getRuns()).toEqual([[17], [0, 1]]);
     expect(tempBoard.getRuns(true)).toEqual([[17]]);
 
-    tempBoard.setShip([2, 0], TYPE.LEFT);
+    tempBoard.setShip([2, 0], TYPES.LEFT);
 
     expect(tempBoard.getRuns()).toEqual([[17], [0, 1, 2]]);
     expect(tempBoard.getRuns(true)).toEqual([[17], [0, 1, 2]]);
@@ -354,15 +354,15 @@ test('getHorRuns', () => {
     expect(board1.getHorRuns(true, true, false)).toEqual([]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.RIGHT)
-        .setShip([1, 0], TYPE.HORIZONTAL);
+        .setShip([0, 0], TYPES.RIGHT)
+        .setShip([1, 0], TYPES.HORIZONTAL);
 
     expect(tempBoard.getHorRuns(false, true, false)).toEqual([[0, 1]]);
     expect(tempBoard.getHorRuns(true, true, false)).toEqual([]);
     expect(tempBoard.getHorRuns(false, true, true)).toEqual([[0, 1], [17]]);
     expect(tempBoard.getHorRuns(true, true, true)).toEqual([[17]]);
 
-    tempBoard.setShip([2, 0], TYPE.LEFT);
+    tempBoard.setShip([2, 0], TYPES.LEFT);
 
     expect(tempBoard.getHorRuns(false, true, false)).toEqual([[0, 1, 2]]);
     expect(tempBoard.getHorRuns(true, true, false)).toEqual([[0, 1, 2]]);
@@ -377,13 +377,13 @@ test('getRowRuns', () => {
     expect(board1.getRowRuns(2, true, true)).toEqual([[17]]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.RIGHT)
-        .setShip([1, 0], TYPE.HORIZONTAL);
+        .setShip([0, 0], TYPES.RIGHT)
+        .setShip([1, 0], TYPES.HORIZONTAL);
 
     expect(tempBoard.getRowRuns(0, false, true)).toEqual([[0, 1]]);
     expect(tempBoard.getRowRuns(0, true, true)).toEqual([]);
 
-    tempBoard.setShip([2, 0], TYPE.LEFT);
+    tempBoard.setShip([2, 0], TYPES.LEFT);
 
     expect(tempBoard.getRowRuns(0, false, true)).toEqual([[0, 1, 2]]);
     expect(tempBoard.getRowRuns(0, true, true)).toEqual([[0, 1, 2]]);
@@ -395,15 +395,15 @@ test('getVertRuns', () => {
     expect(board1.getVertRuns(true, true, false)).toEqual([]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.DOWN)
-        .setShip([0, 1], TYPE.VERTICAL);
+        .setShip([0, 0], TYPES.DOWN)
+        .setShip([0, 1], TYPES.VERTICAL);
 
     expect(tempBoard.getVertRuns(false, true, false)).toEqual([[0, 6]]);
     expect(tempBoard.getVertRuns(true, true, false)).toEqual([]);
     expect(tempBoard.getVertRuns(false, true, true)).toEqual([[0, 6], [17]]);
     expect(tempBoard.getVertRuns(true, true, true)).toEqual([[17]]);
 
-    tempBoard.setShip([0, 2], TYPE.UP);
+    tempBoard.setShip([0, 2], TYPES.UP);
 
     expect(tempBoard.getVertRuns(false, true, false)).toEqual([[0, 6, 12]]);
     expect(tempBoard.getVertRuns(true, true, false)).toEqual([[0, 6, 12]]);
@@ -418,13 +418,13 @@ test('getColRuns', () => {
     expect(board1.getColRuns(5, true, true)).toEqual([[17]]);
 
     const tempBoard = board1.copy()
-        .setShip([0, 0], TYPE.DOWN)
-        .setShip([0, 1], TYPE.VERTICAL);
+        .setShip([0, 0], TYPES.DOWN)
+        .setShip([0, 1], TYPES.VERTICAL);
 
     expect(tempBoard.getColRuns(0, false, true)).toEqual([[0, 6]]);
     expect(tempBoard.getColRuns(0, true, true)).toEqual([]);
 
-    tempBoard.setShip([0, 2], TYPE.UP);
+    tempBoard.setShip([0, 2], TYPES.UP);
 
     expect(tempBoard.getColRuns(0, false, true)).toEqual([[0, 6, 12]]);
     expect(tempBoard.getColRuns(0, true, true)).toEqual([[0, 6, 12]]);
@@ -432,41 +432,41 @@ test('getColRuns', () => {
 
 test('compTypes', () => {
     const board = new Board(6, 6)
-        .setShip(0, TYPE.RIGHT, true)
-        .setShip(1, TYPE.SHIP, true)
-        .setShip(2, TYPE.SHIP)
-        .setShip([0, 5], TYPE.SHIP)
-        .setShip([1, 5], TYPE.SHIP)
-        .setShip([2, 5], TYPE.SHIP)
-        .setShip([3, 5], TYPE.SHIP)
-        .setShip([5, 5], TYPE.SHIP)
-        .setShip([5, 3], TYPE.SHIP)
-        .setShip([5, 2], TYPE.SHIP)
-        .setShip([5, 1], TYPE.SHIP)
-        .setShip([5, 0], TYPE.SHIP)
+        .setShip(0, TYPES.RIGHT, true)
+        .setShip(1, TYPES.SHIP, true)
+        .setShip(2, TYPES.SHIP)
+        .setShip([0, 5], TYPES.SHIP)
+        .setShip([1, 5], TYPES.SHIP)
+        .setShip([2, 5], TYPES.SHIP)
+        .setShip([3, 5], TYPES.SHIP)
+        .setShip([5, 5], TYPES.SHIP)
+        .setShip([5, 3], TYPES.SHIP)
+        .setShip([5, 2], TYPES.SHIP)
+        .setShip([5, 1], TYPES.SHIP)
+        .setShip([5, 0], TYPES.SHIP)
         .softFloodCol(4)
         .softFloodRow(4)
-        .setShip([1, 2], TYPE.RIGHT);
+        .setShip([1, 2], TYPES.RIGHT);
 
     expect(board.compTypes() instanceof Board).toBeTruthy();
 
-    expect(board.getShip(0).graphicalType).toBe(TYPE.RIGHT);
-    expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.getShip(2).graphicalType).toBe(TYPE.SHIP);
-    expect(board.getShip([0, 5]).graphicalType).toBe(TYPE.RIGHT);
-    expect(board.getShip([1, 5]).internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.getShip([1, 5]).graphicalType).toBe(TYPE.ORTHOGONAL);
-    expect(board.getShip([2, 5]).internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.getShip([2, 5]).graphicalType).toBe(TYPE.ORTHOGONAL);
-    expect(board.getShip([3, 5]).graphicalType).toBe(TYPE.LEFT);
-    expect(board.getShip([5, 5]).graphicalType).toBe(TYPE.SINGLE);
-    expect(board.getShip([5, 3]).graphicalType).toBe(TYPE.UP);
-    expect(board.getShip([5, 2]).internalType).toBe(TYPE.VERTICAL);
-    expect(board.getShip([5, 2]).graphicalType).toBe(TYPE.ORTHOGONAL);
-    expect(board.getShip([5, 1]).internalType).toBe(TYPE.VERTICAL);
-    expect(board.getShip([5, 1]).graphicalType).toBe(TYPE.ORTHOGONAL);
-    expect(board.getShip([5, 0]).graphicalType).toBe(TYPE.DOWN);
-    expect(board.getShip([1, 2]).graphicalType).toBe(TYPE.SHIP);
+    expect(board.getShip(0).graphicalType).toBe(TYPES.RIGHT);
+    expect(board.getShip(1).internalType).toBe(TYPES.HORIZONTAL);
+    expect(board.getShip(2).graphicalType).toBe(TYPES.SHIP);
+    expect(board.getShip([0, 5]).graphicalType).toBe(TYPES.RIGHT);
+    expect(board.getShip([1, 5]).internalType).toBe(TYPES.HORIZONTAL);
+    expect(board.getShip([1, 5]).graphicalType).toBe(TYPES.ORTHOGONAL);
+    expect(board.getShip([2, 5]).internalType).toBe(TYPES.HORIZONTAL);
+    expect(board.getShip([2, 5]).graphicalType).toBe(TYPES.ORTHOGONAL);
+    expect(board.getShip([3, 5]).graphicalType).toBe(TYPES.LEFT);
+    expect(board.getShip([5, 5]).graphicalType).toBe(TYPES.SINGLE);
+    expect(board.getShip([5, 3]).graphicalType).toBe(TYPES.UP);
+    expect(board.getShip([5, 2]).internalType).toBe(TYPES.VERTICAL);
+    expect(board.getShip([5, 2]).graphicalType).toBe(TYPES.ORTHOGONAL);
+    expect(board.getShip([5, 1]).internalType).toBe(TYPES.VERTICAL);
+    expect(board.getShip([5, 1]).graphicalType).toBe(TYPES.ORTHOGONAL);
+    expect(board.getShip([5, 0]).graphicalType).toBe(TYPES.DOWN);
+    expect(board.getShip([1, 2]).graphicalType).toBe(TYPES.SHIP);
 });
 
 test('coordToInd', () => {
@@ -497,31 +497,31 @@ test('posToInd', () => {
 
 test('getShip', () => {
     const board = new Board(4, 4);
-    board.state[8] = new Ship(TYPE.SINGLE, true);
+    board.state[8] = new Ship(TYPES.SINGLE, true);
 
-    expect(board.getShip(8).graphicalType).toBe(TYPE.SINGLE);
+    expect(board.getShip(8).graphicalType).toBe(TYPES.SINGLE);
     expect(board.getShip(8).pinned).toBeTruthy();
 });
 
 test('setShip', () => {
     const board = new Board(4, 4);
-    board.setShip(0, TYPE.DOWN);
-    board.setShip(15, new Ship(TYPE.RIGHT));
-    board.setShip([1, 0], TYPE.HORIZONTAL);
+    board.setShip(0, TYPES.DOWN);
+    board.setShip(15, new Ship(TYPES.RIGHT));
+    board.setShip([1, 0], TYPES.HORIZONTAL);
 
-    expect(board.getShip(0).graphicalType).toBe(TYPE.DOWN);
-    expect(board.state[15].graphicalType).toBe(TYPE.RIGHT);
-    expect(board.getShip(1).internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.setShip(5, TYPE.SHIP) instanceof Board).toBeTruthy();
+    expect(board.getShip(0).graphicalType).toBe(TYPES.DOWN);
+    expect(board.state[15].graphicalType).toBe(TYPES.RIGHT);
+    expect(board.getShip(1).internalType).toBe(TYPES.HORIZONTAL);
+    expect(board.setShip(5, TYPES.SHIP) instanceof Board).toBeTruthy();
 });
 
 test('softSetShip', () => {
     const board = new Board(4, 4);
 
-    expect(board.softSetShip(7, TYPE.HORIZONTAL)).toBeTruthy();
-    expect(board.state[7].internalType).toBe(TYPE.HORIZONTAL);
-    expect(board.softSetShip(7, TYPE.LEFT)).toBeFalsy();
-    expect(board.state[7].internalType).toBe(TYPE.HORIZONTAL);
+    expect(board.softSetShip(7, TYPES.HORIZONTAL)).toBeTruthy();
+    expect(board.state[7].internalType).toBe(TYPES.HORIZONTAL);
+    expect(board.softSetShip(7, TYPES.LEFT)).toBeFalsy();
+    expect(board.state[7].internalType).toBe(TYPES.HORIZONTAL);
 });
 
 test('relPosToInd', () => {
@@ -534,91 +534,91 @@ test('relPosToInd', () => {
 
 test('getRelShip', () => {
     const board = new Board(4, 4);
-    board.setShip(0, TYPE.SHIP);
-    board.setShip(1, TYPE.WATER);
-    board.setShip(4, TYPE.VERTICAL);
+    board.setShip(0, TYPES.SHIP);
+    board.setShip(1, TYPES.WATER);
+    board.setShip(4, TYPES.VERTICAL);
 
-    expect(board.getRelShip(0, REL_POS.BOTTOM)?.internalType).toBe(TYPE.VERTICAL);
+    expect(board.getRelShip(0, REL_POS.BOTTOM)?.internalType).toBe(TYPES.VERTICAL);
     expect(board.getRelShip(0, REL_POS.LEFT)).toBeNull();
-    expect(board.getRelShip(0, REL_POS.RIGHT)?.playType).toBe(TYPE.WATER);
+    expect(board.getRelShip(0, REL_POS.RIGHT)?.playType).toBe(TYPES.WATER);
 });
 
 test('setRelShip', () => {
     const board = new Board(4, 4);
 
-    expect(board.setRelShip(0, REL_POS.RIGHT, TYPE.SHIP)).toBeTruthy();
-    expect(board.setRelShip(0, REL_POS.LEFT, TYPE.SHIP)).toBeNull();
-    expect(board.state[1].playType).toBe(TYPE.SHIP);
+    expect(board.setRelShip(0, REL_POS.RIGHT, TYPES.SHIP)).toBeTruthy();
+    expect(board.setRelShip(0, REL_POS.LEFT, TYPES.SHIP)).toBeNull();
+    expect(board.state[1].playType).toBe(TYPES.SHIP);
 });
 
 test('setCarShips', () => {
     const board = new Board(4, 4);
     expect(board.setCarShips([1, 1], REL_POS.TOP) instanceof Board).toBeTruthy();
 
-    expect(board.state[0].playType).toBe(TYPE.WATER);
-    expect(board.state[1].playType).toBe(TYPE.SHIP);
-    expect(board.state[2].playType).toBe(TYPE.WATER);
-    expect(board.state[4].playType).toBe(TYPE.WATER);
-    expect(board.state[6].playType).toBe(TYPE.WATER);
-    expect(board.state[8].playType).toBe(TYPE.WATER);
-    expect(board.state[9].playType).toBe(TYPE.WATER);
-    expect(board.state[10].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPES.WATER);
+    expect(board.state[1].playType).toBe(TYPES.SHIP);
+    expect(board.state[2].playType).toBe(TYPES.WATER);
+    expect(board.state[4].playType).toBe(TYPES.WATER);
+    expect(board.state[6].playType).toBe(TYPES.WATER);
+    expect(board.state[8].playType).toBe(TYPES.WATER);
+    expect(board.state[9].playType).toBe(TYPES.WATER);
+    expect(board.state[10].playType).toBe(TYPES.WATER);
 });
 
 test('setOrthoShips', () => {
     const board = new Board(4, 4);
-    expect(board.setOrthoShips([1, 1], TYPE.VERTICAL) instanceof Board).toBeTruthy();
+    expect(board.setOrthoShips([1, 1], TYPES.VERTICAL) instanceof Board).toBeTruthy();
 
-    expect(board.state[0].playType).toBe(TYPE.WATER);
-    expect(board.state[1].playType).toBe(TYPE.SHIP);
-    expect(board.state[2].playType).toBe(TYPE.WATER);
-    expect(board.state[4].playType).toBe(TYPE.WATER);
-    expect(board.state[6].playType).toBe(TYPE.WATER);
-    expect(board.state[8].playType).toBe(TYPE.WATER);
-    expect(board.state[9].playType).toBe(TYPE.SHIP);
-    expect(board.state[10].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPES.WATER);
+    expect(board.state[1].playType).toBe(TYPES.SHIP);
+    expect(board.state[2].playType).toBe(TYPES.WATER);
+    expect(board.state[4].playType).toBe(TYPES.WATER);
+    expect(board.state[6].playType).toBe(TYPES.WATER);
+    expect(board.state[8].playType).toBe(TYPES.WATER);
+    expect(board.state[9].playType).toBe(TYPES.SHIP);
+    expect(board.state[10].playType).toBe(TYPES.WATER);
 });
 
 test('softFloodCol', () => {
     const board = new Board(4, 4);
 
     expect(board.softFloodCol(0) instanceof Board).toBeTruthy();
-    expect(board.state[0].playType).toBe(TYPE.WATER);
-    expect(board.state[4].playType).toBe(TYPE.WATER);
-    expect(board.state[8].playType).toBe(TYPE.WATER);
-    expect(board.state[12].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPES.WATER);
+    expect(board.state[4].playType).toBe(TYPES.WATER);
+    expect(board.state[8].playType).toBe(TYPES.WATER);
+    expect(board.state[12].playType).toBe(TYPES.WATER);
 
-    expect(board.softFloodCol(3, TYPE.SHIP) instanceof Board).toBeTruthy();
-    expect(board.state[3].playType).toBe(TYPE.SHIP);
-    expect(board.state[7].playType).toBe(TYPE.SHIP);
-    expect(board.state[11].playType).toBe(TYPE.SHIP);
-    expect(board.state[15].playType).toBe(TYPE.SHIP);
+    expect(board.softFloodCol(3, TYPES.SHIP) instanceof Board).toBeTruthy();
+    expect(board.state[3].playType).toBe(TYPES.SHIP);
+    expect(board.state[7].playType).toBe(TYPES.SHIP);
+    expect(board.state[11].playType).toBe(TYPES.SHIP);
+    expect(board.state[15].playType).toBe(TYPES.SHIP);
 });
 
 test('softFloodRow', () => {
     const board = new Board(4, 4);
 
     expect(board.softFloodRow(0) instanceof Board).toBeTruthy();
-    expect(board.state[0].playType).toBe(TYPE.WATER);
-    expect(board.state[1].playType).toBe(TYPE.WATER);
-    expect(board.state[2].playType).toBe(TYPE.WATER);
-    expect(board.state[3].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPES.WATER);
+    expect(board.state[1].playType).toBe(TYPES.WATER);
+    expect(board.state[2].playType).toBe(TYPES.WATER);
+    expect(board.state[3].playType).toBe(TYPES.WATER);
 
-    expect(board.softFloodRow(3, TYPE.SHIP) instanceof Board).toBeTruthy();
-    expect(board.state[12].playType).toBe(TYPE.SHIP);
-    expect(board.state[13].playType).toBe(TYPE.SHIP);
-    expect(board.state[14].playType).toBe(TYPE.SHIP);
-    expect(board.state[15].playType).toBe(TYPE.SHIP);
+    expect(board.softFloodRow(3, TYPES.SHIP) instanceof Board).toBeTruthy();
+    expect(board.state[12].playType).toBe(TYPES.SHIP);
+    expect(board.state[13].playType).toBe(TYPES.SHIP);
+    expect(board.state[14].playType).toBe(TYPES.SHIP);
+    expect(board.state[15].playType).toBe(TYPES.SHIP);
 });
 
 test('floodCorners', () => {
     const board = new Board(4, 4);
 
     expect(board.floodCorners([1, 1]) instanceof Board).toBeTruthy();
-    expect(board.state[0].playType).toBe(TYPE.WATER);
-    expect(board.state[2].playType).toBe(TYPE.WATER);
-    expect(board.state[8].playType).toBe(TYPE.WATER);
-    expect(board.state[10].playType).toBe(TYPE.WATER);
+    expect(board.state[0].playType).toBe(TYPES.WATER);
+    expect(board.state[2].playType).toBe(TYPES.WATER);
+    expect(board.state[8].playType).toBe(TYPES.WATER);
+    expect(board.state[10].playType).toBe(TYPES.WATER);
 });
 
 test('base64 export/import', () => {
@@ -642,8 +642,8 @@ test('base64 export/import', () => {
 
     // board 2
     const board2 = new Board(4, 4, [2, 0, 0, 0], [1, 1, 0, 0], [4, 3, 2, 1])
-        .setShip(0, TYPE.DOWN)
-        .setShip(2, TYPE.UP);
+        .setShip(0, TYPES.DOWN)
+        .setShip(2, TYPES.UP);
     const board2B64 = board2.export();
     const importedBoard2 = Board.from(board2B64);
 
@@ -654,8 +654,8 @@ test('base64 export/import', () => {
 
     // board 3
     const board3 = new Board(2, 2)
-        .setShip(0, TYPE.DOWN)
-        .setShip(2, TYPE.UP);
+        .setShip(0, TYPES.DOWN)
+        .setShip(2, TYPES.UP);
     const board3B64 = board3.export();
     const importedBoard3 = Board.from(board3B64);
 
@@ -666,8 +666,8 @@ test('base64 export/import', () => {
 
     // board 4
     const board4 = new Board(16, 16)
-        .setShip([2, 0], TYPE.SINGLE, true)
-        .setShip([6, 4], TYPE.WATER);
+        .setShip([2, 0], TYPES.SINGLE, true)
+        .setShip([6, 4], TYPES.WATER);
     const board4B64 = board4.export();
     const importedBoard4 = Board.from(board4B64);
 

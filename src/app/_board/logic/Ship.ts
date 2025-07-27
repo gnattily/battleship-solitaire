@@ -20,27 +20,27 @@ export default class Ship {
     }
 
     set playType (type: PlayType) {
-        if (type > TYPE.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
-        if (type !== TYPE.SHIP || this.#type < TYPE.SHIP) this.#type = type;
+        if (type > TYPES.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
+        if (type !== TYPES.SHIP || this.#type < TYPES.SHIP) this.#type = type;
     }
 
     set graphicalType (type: GraphicalType) {
-        if (type > TYPE.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
-        if (type !== TYPE.ORTHOGONAL || this.#type < TYPE.ORTHOGONAL) this.#type = type;
+        if (type > TYPES.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
+        if (type !== TYPES.ORTHOGONAL || this.#type < TYPES.ORTHOGONAL) this.#type = type;
     }
 
     set internalType (type: InternalType) {
-        if (type > TYPE.HORIZONTAL) throw new Error('Expected type to be an InternalType (0-10), got ' + type);
+        if (type > TYPES.HORIZONTAL) throw new Error('Expected type to be an InternalType (0-10), got ' + type);
         this.#type = type;
     }
 
     get playType (): PlayType {
-        if (this.#type >= TYPE.SHIP) return TYPE.SHIP;
+        if (this.#type >= TYPES.SHIP) return TYPES.SHIP;
         else return this.#type as PlayType;
     }
 
     get graphicalType (): GraphicalType {
-        if (this.#type >= TYPE.ORTHOGONAL) return TYPE.ORTHOGONAL;
+        if (this.#type >= TYPES.ORTHOGONAL) return TYPES.ORTHOGONAL;
         else return this.#type as GraphicalType;
     }
 
@@ -56,15 +56,15 @@ export default class Ship {
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     toString () {
         switch (this.graphicalType) {
-            case TYPE.UNKNOWN: return ' ';
-            case TYPE.WATER: return '~';
-            case TYPE.SHIP: return '?';
-            case TYPE.DOWN: return '⯅';
-            case TYPE.LEFT: return '⯈';
-            case TYPE.RIGHT: return '⯇';
-            case TYPE.UP: return '⯆';
-            case TYPE.SINGLE: return '●';
-            case TYPE.ORTHOGONAL: return '■';
+            case TYPES.UNKNOWN: return ' ';
+            case TYPES.WATER: return '~';
+            case TYPES.SHIP: return '?';
+            case TYPES.DOWN: return '⯅';
+            case TYPES.LEFT: return '⯈';
+            case TYPES.RIGHT: return '⯇';
+            case TYPES.UP: return '⯆';
+            case TYPES.SINGLE: return '●';
+            case TYPES.ORTHOGONAL: return '■';
             default: throw new Error('this.graphicalType is not a graphicalType.');
         }
     }
@@ -102,15 +102,15 @@ export default class Ship {
     }
 
     static isWater (...squares: Ship[]): boolean {
-        return Ship.isPlayType(TYPE.WATER, ...squares);
+        return Ship.isPlayType(TYPES.WATER, ...squares);
     }
 
     static isShip (...squares: Ship[]): boolean {
-        return Ship.isPlayType(TYPE.SHIP, ...squares);
+        return Ship.isPlayType(TYPES.SHIP, ...squares);
     }
 
     static isUnknown (...squares: Ship[]): boolean {
-        return Ship.isPlayType(TYPE.UNKNOWN, ...squares);
+        return Ship.isPlayType(TYPES.UNKNOWN, ...squares);
     }
 
     /**
@@ -120,10 +120,10 @@ export default class Ship {
     static typeToRelPos (type: AnyType): RelativePosition {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (type) {
-            case TYPE.LEFT: return REL_POS.LEFT;
-            case TYPE.RIGHT: return REL_POS.RIGHT;
-            case TYPE.UP: return REL_POS.TOP;
-            case TYPE.DOWN: return REL_POS.BOTTOM;
+            case TYPES.LEFT: return REL_POS.LEFT;
+            case TYPES.RIGHT: return REL_POS.RIGHT;
+            case TYPES.UP: return REL_POS.TOP;
+            case TYPES.DOWN: return REL_POS.BOTTOM;
             default: throw new Error(`${type} has no single corresponding relative position`);
         }
     }
@@ -133,7 +133,7 @@ export default class Ship {
  * Everything a square could be
  * @enum {number}
  */
-export const TYPE = {
+export const TYPES = {
     UNKNOWN: 0,
     WATER: 1,
     SHIP: 2,
@@ -150,14 +150,18 @@ export const TYPE = {
 } as const;
 
 const CARDINALS = new Set<AnyType>([
-    TYPE.UP, TYPE.RIGHT, TYPE.DOWN, TYPE.LEFT,
+    TYPES.UP, TYPES.RIGHT, TYPES.DOWN, TYPES.LEFT,
 ]);
 
 const ENDS = new Set<AnyType>([
-    TYPE.UP, TYPE.RIGHT, TYPE.DOWN, TYPE.LEFT, TYPE.SINGLE,
+    TYPES.UP, TYPES.RIGHT, TYPES.DOWN, TYPES.LEFT, TYPES.SINGLE,
 ]);
 
-export type PlayType = typeof TYPE['UNKNOWN' | 'WATER' | 'SHIP'];
-export type GraphicalType = typeof TYPE['UNKNOWN' | 'WATER' | 'SHIP' | 'SINGLE' | 'UP' | 'RIGHT' | 'DOWN' | 'LEFT' | 'ORTHOGONAL'];
-export type InternalType = typeof TYPE[keyof typeof TYPE];
-export type AnyType = typeof TYPE[keyof typeof TYPE];
+export const PLAY_TYPE_COUNT = 3;
+export const GRAPHICAL_TYPE_COUNT = 9;
+// could do the rest but they're unnecessary
+
+export type PlayType = typeof TYPES['UNKNOWN' | 'WATER' | 'SHIP'];
+export type GraphicalType = typeof TYPES['UNKNOWN' | 'WATER' | 'SHIP' | 'SINGLE' | 'UP' | 'RIGHT' | 'DOWN' | 'LEFT' | 'ORTHOGONAL'];
+export type InternalType = typeof TYPES[keyof typeof TYPES];
+export type AnyType = typeof TYPES[keyof typeof TYPES];

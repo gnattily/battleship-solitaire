@@ -1,3 +1,7 @@
+:root {
+    --run-ship-size: 50px;
+}
+
 .Board {
     width: fit-content;
     max-width: 100%;
@@ -9,7 +13,6 @@
     margin-top: 5px;
 
     & button {
-        width: 50px;
         position: relative;
         margin-left: 3px;
         margin-right: 3px;
@@ -35,11 +38,6 @@
     grid-template: repeat(3, auto) / repeat(3, auto);
 
     margin-bottom: 5px;
-
-    &>span:nth-child(3) {
-        width: fit-content;
-        max-width: 0%;
-    }
 }
 
 .Runs {
@@ -62,8 +60,8 @@
 
     & .Ship {
         background: var(--ship-col);
-        width: 25px;
-        height: 25px;
+        width: calc(var(--run-ship-size) / 2);
+        height: calc(var(--run-ship-size) / 2);
         margin-bottom: 1px;
     }
 }
@@ -75,6 +73,10 @@
 
     &.Column p {
         margin: 0;
+    }
+
+    &.Row {
+        padding-right: 3px;
     }
 
     & p {
@@ -89,8 +91,10 @@
     }
 }
 
-.Ships {
+.Inner {
+    justify-self: center;
     display: grid;
+
     position: relative;
     width: fit-content;
     height: fit-content;
