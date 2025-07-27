@@ -29,7 +29,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE }: 
     }
 
     function share (): void {
-        const url = `${window.location.origin}/?data=${
+        const url = `${window.location.origin}/?board=${
             board.export()
                 .replaceAll('+', '-')
                 .replaceAll('/', '_')

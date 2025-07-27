@@ -4,17 +4,17 @@ import Board from './_board/logic/Board';
 import type { JSX } from 'react';
 
 export default async function Page ({ searchParams }: { searchParams: { [key: string]: string | undefined } }): Promise<JSX.Element> {
-    let { data } = await searchParams;
-    let board: Board | undefined;
+    let { board } = await searchParams;
+    let startBoard: Board | undefined;
 
-    if (typeof data === 'string') {
-        data = data
+    if (typeof board === 'string') {
+        board = board
             .replaceAll('-', '+')
             .replaceAll('_', '/')
-            .padEnd(data.length + (4 - (data.length % 4)) % 4, '=');
+            .padEnd(board.length + (4 - (board.length % 4)) % 4, '=');
 
         try {
-            board = Board.from(data);
+            startBoard = Board.from(board);
         } catch (e) {
             console.log(e);
         }
@@ -23,10 +23,10 @@ export default async function Page ({ searchParams }: { searchParams: { [key: st
     return (
         <div className='BoardUI'>
             {((): JSX.Element => {
-                if (board) {
+                if (startBoard) {
                     return (
                         <BoardUI
-                            board={board.export()}
+                            board={startBoard.export()}
                         />
                     );
                 } else return <BoardUI width={4} height={4} />;
