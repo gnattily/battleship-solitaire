@@ -7,6 +7,8 @@ export default async function Page ({ searchParams }: { searchParams: { [key: st
     let { board } = await searchParams;
     let startBoard: Board | undefined;
 
+    // Realistically this should be in BoardUI.tsx
+    // -TODO
     if (typeof board === 'string') {
         board = board
             .replaceAll('-', '+')
