@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
-import { REL_POS } from './Board';
-import Ship, { TYPES } from './Ship';
+import { REL_POS } from '../Board';
+import Ship, { TYPES } from '../Ship';
 
 test('toString', () => {
     const ship = new Ship(TYPES.SHIP);

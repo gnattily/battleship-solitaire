@@ -5,13 +5,13 @@ import { TYPES } from '../logic/Ship';
 import Board from '../logic/Board';
 
 import PlayUI from './PlayUI';
-// import EditUI from './edit/EditUI';
+// import EditUI from './EditUI';
 
 import './css/BoardUI.css';
 import './css/Ships.css';
 
 import type { JSX } from 'react';
-import type { AnyType, GraphicalType } from '../logic/Ship';
+import type { GraphicalType } from '../logic/Ship';
 
 interface Props {
     board?: string;
@@ -25,9 +25,7 @@ interface Props {
 
 interface State {
     board: Board;
-    solved: boolean;
-    draggedType: AnyType | undefined;
-    draggedButton: number;
+    editMode: boolean;
 }
 
 export default class BoardUI extends Component<Props, State> {
@@ -58,21 +56,30 @@ export default class BoardUI extends Component<Props, State> {
 
         this.state = {
             board: board,
-            solved: board.isSolved(),
-            draggedType: undefined,
-            draggedButton: 0,
+            editMode: false,
         };
     }
 
+    toggleMode (): void {
+        this.setState({
+            editMode: !this.state.editMode,
+        });
+    }
+
     render (): JSX.Element {
-        return (
-            <PlayUI
-                board={this.state.board}
-                setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
-                initialBoard={this.#initialBoard}
-                SQUARE_SIZE={50} /* px */
-            />
-        );
+        if (false) {
+            // return (<EditUI />);
+        } else {
+            return (
+                <PlayUI
+                    board={this.state.board}
+                    setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
+                    initialBoard={this.#initialBoard}
+                    SQUARE_SIZE={50} /* px */
+                    toggleMode={this.toggleMode}
+                />
+            );
+        }
     }
 }
 

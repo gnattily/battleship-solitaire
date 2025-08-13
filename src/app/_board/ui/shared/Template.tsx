@@ -1,40 +1,22 @@
-import { useState } from 'react';
-import { TYPES } from '../logic/Ship';
-import { typeToJSX } from './BoardUI';
+import { useState, type JSX } from 'react';
+import type { TemplateParams } from './Mode';
+import { typeToJSX } from '../BoardUI';
+import { TYPES } from '../../logic/Ship';
+import InnerBoard from './InnerBoard';
 
-import type { JSX } from 'react';
-import InnerBoard from './shared/InnerBoard';
-import type { ModeParams } from './shared/Mode';
-
-export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: ModeParams): JSX.Element {
+export default function Template ({
+    board,
+    setBoard,
+    SQUARE_SIZE,
+    editMode,
+    buttons,
+    onClickRuns,
+    onClickColCount,
+    onClickRowCount,
+    extraColCountEl,
+    extraRowCountEl,
+}: TemplateParams): JSX.Element {
     const [solved, setSolved] = useState(board.isSolved());
-
-    function solveBoard (): void {
-        const newBoard = board.solve();
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
-    }
-
-    function reset (): void {
-        const newBoard = initialBoard.copy();
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
-    }
-
-    function share (): void {
-        const url = `${window.location.origin}/?board=${
-            board.export()
-                .replaceAll('+', '-')
-                .replaceAll('/', '_')
-                .replaceAll('=', '')
-        }`;
-
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Link copied to clipboard!');
-        }).catch(() => {
-            alert('Failed to copy link. Copy manually: ' + url);
-        });
-    }
 
     function displayCounts (rows: boolean): JSX.Element[] {
         return (rows ? board.rowCounts : board.colCounts).map((count, index) => (
@@ -96,35 +78,35 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                 <span />
                 <div
                     className='Column Counts'
-                    style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
+                    style={{ gridTemplate: `auto / repeat(${board.width + (!!extraColCountEl ? 1 : 0)}, ${SQUARE_SIZE}px)` }}
                 >
-                    {displayCounts(false) /* false = columns */}
+                    {displayCounts(false)}
+                    {extraColCountEl}
                 </div>
                 <span />
 
                 <div
                     className='Row Counts'
-                    style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
+                    style={{ gridTemplate: `repeat(${board.width + (!!extraRowCountEl ? 1 : 0)}, ${SQUARE_SIZE}px) / auto` }}
                 >
                     {displayCounts(true) /* true = rows */}
+                    {extraRowCountEl}
                 </div>
-                <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={false} />
-                <div
-                    className='Runs'
-                    style={{ height: board.height * SQUARE_SIZE + board.height + 1 + 'px' }}
-                >
-                    {displayRuns()}
-                </div>
-
-                <span />
-                <div className='Buttons'>
-                    <button onClick={() => { solveBoard(); }}> Solve </button>
-                    <button onClick={() => { reset(); }}> Reset </button>
-                    <button onClick={() => { share(); }}> Share</button>
-                    <button onClick={() => { toggleMode(); }}> Edit </button>
-                </div>
-                <span />
+                <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={editMode} />
             </div>
+            <div
+                className='Runs'
+                style={{ height: board.height * SQUARE_SIZE + board.height + 1 + 'px' }}
+                onClick={() => { onClickRuns?.(); }}
+            >
+                {displayRuns()}
+            </div>
+
+            <span />
+            <div className='Buttons'>
+                {buttons}
+            </div>
+            <span />
         </div>
     );
 }

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { TYPES, PLAY_TYPE_COUNT, GRAPHICAL_TYPE_COUNT } from '../logic/Ship';
-import { typeToJSX } from './BoardUI';
+import { TYPES, PLAY_TYPE_COUNT, GRAPHICAL_TYPE_COUNT } from '../../logic/Ship';
+import { typeToJSX } from '../BoardUI';
 
-import type Board from '../logic/Board';
+import type Board from '../../logic/Board';
 import type { JSX } from 'react';
-import type { AnyType } from '../logic/Ship';
+import type { AnyType } from '../../logic/Ship';
 
 type Params = {
     board: Board;
