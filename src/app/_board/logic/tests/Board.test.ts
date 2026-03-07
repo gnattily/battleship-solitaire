@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
-import Board, { REL_POS } from './Board';
-import Ship, { TYPES } from './Ship';
+import Board, { REL_POS } from '../Board';
+import Ship, { TYPES } from '../Ship';
 
 test('constructor', () => {
     expect(() => { new Board(-1, 14); }).toThrow('outside expected range');
