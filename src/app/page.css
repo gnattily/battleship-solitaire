@@ -1,0 +1,36 @@
+:root {
+    --ship-col: #000000;
+    --water-col: #6288f1;
+    --background: #ffffff;
+    --text-col: var(--ship-col);
+    --border-col: #808080;
+    --x-col: #ff0000;
+    --solve-col: hsl(145, 69%, 60%);
+    --square-col: #ffffff;
+    --button-col: #d3d3d3;
+    --button-hover-col: #a9a9a9;
+}
+
+.nohighlight {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    margin: 0;
+
+    width: 100dvw;
+    height: 100dvh;
+    background-color: white;
+    color: black;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.BoardUI {
+    width: fit-content;
+    display: flex;
+}

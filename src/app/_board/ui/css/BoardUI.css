@@ -1,0 +1,171 @@
+:root {
+    --run-ship-size: 50px;
+}
+
+.Board {
+    width: fit-content;
+    max-width: 100%;
+}
+
+.Buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+
+    & button {
+        position: relative;
+        margin-left: 3px;
+        margin-right: 3px;
+
+        border: none;
+        background: none;
+
+        &:not(:last-child)::after {
+            content: '/';
+            position: absolute;
+            right: -10%;
+        }
+
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    }
+}
+
+.Content {
+    display: grid;
+    grid-template: repeat(3, auto) / repeat(3, auto);
+
+    margin-bottom: 5px;
+}
+
+.Runs {
+    display: flex;
+    flex-wrap: wrap;
+    writing-mode: vertical-rl;
+
+    justify-content: center;
+    align-items: center;
+
+    height: 766px;
+    width: fit-content;
+
+    transform: scaleX(-100%);
+}
+
+.Run {
+    display: flex;
+    padding: 3px;
+
+    & .Ship {
+        background: var(--ship-col);
+        width: calc(var(--run-ship-size) / 2);
+        height: calc(var(--run-ship-size) / 2);
+        margin-bottom: 1px;
+    }
+}
+
+.Counts {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+
+    &.Column p {
+        margin: 0;
+    }
+
+    &.Row {
+        padding-right: 3px;
+    }
+
+    & p {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    }
+}
+
+.Inner {
+    justify-self: center;
+    display: grid;
+
+    position: relative;
+    width: fit-content;
+    height: fit-content;
+
+    gap: 1px;
+    background: var(--border-col);
+    border: 1px solid var(--border-col);
+}
+
+.Ship {
+    pointer-events: none;
+    object-fit: contain;
+    width: 90%;
+    height: auto;
+}
+
+.Solved div {
+    background: var(--solve-col);
+}
+
+.Square {
+    background-color: var(--square-col);
+
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 1px;
+
+    & div {
+        background: var(--ship-col);
+        width: 100%;
+        height: 100%;
+
+        border-radius: 5%;
+    }
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.Solved .Square {
+    padding: 0;
+
+    & div {
+        border-radius: 0;
+    }
+}
+
+.desaturated .Ship {
+    opacity: .5;
+}
+
+.over {
+    position: relative;
+    flex: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    &::after {
+        content: 'X';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--x-col);
+        pointer-events: none;
+        font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    }
+}

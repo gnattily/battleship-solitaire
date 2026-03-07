@@ -87,4 +87,10 @@ The state property is a bit more complicated. Normal squares are in the format (
 `11110` to denote sequences of water. It then appends one less than the number of squares in the sequence
 in `ceil(log2(width * height + 1))` bits.
 
-For more details, view the `.export` method directly in [Board.ts](./src/app/_board/Board.ts)
+The logical [`Board.ts`](./src/app/_board/logic/Board.ts) function returns the export as is, but exports
+on the website undergo one last step. To ensure URL compatibility, characters like `+`, `/`, and `=` are
+replaced with safe counterparts. `+` is replaced with `-`, `/` is replaced with `_`, and `=` is removed
+entirely. On import, these replacements are reversed and equals signs are dynamically reintroduced (only
+on the website, `Board.ts` does not support these exports without modification).
+
+For more details, view the `.export` method directly in [Board.ts](./src/app/_board/logic/Board.ts)
