@@ -1,20 +1,10 @@
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
 import stylistic from '@stylistic/eslint-plugin';
-import jsoncParser from 'jsonc-eslint-parser';
+import * as jsoncParser from 'jsonc-eslint-parser';
 import pluginJsonc from 'eslint-plugin-jsonc';
 import tseslint from 'typescript-eslint';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-    baseDirectory: __dirname,
-});
+import nextPlugin from '@next/eslint-plugin-next';
 
 const allScripts = ['**/*.{js,jsx,mjs,ts,tsx,mts}'];
-
 const stylisticConfig = stylistic.configs.customize({
     braceStyle: '1tbs',
     indent: 4,
@@ -33,10 +23,19 @@ const eslintConfig = [
             'out/**',
             'build/**',
             '.pnp/**',
+            'next-env.d.ts',
         ],
     },
 
-    ...compat.extends('next/core-web-vitals'),
+    {
+        plugins: {
+            '@next/next': nextPlugin,
+        },
+        rules: {
+            ...nextPlugin.configs.recommended.rules,
+            ...nextPlugin.configs['core-web-vitals'].rules,
+        },
+    },
 
     {
         files: ['**/*.ts', '**/*.tsx', '**/*.mts'],
