@@ -60,11 +60,12 @@ export default class BoardUI extends Component<Props, State> {
         };
     }
 
-    toggleMode (): void {
+    // arrow declaration to bind this properly
+    toggleMode = (): void => {
         this.setState({
             editMode: !this.state.editMode,
         });
-    }
+    };
 
     render (): JSX.Element {
         if (false) {
