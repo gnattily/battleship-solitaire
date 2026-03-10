@@ -27,11 +27,12 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
         let newType;
         const diff = event.button === 0 ? 1 : -1;
 
-        if (isEditMode) {
-            newType = (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT;
-        } else {
-            newType = (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
-        }
+        newType = isEditMode
+            ? (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT
+            : newType = (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
+
+        console.log(newType);
+        console.log(isEditMode);
 
         const newBoard = board.setShip(index, newType as AnyType);
         if (!isEditMode) newBoard.compTypes();

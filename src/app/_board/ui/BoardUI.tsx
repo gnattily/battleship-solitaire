@@ -5,7 +5,7 @@ import { TYPES } from '../logic/Ship';
 import Board from '../logic/Board';
 
 import PlayUI from './PlayUI';
-// import EditUI from './EditUI';
+import EditUI from './EditUI';
 
 import './css/BoardUI.css';
 import './css/Ships.css';
@@ -68,41 +68,35 @@ export default class BoardUI extends Component<Props, State> {
     };
 
     render (): JSX.Element {
-        if (false) {
-            // return (<EditUI />);
-        } else {
-            return (
-                <PlayUI
-                    board={this.state.board}
-                    setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
-                    initialBoard={this.#initialBoard}
-                    SQUARE_SIZE={50} /* px */
-                    toggleMode={this.toggleMode}
-                />
-            );
-        }
+        if (this.state.editMode) return (
+            <EditUI
+                board={this.state.board}
+                setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
+                SQUARE_SIZE={50} // px
+                toggleMode={this.toggleMode}
+            />
+        ); else return (
+            <PlayUI
+                board={this.state.board}
+                setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
+                initialBoard={this.#initialBoard}
+                SQUARE_SIZE={50} /* px */
+                toggleMode={this.toggleMode}
+            />
+        );
     }
 }
 
 export function typeToJSX (type: GraphicalType, key: number): JSX.Element | undefined {
     switch (type) {
-        case TYPES.UNKNOWN:
-            return;
-        case TYPES.SINGLE:
-            return <div className='Ship Single' key={key} />;
-        case TYPES.UP:
-            return <div className='Ship Up' key={key} />;
-        case TYPES.RIGHT:
-            return <div className='Ship Right' key={key} />;
-        case TYPES.LEFT:
-            return <div className='Ship Left' key={key} />;
-        case TYPES.DOWN:
-            return <div className='Ship Down' key={key} />;
-        case TYPES.SHIP:
-            return <div className='Ship UnknownShip' key={key} />;
-        case TYPES.ORTHOGONAL:
-            return <div className='Ship Orthogonal' key={key} />;
-        case TYPES.WATER:
-            return <div className='Ship Water' key={key} />;
+        case TYPES.UNKNOWN: return;
+        case TYPES.SINGLE: return <div className='Ship Single' key={key} />;
+        case TYPES.UP: return <div className='Ship Up' key={key} />;
+        case TYPES.RIGHT: return <div className='Ship Right' key={key} />;
+        case TYPES.LEFT: return <div className='Ship Left' key={key} />;
+        case TYPES.DOWN: return <div className='Ship Down' key={key} />;
+        case TYPES.SHIP: return <div className='Ship UnknownShip' key={key} />;
+        case TYPES.ORTHOGONAL: return <div className='Ship Orthogonal' key={key} />;
+        case TYPES.WATER: return <div className='Ship Water' key={key} />;
     }
 }

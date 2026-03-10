@@ -7,8 +7,12 @@ export type CommonParams = {
     SQUARE_SIZE: number;
 };
 
-export type ModeParams = CommonParams & {
+export type PlayParams = CommonParams & {
     initialBoard: Board;
+    toggleMode: () => void;
+};
+
+export type EditParams = CommonParams & {
     toggleMode: () => void;
 };
 

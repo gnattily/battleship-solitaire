@@ -4,9 +4,9 @@ import { typeToJSX } from './BoardUI';
 
 import type { JSX } from 'react';
 import InnerBoard from './shared/InnerBoard';
-import type { ModeParams } from './shared/Mode';
+import type { PlayParams } from './shared/Mode';
 
-export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: ModeParams): JSX.Element {
+export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: PlayParams): JSX.Element {
     const [solved, setSolved] = useState(board.isSolved());
 
     function solveBoard (): void {
