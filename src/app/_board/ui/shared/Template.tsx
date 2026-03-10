@@ -11,8 +11,6 @@ export default function Template ({
     editMode,
     buttons,
     onClickRuns,
-    onClickColCount,
-    onClickRowCount,
     extraColCountEl,
     extraRowCountEl,
 }: TemplateParams): JSX.Element {

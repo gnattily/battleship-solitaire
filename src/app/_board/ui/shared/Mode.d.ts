@@ -19,8 +19,6 @@ export type EditParams = CommonParams & {
 export type TemplateParams = CommonParams & {
     editMode: boolean;
     buttons: JSX.Element[];
-    onClickColCount: () => void;
-    onClickRowCount: () => void;
     onClickRuns?: () => void;
     extraRowCountEl?: JSX.Element;
     extraColCountEl?: JSX.Element;

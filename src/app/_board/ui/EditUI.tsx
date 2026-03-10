@@ -42,21 +42,30 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
         });
     }
 
-    // make this clickable to edit w/ textbox in place
+    // move the majority of this logic to template if at all possible
     function displayCounts (rows: boolean): JSX.Element[] {
         return (rows ? board.rowCounts : board.colCounts).map((count, index) => (
             <p
                 key={index}
-                onClick={() => {
-                    const newBoard = rows ? board.softFloodRow(index) : board.softFloodCol(index);
-                    newBoard.compTypes();
-                    setBoard(newBoard);
-                    setSolved(newBoard.isSolved());
-                }}
+                onClick={() => { inputCount(rows, index); }}
             >
                 {count}
             </p>
         ));
+    }
+
+    function inputCount (rows: boolean, index: number): void {
+        const newCount = Number(prompt('New count', '0'));
+
+        if (false
+            || !Number.isInteger(newCount)
+            || newCount < 0
+            || newCount > board[rows ? 'width' : 'height']
+        ) return alert('Invalid input');
+
+        const newBoard = board.copy();
+        newBoard[rows ? 'rowCounts' : 'colCounts'][index] = newCount;
+        setBoard(newBoard);
     }
 
     // make this clickable to edit w/ popup
