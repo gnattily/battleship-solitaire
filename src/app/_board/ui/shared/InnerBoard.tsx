@@ -21,7 +21,15 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     function onMouseDown (event: React.MouseEvent, index: number): void {
         const ship = board.getShip(index);
 
-        if (ship.pinned) return;
+        if (isEditMode
+            && ship.playType !== TYPES.UNKNOWN
+            && event.button === 1
+        ) {
+            board.setShip(index, ship.graphicalType, !ship.pinned);
+            return setBoard(board);
+        }
+
+        if (!isEditMode && ship.pinned) return;
         if (event.button !== 0 && event.button !== 2) return;
 
         let newType;
@@ -29,16 +37,13 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
 
         newType = isEditMode
             ? (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT
-            : newType = (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
+            : (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
 
-        console.log(newType);
-        console.log(isEditMode);
+        board.setShip(index, newType as AnyType);
+        if (!isEditMode) board.compTypes();
 
-        const newBoard = board.setShip(index, newType as AnyType);
-        if (!isEditMode) newBoard.compTypes();
-
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
+        setBoard(board);
+        setSolved(board.isSolved());
         setDraggedType(newType as AnyType);
         setDraggedButton(event.buttons);
     }
@@ -46,9 +51,9 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     function onMouseEnter (index: number): void {
         if (draggedType === undefined || board.getShip(index).pinned) return;
 
-        const newBoard = board.setShip(index, draggedType).compTypes();
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
+        board.setShip(index, draggedType).compTypes();
+        setBoard(board);
+        setSolved(board.isSolved());
     }
 
     function onEnterBoard (event: React.MouseEvent): void {

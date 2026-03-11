@@ -48,13 +48,13 @@ export default class Ship {
         return this.#type;
     }
 
+    // ships are often replaced so it could be good to remove this later -TODO
     get initialType (): AnyType {
         return this.#initialType;
     }
 
     // I want the string literals without effort
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    toString () {
+    toString (): String {
         switch (this.graphicalType) {
             case TYPES.UNKNOWN: return ' ';
             case TYPES.WATER: return '~';
@@ -77,7 +77,7 @@ export default class Ship {
     }
 
     /**
-     * Checks if the ship is cardinal
+     * Checks if the ship is facing up/down/left/right
      */
     isCardinal (): boolean {
         return CARDINALS.has(this.internalType);
