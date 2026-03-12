@@ -5,6 +5,7 @@
     --text-col: var(--ship-col);
     --border-col: #808080;
     --x-col: #ff0000;
+    --pin-col: #f99;
     --solve-col: hsl(145, 69%, 60%);
     --square-col: #ffffff;
     --button-col: #d3d3d3;

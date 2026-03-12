@@ -69,7 +69,7 @@ export default class Board {
         if (newState.length !== this.width * this.height) {
             const diff = this.width * this.height - newState.length;
             throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}),${
-                ' '}got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
+                ''} got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
         } else
             this.#state = newState;
     }
@@ -332,8 +332,6 @@ export default class Board {
             || !this.colCounts
             || !this.rowCounts
             || !this.runs
-            || this.colCounts.length === 0
-            || this.rowCounts.length === 0
             || this.runs.length === 0
         ) return this;
 
@@ -443,14 +441,14 @@ export default class Board {
                                 } else {
                                     // It's somewhere in the middle. This is unlikely to be much of a help
                                     // while solving and would take substantial effort to implement. Until
-                                    // an issue is created or I'm no longer lazy, I won't implement it.
-                                    // TODO
+                                    // an issue is created, I won't implement it.
+                                    // -TODO
                                 }
                             } else {
                                 // Like the previous one, this is unlikely to occur. If it does,
                                 // again like the other one it should find everywhere the ship
                                 // could go and find common squares between all possibilities.
-                                // Those are the squares that have to have something
+                                // Those are the squares that have to have something.
                             }
                         }
                     } else {
@@ -491,7 +489,7 @@ export default class Board {
                         // this is terribly inefficient since it has to instantiate
                         // a whole new board, but it works for now. maybe we could
                         // modify the actual board instead then revert things????
-                        // TODO improve efficiency
+                        // -TODO improve efficiency
                         const tmpBoard = this.copy();
 
                         for (const index of possibility) {

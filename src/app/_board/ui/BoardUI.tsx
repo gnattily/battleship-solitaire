@@ -36,20 +36,22 @@ export default class BoardUI extends Component<Props, State> {
         super(props);
 
         let board;
+        const hasSolveData = this.props.colCounts && this.props.rowCounts && this.props.runs;
 
+        // full board already provided
         if (this.props.board) board = Board.from(this.props.board);
+
+        // new empty board
         else if (this.props.width && this.props.height) {
-            if (this.props.colCounts && this.props.rowCounts && this.props.runs) {
+            if (hasSolveData)
                 board = new Board(this.props.width, this.props.height, this.props.colCounts, this.props.rowCounts, this.props.runs);
-            } else {
-                board = new Board(this.props.width, this.props.height);
-            }
+            else board = new Board(this.props.width, this.props.height);
+
+        // board from preset
         } else if (this.props.preset instanceof Board) {
-            if (this.props.colCounts && this.props.rowCounts && this.props.runs) {
+            if (hasSolveData)
                 board = new Board(this.props.preset, this.props.colCounts, this.props.rowCounts, this.props.runs);
-            } else {
-                board = new Board(this.props.preset);
-            }
+            else board = new Board(this.props.preset);
         } else throw new Error('Invalid props');
 
         this.#initialBoard = board.copy();

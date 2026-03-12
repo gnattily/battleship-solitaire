@@ -137,8 +137,8 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                     <button onClick={() => { solveBoard(); }}> Solve </button>
                     <button onClick={() => { reset(); }}> Reset </button>
                     <button onClick={() => { share(); }}> Share</button>
-                    <button onClick={() => { toggleMode(); }}> Edit </button>
-                    {/* Add an undo button on this an the Play UI */}
+                    <button onClick={() => { toggleMode(); }}> Play </button>
+                    {/* Add undo/redo buttons on this an the Play UI */}
                 </div>
                 <span />
             </div>

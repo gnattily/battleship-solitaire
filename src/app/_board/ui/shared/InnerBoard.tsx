@@ -79,7 +79,8 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
                 board.state.map((ship, index) => {
                     return (
                         <div
-                            className='Square nohighlight'
+                            // giving every square the same classes feels unnecessary -TODO
+                            className={`Square nohighlight ${isEditMode && ship.pinned ? 'pinned' : ''}`}
                             key={index}
                             onMouseDown={event => onMouseDown(event, index)}
                             onMouseEnter={() => onMouseEnter(index)}

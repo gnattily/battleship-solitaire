@@ -125,6 +125,10 @@
 
     padding: 1px;
 
+    &.pinned {
+        background-color: var(--pin-col) !important;
+    }
+
     & div {
         background: var(--ship-col);
         width: 100%;
