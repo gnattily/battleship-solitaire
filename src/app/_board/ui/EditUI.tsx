@@ -54,6 +54,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
         ));
     }
 
+    // doesnt show up with no count, set default to zero
     function inputCount (rows: boolean, index: number): void {
         const newCount = Number(prompt('New count', '0'));
 

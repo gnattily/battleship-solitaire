@@ -40,8 +40,8 @@ export default class Board {
 
             this.width = width;
             this.height = height;
-            this.colCounts = colCounts || [];
-            this.rowCounts = rowCounts || [];
+            this.colCounts = colCounts || new Array(width).fill(0);
+            this.rowCounts = rowCounts || new Array(height).fill(0);
             this.runs = runs || [];
             this.#state = createState(this.width, this.height);
         } else if (
