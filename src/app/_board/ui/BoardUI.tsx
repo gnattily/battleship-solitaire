@@ -5,7 +5,7 @@ import { TYPES } from '../logic/Ship';
 import Board from '../logic/Board';
 
 import PlayUI from './PlayUI';
-import EditUI from './EditUI';
+import EditUI from './edit/EditUI';
 
 import './css/BoardUI.css';
 import './css/Ships.css';

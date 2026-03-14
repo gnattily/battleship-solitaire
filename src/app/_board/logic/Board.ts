@@ -267,7 +267,7 @@ export default class Board {
         if (state.length !== width * height) {
             const diff = width * height - state.length;
             throw new Error(`Expected state.length to equal width (${width}) * height (${height}),${
-                ' '}got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
+                ''} got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
         }
 
         const board = new Board(width, height, colCounts, rowCounts, runs);
@@ -441,7 +441,7 @@ export default class Board {
                                 } else {
                                     // It's somewhere in the middle. This is unlikely to be much of a help
                                     // while solving and would take substantial effort to implement. Until
-                                    // an issue is created, I won't implement it.
+                                    // it's an issue, I won't implement it.
                                     // -TODO
                                 }
                             } else {
@@ -796,7 +796,8 @@ export default class Board {
 
         for (let i = 0; i < this.state.length; i++) {
             const ship = this.getShip(i);
-            if (ship.pinned && (ship.initialType > TYPES.SHIP || ship.initialType > TYPES.ORTHOGONAL) && ship.initialType !== TYPES.ORTHOGONAL) continue;
+            // make a static method on ship for this to tell if the type starts resolved -TODO
+            if (ship.pinned && ship.initialType > TYPES.SHIP && ship.initialType !== TYPES.ORTHOGONAL) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
@@ -809,9 +810,14 @@ export default class Board {
             if (isWater(left, top, right, bottom)) ship.internalType = TYPES.SINGLE;
             else if (isShip(left, right)) ship.internalType = TYPES.HORIZONTAL;
             else if (isShip(top, bottom)) ship.internalType = TYPES.VERTICAL;
-            else if (ship.initialType === TYPES.ORTHOGONAL) {
+            else if (false
+                || ship.initialType === TYPES.ORTHOGONAL
+                || ship.initialType === TYPES.HORIZONTAL
+                || ship.initialType === TYPES.VERTICAL
+            ) {
                 if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPES.HORIZONTAL;
                 else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPES.VERTICAL;
+                else ship.internalType = TYPES.ORTHOGONAL;
             } else if (isShip(left) && isWater(right)) ship.internalType = TYPES.LEFT;
             else if (isShip(top) && isWater(bottom)) ship.internalType = TYPES.UP;
             else if (isShip(right) && isWater(left)) ship.internalType = TYPES.RIGHT;
