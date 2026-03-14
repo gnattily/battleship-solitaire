@@ -7,10 +7,12 @@ import SetCount from './SetCount';
 
 import type { JSX } from 'react';
 import type { EditParams } from '../shared/Mode';
+import EditRuns from './EditRuns';
 
 export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: EditParams): JSX.Element {
     const [solved, setSolved] = useState(board.isSolved());
     const [editingIndex, setEditingIndex] = useState<number | undefined>(undefined);
+    const [editingRuns, setEditingRuns] = useState(false);
 
     function solveBoard (): void {
         const newBoard = board.solve();
@@ -96,54 +98,66 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
         return out;
     }
 
-    function renderRun (length: number): (JSX.Element | undefined)[] {
-        if (length === 1) return [typeToJSX(TYPES.SINGLE, 0)];
+    return (
+        <>
+            <div className='Board' key={0}>
+                <div className='Content'>
+                    <span />
+                    <div
+                        className='Column Counts'
+                        style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
+                    >
+                        {displayCounts(false) /* false = columns */}
+                    </div>
+                    <span />
 
-        const out = [typeToJSX(TYPES.DOWN, 0)];
+                    <div
+                        className='Row Counts'
+                        style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
+                    >
+                        {displayCounts(true) /* true = rows */}
+                    </div>
+                    <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={true} />
+                    <div
+                        onClick={() => { setEditingRuns(true); }}
+                        className='Runs'
+                        style={{ height: board.height * SQUARE_SIZE + board.height + 1 + 'px' }}
+                    >
+                        {displayRuns()}
+                    </div>
 
+                    <span />
+                    <div className='Buttons'>
+                        <button onClick={() => { solveBoard(); }}> Solve </button>
+                        <button onClick={() => { reset(); }}> Reset </button>
+                        <button onClick={() => { share(); }}> Share</button>
+                        <button onClick={() => { toggleMode(); }}> Play </button>
+                        {/* Add undo/redo buttons on this an the Play UI */}
+                    </div>
+                    <span />
+                </div>
+            </div>
+            {editingRuns && <EditRuns board={board} setBoard={setBoard} del={() => { setEditingRuns(false); }} />}
+        </>
+    );
+}
+
+export function renderRun (length: number): (JSX.Element | undefined)[] {
+    if (length === 1) return [typeToJSX(TYPES.SINGLE, 0)];
+
+    const out = [typeToJSX(TYPES.DOWN, 0)];
+
+    if (length <= 5) {
         for (let i = 0; i < length - 2; i++) {
             out.push(typeToJSX(TYPES.ORTHOGONAL, i + 1));
         }
-
-        return [...out, typeToJSX(TYPES.UP, out.length)];
+    } else {
+        out.push(
+            <p key={1} className='ellipsis'>...</p>,
+            <p key={2} className='length'>{length}</p>,
+            <p key={3} className='ellipsis'>...</p>,
+        );
     }
 
-    return (
-        <div className='Board'>
-            <div className='Content'>
-                <span />
-                <div
-                    className='Column Counts'
-                    style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
-                >
-                    {displayCounts(false) /* false = columns */}
-                </div>
-                <span />
-
-                <div
-                    className='Row Counts'
-                    style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
-                >
-                    {displayCounts(true) /* true = rows */}
-                </div>
-                <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={true} />
-                <div
-                    className='Runs'
-                    style={{ height: board.height * SQUARE_SIZE + board.height + 1 + 'px' }}
-                >
-                    {displayRuns()}
-                </div>
-
-                <span />
-                <div className='Buttons'>
-                    <button onClick={() => { solveBoard(); }}> Solve </button>
-                    <button onClick={() => { reset(); }}> Reset </button>
-                    <button onClick={() => { share(); }}> Share</button>
-                    <button onClick={() => { toggleMode(); }}> Play </button>
-                    {/* Add undo/redo buttons on this an the Play UI */}
-                </div>
-                <span />
-            </div>
-        </div>
-    );
+    return [...out, typeToJSX(TYPES.UP, out.length)];
 }

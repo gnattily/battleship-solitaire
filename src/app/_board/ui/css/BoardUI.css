@@ -50,13 +50,22 @@
 
     height: 766px;
     width: fit-content;
+    min-width: 50px;
 
     transform: scaleX(-100%);
+
+    &:hover {
+        background-color: rgba(0, 0, 0, .1);
+    }
+
+    &>.Run {
+        padding-right: 3px;
+        padding-top: 3px
+    }
 }
 
 .Run {
     display: flex;
-    padding: 3px;
 
     & .Ship {
         background: var(--ship-col);
@@ -171,5 +180,55 @@
         color: var(--x-col);
         pointer-events: none;
         font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    }
+}
+
+.EditRuns {
+    position: absolute;
+    background-color: var(--background);
+    border: 1px solid var(--border-col);
+    border-radius: 5px;
+
+    &>p {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        margin: 0;
+
+        &:hover {
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    }
+
+    &>div {
+        margin: 10px;
+        display: grid;
+        grid-template-rows: auto auto;
+        align-items: baseline;
+
+        &>span {
+            margin-left: 3px;
+
+            &>span {
+                writing-mode: vertical-rl;
+                align-items: center;
+                width: 100%;
+                margin-bottom: 3px;
+
+                &>div {
+                    height: 50px;
+                    width: 50px;
+                }
+            }
+
+            &>input {
+                width: 30px
+            }
+        }
+
+        &>span:first-child {
+            margin-left: 0px !important;
+        }
     }
 }
