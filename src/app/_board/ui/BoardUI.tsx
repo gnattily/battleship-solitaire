@@ -25,12 +25,15 @@ interface Props {
 
 interface State {
     board: Board;
+    solved: boolean;
     editMode: boolean;
 }
 
 export default class BoardUI extends Component<Props, State> {
     readonly #initialBoard: Board;
     readonly SIZE = 50; // px
+    history: Board[] = [];
+    historyIndex = 0;
 
     constructor (props: Props) {
         super(props);
@@ -58,8 +61,11 @@ export default class BoardUI extends Component<Props, State> {
 
         this.state = {
             board: board,
+            solved: board.isSolved(),
             editMode: false,
         };
+
+        this.history.push(board.copy());
     }
 
     // arrow declaration to bind this properly
@@ -69,21 +75,46 @@ export default class BoardUI extends Component<Props, State> {
         });
     };
 
+    setBoard = (newBoard: Board): void => {
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        this.history.push(newBoard.copy());
+        this.historyIndex++;
+        this.setState({ board: newBoard, solved: newBoard.isSolved() });
+    };
+
+    undo = (): void => {
+        this.historyIndex = Math.max(this.historyIndex - 1, 0);
+        const newBoard = this.history[this.historyIndex].copy();
+        this.setState({ board: newBoard, solved: newBoard.isSolved() });
+    };
+
+    redo = (): void => {
+        this.historyIndex = Math.min(this.history.length - 1, this.historyIndex + 1);
+        const newBoard = this.history[this.historyIndex].copy();
+        this.setState({ board: newBoard, solved: newBoard.isSolved() });
+    };
+
     render (): JSX.Element {
         if (this.state.editMode) return (
             <EditUI
                 board={this.state.board}
-                setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
+                setBoard={this.setBoard}
                 SQUARE_SIZE={50} // px
                 toggleMode={this.toggleMode}
+                undo={this.undo}
+                redo={this.redo}
+                solved={this.state.solved}
             />
         ); else return (
             <PlayUI
                 board={this.state.board}
-                setBoard={(newBoard: Board) => { this.setState({ board: newBoard }); }}
+                setBoard={this.setBoard}
                 initialBoard={this.#initialBoard}
                 SQUARE_SIZE={50} /* px */
                 toggleMode={this.toggleMode}
+                undo={this.undo}
+                redo={this.redo}
+                solved={this.state.solved}
             />
         );
     }

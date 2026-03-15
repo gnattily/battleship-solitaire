@@ -10,11 +10,10 @@ type Params = {
     board: Board;
     setBoard: (newBoard: Board) => void;
     solved: boolean;
-    setSolved: (isSolved: boolean) => void;
     isEditMode: boolean;
 };
 
-export default function InnerBoard ({ board, setBoard, solved, setSolved, isEditMode }: Params): JSX.Element {
+export default function InnerBoard ({ board, setBoard, solved, isEditMode }: Params): JSX.Element {
     const [draggedType, setDraggedType] = useState<AnyType | undefined>(undefined);
     const [draggedButton, setDraggedButton] = useState<number | undefined>(undefined);
 
@@ -43,7 +42,6 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
         if (!isEditMode) board.compTypes();
 
         setBoard(board);
-        setSolved(board.isSolved());
         setDraggedType(newType as AnyType);
         setDraggedButton(event.buttons);
     }
@@ -54,7 +52,6 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
         board.setShip(index, draggedType, isEditMode && draggedType !== TYPES.UNKNOWN);
         if (!isEditMode) board.compTypes();
         setBoard(board);
-        setSolved(board.isSolved());
     }
 
     function onEnterBoard (event: React.MouseEvent): void {

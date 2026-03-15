@@ -9,8 +9,7 @@ import type { JSX } from 'react';
 import type { EditParams } from '../shared/Mode';
 import EditRuns from './EditRuns';
 
-export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: EditParams): JSX.Element {
-    const [solved, setSolved] = useState(board.isSolved());
+export default function EditUI ({ board, setBoard, SQUARE_SIZE, undo, redo, toggleMode, solved }: EditParams): JSX.Element {
     const [editingIndex, setEditingIndex] = useState<number | undefined>(undefined);
     const [editingRuns, setEditingRuns] = useState(false);
 
@@ -20,7 +19,6 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
     function solveBoard (): void {
         const newBoard = board.solve();
         setBoard(newBoard);
-        setSolved(newBoard.isSolved());
     }
 
     function reset (): void {
@@ -161,7 +159,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                     >
                         {displayCounts(true) /* true = rows */}
                     </div>
-                    <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={true} />
+                    <InnerBoard board={board} setBoard={setBoard} solved={solved} isEditMode={true} />
                     <div
                         onClick={() => { setEditingRuns(true); }}
                         className='Runs'
@@ -172,10 +170,12 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
 
                     {dimension(false)}
                     <div className='Buttons'>
-                        <button onClick={() => { solveBoard(); }}> Solve </button>
-                        <button onClick={() => { reset(); }}> Reset </button>
-                        <button onClick={() => { share(); }}> Share</button>
-                        <button onClick={() => { toggleMode(); }}> Play </button>
+                        <button onClick={() => { solveBoard(); }}>Solve</button>
+                        <button onClick={() => { reset(); }}>Clear</button>
+                        <button onClick={() => { undo(); }}>Undo</button>
+                        <button onClick={() => { redo(); }}>Redo</button>
+                        <button onClick={() => { share(); }}>Share</button>
+                        <button onClick={() => { toggleMode(); }}>Play</button>
                         {/* Add undo/redo buttons on this an the Play UI */}
                     </div>
                     <span />

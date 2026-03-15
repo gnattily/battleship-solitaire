@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { TYPES } from '../logic/Ship';
 import { typeToJSX } from './BoardUI';
 
@@ -6,19 +5,15 @@ import type { JSX } from 'react';
 import InnerBoard from './shared/InnerBoard';
 import type { PlayParams } from './shared/Mode';
 
-export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: PlayParams): JSX.Element {
-    const [solved, setSolved] = useState(board.isSolved());
-
+export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, undo, redo, solved, toggleMode }: PlayParams): JSX.Element {
     function solveBoard (): void {
         const newBoard = board.solve();
         setBoard(newBoard);
-        setSolved(newBoard.isSolved());
     }
 
     function reset (): void {
         const newBoard = initialBoard.copy();
         setBoard(newBoard);
-        setSolved(newBoard.isSolved());
     }
 
     function share (): void {
@@ -44,7 +39,6 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                     const newBoard = rows ? board.softFloodRow(index) : board.softFloodCol(index);
                     newBoard.compTypes();
                     setBoard(newBoard);
-                    setSolved(newBoard.isSolved());
                 }}
             >
                 {count}
@@ -108,7 +102,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                 >
                     {displayCounts(true) /* true = rows */}
                 </div>
-                <InnerBoard board={board} setBoard={setBoard} solved={solved} setSolved={setSolved} isEditMode={false} />
+                <InnerBoard board={board} setBoard={setBoard} solved={solved} isEditMode={false} />
                 <div
                     className='Runs'
                     style={{ height: board.height * SQUARE_SIZE + board.height + 1 + 'px' }}
@@ -120,6 +114,8 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                 <div className='Buttons'>
                     <button onClick={() => { solveBoard(); }}> Solve </button>
                     <button onClick={() => { reset(); }}> Reset </button>
+                    <button onClick={() => { undo(); }}>Undo</button>
+                    <button onClick={() => { redo(); }}>Redo</button>
                     <button onClick={() => { share(); }}> Share</button>
                     <button onClick={() => { toggleMode(); }}> Edit </button>
                 </div>
