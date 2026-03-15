@@ -2,21 +2,21 @@ import type { KeyboardEvent } from 'react';
 import { useRef, type JSX } from 'react';
 
 type Params = {
-    updateCount: (count: number) => void;
+    updateNum: (count: number) => void;
     del: () => void;
-    initCount: number;
+    initNum: number;
     max: number;
+    min: number;
 };
 
-export default function SetCount ({ initCount, updateCount, del, max }: Params): JSX.Element {
+export default function SetNum ({ initNum, updateNum, del, max, min }: Params): JSX.Element {
     const input = useRef<HTMLInputElement>(null);
 
     function submit (): void {
         if (!input.current) throw ReferenceError;
         const val = parseInt(input.current.value);
 
-        if (Number.isInteger(val) && val >= 0 && val <= max)
-            updateCount(val);
+        if (Number.isInteger(val) && val >= 0 && val <= max) updateNum(val);
 
         del();
     }
@@ -31,9 +31,9 @@ export default function SetCount ({ initCount, updateCount, del, max }: Params):
             autoFocus
             ref={input}
             type='number'
-            min={0}
+            min={min}
             max={max}
-            defaultValue={initCount}
+            defaultValue={initNum}
             onKeyDown={handleKey}
             onBlur={submit}
             onFocus={e => e.target.select()}

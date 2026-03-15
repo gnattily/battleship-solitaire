@@ -232,3 +232,16 @@
         }
     }
 }
+
+.width,
+.height {
+    margin: 0;
+}
+
+.width {
+    margin-left: 10px;
+}
+
+.height {
+    margin-top: 5px;
+}

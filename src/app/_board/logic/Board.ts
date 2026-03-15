@@ -7,8 +7,8 @@ import type { AnyType } from './Ship';
  * @param {...any} args All arguments
  */
 export default class Board {
-    width: number;
-    height: number;
+    #width: number;
+    #height: number;
     colCounts: number[];
     rowCounts: number[];
     runs: number[];
@@ -31,15 +31,15 @@ export default class Board {
             if (!Number.isInteger(height) || !Number.isInteger(width))
                 throw new TypeError(`Expected width and height to be integers, got ${width} and ${height}`);
 
-            if (height <= 0 || width <= 0 || height >= 256 || width >= 256)
-                throw new RangeError('Width or height outside expected range (0 - 255)');
+            if (height <= 0 || width <= 0 || height > 32 || width > 32)
+                throw new RangeError('Width or height outside expected range (1 - 32)');
 
             if ((colCounts && colCounts.length !== 0 && colCounts.length !== width)
                 || (rowCounts && rowCounts.length !== 0 && rowCounts.length !== height))
                 throw new Error('colCounts and rowCounts\' lengths must match the width and height of the board respectively');
 
-            this.width = width;
-            this.height = height;
+            this.#width = width;
+            this.#height = height;
             this.colCounts = colCounts || new Array(width).fill(0);
             this.rowCounts = rowCounts || new Array(height).fill(0);
             this.runs = runs || [];
@@ -54,8 +54,8 @@ export default class Board {
             if (typeof preset === 'string') preset = Board.from(preset);
 
             this.preset = preset;
-            this.width = preset.width;
-            this.height = preset.height;
+            this.#width = preset.width;
+            this.#height = preset.height;
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
@@ -77,6 +77,44 @@ export default class Board {
     get state (): Ship[] {
         return this.#state;
     }
+
+    // setting dimensions might be a bit costly but it happens so infrequently that it's not an issue
+    set width (newWidth: number) {
+        const old = this.copy();
+
+        if (!Number.isInteger(newWidth))
+            throw new TypeError(`Expected width to be an integer, got ${newWidth}`);
+        if (newWidth <= 0 || newWidth > 32)
+            throw new RangeError('Width outside expected range (1 - 32)');
+
+        this.#width = newWidth;
+        this.#updateState(old);
+    }
+
+    set height (newHeight: number) {
+        const old = this.copy();
+
+        if (!Number.isInteger(newHeight))
+            throw new TypeError(`Expected height to be an integer, got ${newHeight}`);
+        if (newHeight <= 0 || newHeight > 32)
+            throw new RangeError('Height outside expected range (1 - 32)');
+
+        this.#height = newHeight;
+        this.#updateState(old);
+    }
+
+    #updateState (old: Board): void {
+        this.state = createState(this.width, this.height);
+
+        for (let x = 0; x < Math.min(this.width, old.width); x++) {
+            for (let y = 0; y < Math.min(this.height, old.height); y++) {
+                this.setShip([x, y], old.getShip([x, y]));
+            }
+        }
+    }
+
+    get width (): number { return this.#width; }
+    get height (): number { return this.#height; }
 
     toString (): string {
         return boardToString(this);

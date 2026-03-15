@@ -3,7 +3,7 @@ import { TYPES } from '../../logic/Ship';
 import { typeToJSX } from '../BoardUI';
 import InnerBoard from '../shared/InnerBoard';
 import Board from '../../logic/Board';
-import SetCount from './SetCount';
+import SetNum from './SetNum';
 
 import type { JSX } from 'react';
 import type { EditParams } from '../shared/Mode';
@@ -13,6 +13,9 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
     const [solved, setSolved] = useState(board.isSolved());
     const [editingIndex, setEditingIndex] = useState<number | undefined>(undefined);
     const [editingRuns, setEditingRuns] = useState(false);
+
+    // 0 = editing width, 1 = editing height, undefined = not editing
+    const [editingDimension, setEditingDimension] = useState<undefined | 0 | 1>();
 
     function solveBoard (): void {
         const newBoard = board.solve();
@@ -48,20 +51,21 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
 
     function displayCounts (rows: boolean): JSX.Element[] {
         return (rows ? board.rowCounts : board.colCounts).map((count, index) => {
-            if (index + (rows ? board.width : 0) === editingIndex)
+            if (index + (rows ? board.width : 0) === editingIndex) {
                 return (
-                    <SetCount
+                    <SetNum
                         key={index}
-                        initCount={count}
+                        initNum={count}
                         max={rows ? board.width : board.height}
-                        updateCount={updatedCount => {
+                        min={0}
+                        updateNum={updatedCount => {
                             (rows ? board.rowCounts : board.colCounts)[index] = updatedCount;
                             setBoard(board);
                         }}
                         del={() => setEditingIndex(undefined)}
                     />
                 );
-            else
+            } else {
                 return (
                     <p
                         key={index}
@@ -70,6 +74,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                         {count}
                     </p>
                 );
+            }
         });
     }
 
@@ -98,6 +103,45 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
         return out;
     }
 
+    function dimension (width: boolean): JSX.Element {
+        if (editingDimension === 0 && width) {
+            return (
+                <SetNum
+                    initNum={board.width}
+                    max={32}
+                    min={1}
+                    updateNum={updatedDimension => {
+                        board.width = updatedDimension;
+                        setBoard(board);
+                    }}
+                    del={() => { setEditingDimension(undefined); }}
+                />
+            );
+        } if (editingDimension === 1 && !width) {
+            return (
+                <SetNum
+                    initNum={board.height}
+                    max={32}
+                    min={1}
+                    updateNum={updatedDimension => {
+                        board.height = updatedDimension;
+                        setBoard(board);
+                    }}
+                    del={() => { setEditingDimension(undefined); }}
+                />
+            );
+        } else {
+            return (
+                <p
+                    className={width ? 'width' : 'height'}
+                    onClick={() => { setEditingDimension(width ? 0 : 1); alert(`${width}, ${editingDimension}`); }}
+                >
+                    {width ? board.width : board.height}
+                </p>
+            );
+        }
+    }
+
     return (
         <>
             <div className='Board' key={0}>
@@ -109,7 +153,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                     >
                         {displayCounts(false) /* false = columns */}
                     </div>
-                    <span />
+                    {dimension(true)}
 
                     <div
                         className='Row Counts'
@@ -126,7 +170,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                         {displayRuns()}
                     </div>
 
-                    <span />
+                    {dimension(false)}
                     <div className='Buttons'>
                         <button onClick={() => { solveBoard(); }}> Solve </button>
                         <button onClick={() => { reset(); }}> Reset </button>
