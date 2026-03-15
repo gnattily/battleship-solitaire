@@ -25,7 +25,10 @@ export default class Board {
         | [Board | string]
         | [Board | string, number[], number[], number[]]
     ) {
-        if (typeof args[0] === 'number' && typeof args[1] === 'number') {
+        if (true
+            && typeof args[0] === 'number'
+            && typeof args[1] === 'number'
+        ) {
             const [width, height, colCounts, rowCounts, runs] = args;
 
             if (!Number.isInteger(height) || !Number.isInteger(width))
@@ -44,8 +47,8 @@ export default class Board {
             this.rowCounts = rowCounts || new Array(height).fill(0);
             this.runs = runs || [];
             this.#state = createState(this.width, this.height);
-        } else if (
-            (args[0] instanceof Board || typeof args[0] === 'string')
+        } else if (true
+            && (args[0] instanceof Board || typeof args[0] === 'string')
             && typeof args[1] !== 'number'
         ) {
             let preset = args[0];
@@ -70,8 +73,7 @@ export default class Board {
             const diff = this.width * this.height - newState.length;
             throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}),${
                 ''} got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
-        } else
-            this.#state = newState;
+        } else this.#state = newState;
     }
 
     get state (): Ship[] {
@@ -88,7 +90,7 @@ export default class Board {
             throw new RangeError('Width outside expected range (1 - 32)');
 
         this.#width = newWidth;
-        this.#updateState(old);
+        this.#updateProps(old);
     }
 
     set height (newHeight: number) {
@@ -100,10 +102,10 @@ export default class Board {
             throw new RangeError('Height outside expected range (1 - 32)');
 
         this.#height = newHeight;
-        this.#updateState(old);
+        this.#updateProps(old);
     }
 
-    #updateState (old: Board): void {
+    #updateProps (old: Board): void {
         this.state = createState(this.width, this.height);
 
         for (let x = 0; x < Math.min(this.width, old.width); x++) {
@@ -111,6 +113,10 @@ export default class Board {
                 this.setShip([x, y], old.getShip([x, y]));
             }
         }
+
+        this.colCounts = resizeArray(this.colCounts, this.width);
+        this.rowCounts = resizeArray(this.rowCounts, this.height);
+        this.runs = this.runs.slice(0, Math.max(this.width, this.height));
     }
 
     get width (): number { return this.#width; }
@@ -1084,6 +1090,11 @@ function createState (width: number, height: number, preset?: Board): Ship[] {
     return out;
 }
 
+function resizeArray (arr: number[], newSize: number): number[] {
+    if (newSize >= arr.length) return [...arr, ...new Array(newSize - arr.length).fill(0)];
+    return arr.slice(0, newSize);
+}
+
 /**
  * Postions around a square
  */
@@ -1109,7 +1120,7 @@ export type RelativePosition = typeof REL_POS[keyof typeof REL_POS];
 type Run = number[];
 
 /**
- * [x, y] starting at 0
+ * [x, y] starting at 0, anchored top left
  */
 type Coordinates = [number, number];
 
