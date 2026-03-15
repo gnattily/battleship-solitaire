@@ -96,7 +96,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                 <span />
                 <div
                     className='Column Counts'
-                    style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
+                    style={{ gridTemplate: `auto / repeat(${board.width}, ${SQUARE_SIZE}px)` }}
                 >
                     {displayCounts(false) /* false = columns */}
                 </div>
@@ -104,7 +104,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
 
                 <div
                     className='Row Counts'
-                    style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
+                    style={{ gridTemplate: `repeat(${board.height}, ${SQUARE_SIZE}px) / auto` }}
                 >
                     {displayCounts(true) /* true = rows */}
                 </div>

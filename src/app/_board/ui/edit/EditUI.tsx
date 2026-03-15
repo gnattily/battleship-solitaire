@@ -134,7 +134,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
             return (
                 <p
                     className={width ? 'width' : 'height'}
-                    onClick={() => { setEditingDimension(width ? 0 : 1); alert(`${width}, ${editingDimension}`); }}
+                    onClick={() => { setEditingDimension(width ? 0 : 1); }}
                 >
                     {width ? board.width : board.height}
                 </p>
@@ -149,7 +149,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
                     <span />
                     <div
                         className='Column Counts'
-                        style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
+                        style={{ gridTemplate: `auto / repeat(${board.width}, ${SQUARE_SIZE}px)` }}
                     >
                         {displayCounts(false) /* false = columns */}
                     </div>
@@ -157,7 +157,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, toggleMode }: Ed
 
                     <div
                         className='Row Counts'
-                        style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
+                        style={{ gridTemplate: `repeat(${board.height}, ${SQUARE_SIZE}px) / auto` }}
                     >
                         {displayCounts(true) /* true = rows */}
                     </div>

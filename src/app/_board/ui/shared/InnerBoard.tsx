@@ -72,7 +72,7 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     return (
         <div
             className={'Inner' + (solved ? ' Solved' : '')}
-            style={{ gridTemplate: `repeat(${board.width}, 50px) / repeat(${board.height}, 50px)` }}
+            style={{ gridTemplate: `repeat(${board.height}, 50px) / repeat(${board.width}, 50px)` }}
             onMouseEnter={e => onEnterBoard(e)}
         >
             {
