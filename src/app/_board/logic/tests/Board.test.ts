@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
-import Board, { REL_POS } from './Board';
-import Ship, { TYPES } from './Ship';
+import Board, { REL_POS } from '../Board';
+import Ship, { TYPES } from '../Ship';
 
 test('constructor', () => {
     expect(() => { new Board(-1, 14); }).toThrow('outside expected range');
@@ -14,6 +14,46 @@ test('constructor', () => {
 
     // the constructor is used extensively throughout testing
     // so I don't see much of a use in too extensive of tests
+});
+
+test('setDimensions', () => {
+    const board = new Board(3, 3)
+        .softFloodCol(0)
+        .softFloodCol(1, TYPES.DOWN)
+        .softFloodCol(2, TYPES.RIGHT);
+
+    expect(() => { board.width = 0; }).toThrow(RangeError);
+    expect(() => { board.width = 33; }).toThrow(RangeError);
+    expect(() => { board.width = 2.3; }).toThrow(TypeError);
+    expect(() => { board.height = 0; }).toThrow(RangeError);
+    expect(() => { board.height = 33; }).toThrow(RangeError);
+    expect(() => { board.height = 2.3; }).toThrow(TypeError);
+
+    // expand
+    board.height = 4;
+    board.width = 4;
+    expect(board.width).toBe(4);
+    expect(board.height).toBe(4);
+    expect(board.colCounts.length).toBe(4);
+    expect(board.rowCounts.length).toBe(4);
+    expect(board.getShip([2, 0]).internalType).toBe(TYPES.RIGHT);
+    expect(board.getShip([3, 0]).internalType).toBe(TYPES.UNKNOWN);
+    expect(board.getShip([0, 2]).internalType).toBe(TYPES.WATER);
+    expect(board.getShip([0, 3]).internalType).toBe(TYPES.UNKNOWN);
+    expect(board.getShip([1, 1]).internalType).toBe(TYPES.DOWN);
+    expect(board.getShip([2, 2]).internalType).toBe(TYPES.RIGHT);
+
+    // shrink
+    board.height = 2;
+    board.width = 2;
+    expect(board.width).toBe(2);
+    expect(board.height).toBe(2);
+    expect(board.colCounts.length).toBe(2);
+    expect(board.rowCounts.length).toBe(2);
+    expect(board.getShip([0, 0]).internalType).toBe(TYPES.WATER);
+    expect(board.getShip([0, 1]).internalType).toBe(TYPES.WATER);
+    expect(board.getShip([1, 0]).internalType).toBe(TYPES.DOWN);
+    expect(board.getShip([1, 1]).internalType).toBe(TYPES.DOWN);
 });
 
 test('createState', () => {

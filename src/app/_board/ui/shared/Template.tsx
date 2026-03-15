@@ -11,8 +11,6 @@ export default function Template ({
     editMode,
     buttons,
     onClickRuns,
-    onClickColCount,
-    onClickRowCount,
     extraColCountEl,
     extraRowCountEl,
 }: TemplateParams): JSX.Element {
@@ -70,8 +68,6 @@ export default function Template ({
         return [...out, typeToJSX(TYPES.UP, out.length)];
     }
 
-    // Content div is unnecessary, but has all the styling.
-    // Remove Board div and rename Content to Board. -TODO
     return (
         <div className='Board'>
             <div className='Content'>

@@ -4,9 +4,9 @@ import { typeToJSX } from './BoardUI';
 
 import type { JSX } from 'react';
 import InnerBoard from './shared/InnerBoard';
-import type { ModeParams } from './shared/Mode';
+import type { PlayParams } from './shared/Mode';
 
-export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: ModeParams): JSX.Element {
+export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, toggleMode }: PlayParams): JSX.Element {
     const [solved, setSolved] = useState(board.isSolved());
 
     function solveBoard (): void {
@@ -96,7 +96,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
                 <span />
                 <div
                     className='Column Counts'
-                    style={{ gridTemplate: `auto / repeat(${board.height}, ${SQUARE_SIZE}px)` }}
+                    style={{ gridTemplate: `auto / repeat(${board.width}, ${SQUARE_SIZE}px)` }}
                 >
                     {displayCounts(false) /* false = columns */}
                 </div>
@@ -104,7 +104,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, to
 
                 <div
                     className='Row Counts'
-                    style={{ gridTemplate: `repeat(${board.width}, ${SQUARE_SIZE}px) / auto` }}
+                    style={{ gridTemplate: `repeat(${board.height}, ${SQUARE_SIZE}px) / auto` }}
                 >
                     {displayCounts(true) /* true = rows */}
                 </div>

@@ -7,16 +7,18 @@ export type CommonParams = {
     SQUARE_SIZE: number;
 };
 
-export type ModeParams = CommonParams & {
+export type PlayParams = CommonParams & {
     initialBoard: Board;
+    toggleMode: () => void;
+};
+
+export type EditParams = CommonParams & {
     toggleMode: () => void;
 };
 
 export type TemplateParams = CommonParams & {
     editMode: boolean;
     buttons: JSX.Element[];
-    onClickColCount: () => void;
-    onClickRowCount: () => void;
     onClickRuns?: () => void;
     extraRowCountEl?: JSX.Element;
     extraColCountEl?: JSX.Element;

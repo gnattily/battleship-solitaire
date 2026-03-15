@@ -7,8 +7,8 @@ import type { AnyType } from './Ship';
  * @param {...any} args All arguments
  */
 export default class Board {
-    width: number;
-    height: number;
+    #width: number;
+    #height: number;
     colCounts: number[];
     rowCounts: number[];
     runs: number[];
@@ -25,27 +25,30 @@ export default class Board {
         | [Board | string]
         | [Board | string, number[], number[], number[]]
     ) {
-        if (typeof args[0] === 'number' && typeof args[1] === 'number') {
+        if (true
+            && typeof args[0] === 'number'
+            && typeof args[1] === 'number'
+        ) {
             const [width, height, colCounts, rowCounts, runs] = args;
 
             if (!Number.isInteger(height) || !Number.isInteger(width))
                 throw new TypeError(`Expected width and height to be integers, got ${width} and ${height}`);
 
-            if (height <= 0 || width <= 0 || height >= 256 || width >= 256)
-                throw new RangeError('Width or height outside expected range (0 - 255)');
+            if (height <= 0 || width <= 0 || height > 32 || width > 32)
+                throw new RangeError('Width or height outside expected range (1 - 32)');
 
             if ((colCounts && colCounts.length !== 0 && colCounts.length !== width)
                 || (rowCounts && rowCounts.length !== 0 && rowCounts.length !== height))
                 throw new Error('colCounts and rowCounts\' lengths must match the width and height of the board respectively');
 
-            this.width = width;
-            this.height = height;
-            this.colCounts = colCounts || [];
-            this.rowCounts = rowCounts || [];
+            this.#width = width;
+            this.#height = height;
+            this.colCounts = colCounts || new Array(width).fill(0);
+            this.rowCounts = rowCounts || new Array(height).fill(0);
             this.runs = runs || [];
             this.#state = createState(this.width, this.height);
-        } else if (
-            (args[0] instanceof Board || typeof args[0] === 'string')
+        } else if (true
+            && (args[0] instanceof Board || typeof args[0] === 'string')
             && typeof args[1] !== 'number'
         ) {
             let preset = args[0];
@@ -54,8 +57,8 @@ export default class Board {
             if (typeof preset === 'string') preset = Board.from(preset);
 
             this.preset = preset;
-            this.width = preset.width;
-            this.height = preset.height;
+            this.#width = preset.width;
+            this.#height = preset.height;
             this.colCounts = colCounts || [];
             this.rowCounts = rowCounts || [];
             this.runs = runs || [];
@@ -69,14 +72,55 @@ export default class Board {
         if (newState.length !== this.width * this.height) {
             const diff = this.width * this.height - newState.length;
             throw new Error(`Expected newState.length to equal width (${this.width}) * height (${this.height}),${
-                ' '}got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
-        } else
-            this.#state = newState;
+                ''} got ${newState.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${this.width * this.height})`);
+        } else this.#state = newState;
     }
 
     get state (): Ship[] {
         return this.#state;
     }
+
+    // setting dimensions might be a bit costly but it happens so infrequently that it's not an issue
+    set width (newWidth: number) {
+        const old = this.copy();
+
+        if (!Number.isInteger(newWidth))
+            throw new TypeError(`Expected width to be an integer, got ${newWidth}`);
+        if (newWidth <= 0 || newWidth > 32)
+            throw new RangeError('Width outside expected range (1 - 32)');
+
+        this.#width = newWidth;
+        this.#updateProps(old);
+    }
+
+    set height (newHeight: number) {
+        const old = this.copy();
+
+        if (!Number.isInteger(newHeight))
+            throw new TypeError(`Expected height to be an integer, got ${newHeight}`);
+        if (newHeight <= 0 || newHeight > 32)
+            throw new RangeError('Height outside expected range (1 - 32)');
+
+        this.#height = newHeight;
+        this.#updateProps(old);
+    }
+
+    #updateProps (old: Board): void {
+        this.state = createState(this.width, this.height);
+
+        for (let x = 0; x < Math.min(this.width, old.width); x++) {
+            for (let y = 0; y < Math.min(this.height, old.height); y++) {
+                this.setShip([x, y], old.getShip([x, y]));
+            }
+        }
+
+        this.colCounts = resizeArray(this.colCounts, this.width);
+        this.rowCounts = resizeArray(this.rowCounts, this.height);
+        this.runs = this.runs.slice(0, Math.max(this.width, this.height));
+    }
+
+    get width (): number { return this.#width; }
+    get height (): number { return this.#height; }
 
     toString (): string {
         return boardToString(this);
@@ -267,7 +311,7 @@ export default class Board {
         if (state.length !== width * height) {
             const diff = width * height - state.length;
             throw new Error(`Expected state.length to equal width (${width}) * height (${height}),${
-                ' '}got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
+                ''} got ${state.length} (${Math.abs(diff)} ${diff > 0 ? 'short' : 'long'} of ${width * height})`);
         }
 
         const board = new Board(width, height, colCounts, rowCounts, runs);
@@ -332,8 +376,6 @@ export default class Board {
             || !this.colCounts
             || !this.rowCounts
             || !this.runs
-            || this.colCounts.length === 0
-            || this.rowCounts.length === 0
             || this.runs.length === 0
         ) return this;
 
@@ -443,14 +485,14 @@ export default class Board {
                                 } else {
                                     // It's somewhere in the middle. This is unlikely to be much of a help
                                     // while solving and would take substantial effort to implement. Until
-                                    // an issue is created or I'm no longer lazy, I won't implement it.
-                                    // TODO
+                                    // it's an issue, I won't implement it.
+                                    // -TODO
                                 }
                             } else {
                                 // Like the previous one, this is unlikely to occur. If it does,
                                 // again like the other one it should find everywhere the ship
                                 // could go and find common squares between all possibilities.
-                                // Those are the squares that have to have something
+                                // Those are the squares that have to have something.
                             }
                         }
                     } else {
@@ -491,7 +533,7 @@ export default class Board {
                         // this is terribly inefficient since it has to instantiate
                         // a whole new board, but it works for now. maybe we could
                         // modify the actual board instead then revert things????
-                        // TODO improve efficiency
+                        // -TODO improve efficiency
                         const tmpBoard = this.copy();
 
                         for (const index of possibility) {
@@ -798,7 +840,8 @@ export default class Board {
 
         for (let i = 0; i < this.state.length; i++) {
             const ship = this.getShip(i);
-            if (ship.pinned && (ship.initialType > TYPES.SHIP || ship.initialType > TYPES.ORTHOGONAL) && ship.initialType !== TYPES.ORTHOGONAL) continue;
+            // make a static method on ship for this to tell if the type starts resolved -TODO
+            if (ship.pinned && ship.initialType > TYPES.SHIP && ship.initialType !== TYPES.ORTHOGONAL) continue;
             if (!isShip(ship)) continue;
 
             // makes the edges act as water
@@ -811,9 +854,14 @@ export default class Board {
             if (isWater(left, top, right, bottom)) ship.internalType = TYPES.SINGLE;
             else if (isShip(left, right)) ship.internalType = TYPES.HORIZONTAL;
             else if (isShip(top, bottom)) ship.internalType = TYPES.VERTICAL;
-            else if (ship.initialType === TYPES.ORTHOGONAL) {
+            else if (false
+                || ship.initialType === TYPES.ORTHOGONAL
+                || ship.initialType === TYPES.HORIZONTAL
+                || ship.initialType === TYPES.VERTICAL
+            ) {
                 if (isShip(left) || isShip(right) || isWater(top) || isWater(bottom)) ship.internalType = TYPES.HORIZONTAL;
                 else if (isShip(top) || isShip(bottom) || isWater(left) || isWater(right)) ship.internalType = TYPES.VERTICAL;
+                else ship.internalType = TYPES.ORTHOGONAL;
             } else if (isShip(left) && isWater(right)) ship.internalType = TYPES.LEFT;
             else if (isShip(top) && isWater(bottom)) ship.internalType = TYPES.UP;
             else if (isShip(right) && isWater(left)) ship.internalType = TYPES.RIGHT;
@@ -1042,6 +1090,11 @@ function createState (width: number, height: number, preset?: Board): Ship[] {
     return out;
 }
 
+function resizeArray (arr: number[], newSize: number): number[] {
+    if (newSize >= arr.length) return [...arr, ...new Array(newSize - arr.length).fill(0)];
+    return arr.slice(0, newSize);
+}
+
 /**
  * Postions around a square
  */
@@ -1067,7 +1120,7 @@ export type RelativePosition = typeof REL_POS[keyof typeof REL_POS];
 type Run = number[];
 
 /**
- * [x, y] starting at 0
+ * [x, y] starting at 0, anchored top left
  */
 type Coordinates = [number, number];
 

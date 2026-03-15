@@ -21,23 +21,29 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     function onMouseDown (event: React.MouseEvent, index: number): void {
         const ship = board.getShip(index);
 
-        if (ship.pinned) return;
+        if (isEditMode
+            && ship.playType !== TYPES.UNKNOWN
+            && event.button === 1
+        ) {
+            board.setShip(index, ship.graphicalType, !ship.pinned);
+            return setBoard(board);
+        }
+
+        if (!isEditMode && ship.pinned) return;
         if (event.button !== 0 && event.button !== 2) return;
 
         let newType;
         const diff = event.button === 0 ? 1 : -1;
 
-        if (isEditMode) {
-            newType = (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT;
-        } else {
-            newType = (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
-        }
+        newType = isEditMode
+            ? (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT
+            : (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
 
-        const newBoard = board.setShip(index, newType as AnyType);
-        if (!isEditMode) newBoard.compTypes();
+        board.setShip(index, newType as AnyType, isEditMode && newType !== TYPES.UNKNOWN);
+        if (!isEditMode) board.compTypes();
 
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
+        setBoard(board);
+        setSolved(board.isSolved());
         setDraggedType(newType as AnyType);
         setDraggedButton(event.buttons);
     }
@@ -45,9 +51,10 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     function onMouseEnter (index: number): void {
         if (draggedType === undefined || board.getShip(index).pinned) return;
 
-        const newBoard = board.setShip(index, draggedType).compTypes();
-        setBoard(newBoard);
-        setSolved(newBoard.isSolved());
+        board.setShip(index, draggedType, isEditMode && draggedType !== TYPES.UNKNOWN);
+        if (!isEditMode) board.compTypes();
+        setBoard(board);
+        setSolved(board.isSolved());
     }
 
     function onEnterBoard (event: React.MouseEvent): void {
@@ -66,14 +73,15 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     return (
         <div
             className={'Inner' + (solved ? ' Solved' : '')}
-            style={{ gridTemplate: `repeat(${board.width}, 50px) / repeat(${board.height}, 50px)` }}
+            style={{ gridTemplate: `repeat(${board.height}, 50px) / repeat(${board.width}, 50px)` }}
             onMouseEnter={e => onEnterBoard(e)}
         >
             {
                 board.state.map((ship, index) => {
                     return (
                         <div
-                            className='Square nohighlight'
+                            // giving every square the same classes feels unnecessary -TODO
+                            className={`Square nohighlight ${isEditMode && ship.pinned ? 'pinned' : ''}`}
                             key={index}
                             onMouseDown={event => onMouseDown(event, index)}
                             onMouseEnter={() => onMouseEnter(index)}

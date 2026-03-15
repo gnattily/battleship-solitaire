@@ -27,9 +27,7 @@ export function displayBoard (board: Board, showInternal = true, gridType: GridT
 
 /**
  * Prints out a representation of the board to the console
- * @param board The board to display
  * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
- * @param [gridType] 0 for no grid, 1 for minimal, 2 for full
  */
 export function boardToString (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): string {
     let final = '';
