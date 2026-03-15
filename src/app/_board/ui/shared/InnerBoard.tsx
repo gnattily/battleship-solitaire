@@ -39,7 +39,7 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
             ? (ship.graphicalType + GRAPHICAL_TYPE_COUNT + diff) % GRAPHICAL_TYPE_COUNT
             : (ship.playType + PLAY_TYPE_COUNT + diff) % PLAY_TYPE_COUNT;
 
-        board.setShip(index, newType as AnyType);
+        board.setShip(index, newType as AnyType, isEditMode && newType !== TYPES.UNKNOWN);
         if (!isEditMode) board.compTypes();
 
         setBoard(board);
@@ -51,7 +51,8 @@ export default function InnerBoard ({ board, setBoard, solved, setSolved, isEdit
     function onMouseEnter (index: number): void {
         if (draggedType === undefined || board.getShip(index).pinned) return;
 
-        board.setShip(index, draggedType).compTypes();
+        board.setShip(index, draggedType, isEditMode && draggedType !== TYPES.UNKNOWN);
+        if (!isEditMode) board.compTypes();
         setBoard(board);
         setSolved(board.isSolved());
     }
