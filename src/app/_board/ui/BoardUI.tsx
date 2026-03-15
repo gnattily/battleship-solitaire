@@ -29,6 +29,8 @@ interface State {
     editMode: boolean;
 }
 
+const MAX_HISTORY_LENGTH = 101;
+
 export default class BoardUI extends Component<Props, State> {
     readonly #initialBoard: Board;
     readonly SIZE = 50; // px
@@ -79,6 +81,12 @@ export default class BoardUI extends Component<Props, State> {
         this.history = this.history.slice(0, this.historyIndex + 1);
         this.history.push(newBoard.copy());
         this.historyIndex++;
+
+        if (this.history.length > MAX_HISTORY_LENGTH) {
+            this.history = this.history.slice(this.history.length - MAX_HISTORY_LENGTH);
+            this.historyIndex = this.history.length - 1;
+        }
+
         this.setState({ board: newBoard, solved: newBoard.isSolved() });
     };
 
