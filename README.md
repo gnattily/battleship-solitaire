@@ -24,7 +24,7 @@ Although this tool can solve any puzzle that can be completed through pure logic
 [lukerissacher.com](https://lukerissacher.com/battleships) can also create puzzles that can only be
 solved with guess-and-check. Initially this was a planned feature, but I've since limited the scope
 of this project so I could move on to new plans. This tool can still help with these puzzles, but it
-is not designed for them and will require much manual input.
+is not designed for them and will require a lot of manual input.
 
 ### Rules
 There are only a few rules to this game:
@@ -34,9 +34,7 @@ There are only a few rules to this game:
 - There are only horizontal/vertical ships. They cannot be diagonal.
 
 ## Deploying Locally
-Deploying a local server is extremely simple.
-
-Install [Node.js](https://nodejs.org), then run these commands:
+Deploying a local server is extremely simple. Install [Node.js](https://nodejs.org), then run these commands:
 ```sh
 npm install -g pnpm@latest-10 # pnpm is like npm, but much faster
 pnpm i # install dependencies
@@ -49,7 +47,7 @@ Your new web server should now be accessible at [localhost:3000](http://localhos
 
 ## Contributing
 If you would like to contribute to the project, you are more than welcome, so long as you follow our
-[Code of Conduct](./CODE_OF_CONDUCT.md). Here's a couple commands to get you started:
+[Code of Conduct](./CODE_OF_CONDUCT.md). Here are a couple commands to get you started:
 
 ```sh
 pnpm dev # start a development server
