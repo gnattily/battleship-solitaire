@@ -114,3 +114,17 @@ export const GRID_TYPES = {
 } as const;
 
 type GridType = typeof GRID_TYPES[keyof typeof GRID_TYPES];
+
+export function b64ToURLSafe (b64: string): string {
+    return b64
+        .replaceAll('+', '-')
+        .replaceAll('/', '_')
+        .replaceAll('=', '');
+}
+
+export function URLSafeToB64 (URLSafe: string): string {
+    return URLSafe
+        .replaceAll('-', '+')
+        .replaceAll('_', '/')
+        .padEnd(URLSafe.length + (4 - (URLSafe.length % 4)) % 4, '=');
+}

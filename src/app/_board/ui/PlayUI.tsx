@@ -1,5 +1,6 @@
 import { TYPES } from '../logic/Ship';
 import { typeToJSX } from './BoardUI';
+import { b64ToURLSafe } from '../logic/BoardUtils';
 import InnerBoard from './shared/InnerBoard';
 
 import type { JSX } from 'react';
@@ -18,10 +19,7 @@ export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, un
 
     function share (): void {
         const url = `${window.location.origin}/?board=${
-            board.export()
-                .replaceAll('+', '-')
-                .replaceAll('/', '_')
-                .replaceAll('=', '')
+            b64ToURLSafe(board.export())
         }`;
 
         navigator.clipboard.writeText(url).then(() => {

@@ -1,4 +1,5 @@
 import Board from './_board/logic/Board';
+import { URLSafeToB64 } from './_board/logic/BoardUtils';
 import BoardUI from './_board/ui/BoardUI';
 import './page.css';
 
@@ -10,10 +11,7 @@ export default async function Page ({ searchParams }: { searchParams: { [key: st
 
     // Realistically this should be in a Board helper file -TODO
     if (typeof board === 'string') {
-        board = board
-            .replaceAll('-', '+')
-            .replaceAll('_', '/')
-            .padEnd(board.length + (4 - (board.length % 4)) % 4, '=');
+        board = URLSafeToB64(board);
 
         try {
             startBoard = Board.from(board);
