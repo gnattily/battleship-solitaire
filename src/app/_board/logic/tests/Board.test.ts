@@ -12,8 +12,8 @@ test('constructor', () => {
     expect(board.height).toBe(7);
     expect(board.state.length).toBe(15 * 7);
 
-    // the constructor is used extensively throughout testing
-    // so I don't see much of a use in too extensive of tests
+    // majority of testing omitted here since the contructor
+    // is used extensively in other tests
 });
 
 test('setDimensions', () => {
@@ -85,9 +85,7 @@ test('copy', () => {
     const board1Copy = board1.copy();
 
     expect(board1.sameState(board1Copy)).toBeTruthy();
-
     board1Copy.setShip([1, 3], TYPES.LEFT);
-
     expect(board1.sameState(board1Copy)).toBeFalsy();
 
     const board2 = new Board(board1Copy)
@@ -354,7 +352,6 @@ test('countRow', () => {
 
 test('countRunsLeft', () => {
     expect(new Board(4, 4).countRunsLeft()).toEqual([]);
-
     expect(board1.countRunsLeft()).toEqual([2, 2, 1]);
     expect(board1.countRunsLeft(true)).toEqual([2, 2, 1]);
 

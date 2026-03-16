@@ -1,4 +1,5 @@
 import { REL_POS } from './Board';
+
 import type { RelativePosition } from './Board';
 
 /**
@@ -20,17 +21,22 @@ export default class Ship {
     }
 
     set playType (type: PlayType) {
-        if (type > TYPES.SHIP) throw new Error('Expected type to be a PlayType (0-2), got ' + type);
-        if (type !== TYPES.SHIP || this.#type < TYPES.SHIP) this.#type = type;
+        if (type > TYPES.SHIP)
+            throw new Error('Expected type to be a PlayType (0-2), got ' + type);
+        if (type !== TYPES.SHIP || this.#type < TYPES.SHIP)
+            this.#type = type;
     }
 
     set graphicalType (type: GraphicalType) {
-        if (type > TYPES.ORTHOGONAL) throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
-        if (type !== TYPES.ORTHOGONAL || this.#type < TYPES.ORTHOGONAL) this.#type = type;
+        if (type > TYPES.ORTHOGONAL)
+            throw new Error('Expected type to be a GraphicalType (0-8), got ' + type);
+        if (type !== TYPES.ORTHOGONAL || this.#type < TYPES.ORTHOGONAL)
+            this.#type = type;
     }
 
     set internalType (type: InternalType) {
-        if (type > TYPES.HORIZONTAL) throw new Error('Expected type to be an InternalType (0-10), got ' + type);
+        if (type > TYPES.HORIZONTAL)
+            throw new Error('Expected type to be an InternalType (0-10), got ' + type);
         this.#type = type;
     }
 
@@ -159,7 +165,7 @@ const ENDS = new Set<AnyType>([
 
 export const PLAY_TYPE_COUNT = 3;
 export const GRAPHICAL_TYPE_COUNT = 9;
-// could do the rest but they're unnecessary
+// could do INTERNAL types but it's unnecessary
 
 export type PlayType = typeof TYPES['UNKNOWN' | 'WATER' | 'SHIP'];
 export type GraphicalType = typeof TYPES['UNKNOWN' | 'WATER' | 'SHIP' | 'SINGLE' | 'UP' | 'RIGHT' | 'DOWN' | 'LEFT' | 'ORTHOGONAL'];

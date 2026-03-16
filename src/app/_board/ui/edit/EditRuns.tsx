@@ -1,6 +1,8 @@
-import { useRef, type JSX } from 'react';
-import type Board from '../../logic/Board';
+import { useRef } from 'react';
 import { renderRun } from './EditUI';
+
+import type { JSX } from 'react';
+import type Board from '../../logic/Board';
 
 type Params = {
     board: Board;

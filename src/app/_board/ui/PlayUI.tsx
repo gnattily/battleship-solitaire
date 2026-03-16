@@ -1,8 +1,8 @@
 import { TYPES } from '../logic/Ship';
 import { typeToJSX } from './BoardUI';
+import InnerBoard from './shared/InnerBoard';
 
 import type { JSX } from 'react';
-import InnerBoard from './shared/InnerBoard';
 import type { PlayParams } from './shared/Mode';
 
 export default function PlayUI ({ board, setBoard, initialBoard, SQUARE_SIZE, undo, redo, solved, toggleMode }: PlayParams): JSX.Element {

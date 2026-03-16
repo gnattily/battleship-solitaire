@@ -1,9 +1,9 @@
 'use client';
 
-import { Component } from 'react';
-import { TYPES } from '../logic/Ship';
 import Board from '../logic/Board';
+import { TYPES } from '../logic/Ship';
 
+import { Component } from 'react';
 import PlayUI from './PlayUI';
 import EditUI from './edit/EditUI';
 

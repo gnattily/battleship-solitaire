@@ -1,13 +1,14 @@
 import { useState } from 'react';
+import Board from '../../logic/Board';
 import { TYPES } from '../../logic/Ship';
 import { typeToJSX } from '../BoardUI';
+
 import InnerBoard from '../shared/InnerBoard';
-import Board from '../../logic/Board';
+import EditRuns from './EditRuns';
 import SetNum from './SetNum';
 
 import type { JSX } from 'react';
 import type { EditParams } from '../shared/Mode';
-import EditRuns from './EditRuns';
 
 export default function EditUI ({ board, setBoard, SQUARE_SIZE, undo, redo, toggleMode, solved }: EditParams): JSX.Element {
     const [editingIndex, setEditingIndex] = useState<number | undefined>(undefined);
@@ -115,7 +116,7 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, undo, redo, togg
                     del={() => { setEditingDimension(undefined); }}
                 />
             );
-        } if (editingDimension === 1 && !width) {
+        } else if (editingDimension === 1 && !width) {
             return (
                 <SetNum
                     initNum={board.height}
@@ -176,7 +177,6 @@ export default function EditUI ({ board, setBoard, SQUARE_SIZE, undo, redo, togg
                         <button onClick={() => { redo(); }}>Redo</button>
                         <button onClick={() => { share(); }}>Share</button>
                         <button onClick={() => { toggleMode(); }}>Play</button>
-                        {/* Add undo/redo buttons on this an the Play UI */}
                     </div>
                     <span />
                 </div>
