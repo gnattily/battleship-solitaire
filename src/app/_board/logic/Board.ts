@@ -1,5 +1,6 @@
 import { boardToString } from './BoardUtils';
 import Ship, { TYPES } from './Ship';
+
 import type { AnyType } from './Ship';
 
 /**
@@ -133,8 +134,8 @@ export default class Board {
     export (): string {
         let out = '';
 
-        out += (this.width - 1).toString(2).padStart(8, '0');
-        out += (this.height - 1).toString(2).padStart(8, '0');
+        out += (this.width - 1).toString(2).padStart(5, '0');
+        out += (this.height - 1).toString(2).padStart(5, '0');
 
         const hasSolveData = true
             && this.colCounts.length === this.width
@@ -249,8 +250,8 @@ export default class Board {
             return val;
         }
 
-        const width = getAndTrim(8) + 1;
-        const height = getAndTrim(8) + 1;
+        const width = getAndTrim(5) + 1;
+        const height = getAndTrim(5) + 1;
 
         const hasSolveData = !!getAndTrim(1);
 
