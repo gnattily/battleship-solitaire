@@ -67,8 +67,8 @@ the number of bits it uses:
 
 | property  |        number of bits         |    type   |
 |-----------|:-----------------------------:|:---------:|
-| width     |              8                |   number  |
-| height    |              8                |   number  |
+| width     |              5                |   number  |
+| height    |              5                |   number  |
 | solveData |              1                |  boolean  |
 | colCounts | `a = ceil(log2(width)) + 1`   |  number[] |
 | rowCounts | `b = ceil(log2(height)) + 1`  |  number[] |

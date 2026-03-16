@@ -1,19 +1,17 @@
-import './page.css';
-import BoardUI from './_board/ui/BoardUI';
 import Board from './_board/logic/Board';
+import { URLSafeToB64 } from './_board/logic/BoardUtils';
+import BoardUI from './_board/ui/BoardUI';
+import './page.css';
+
 import type { JSX } from 'react';
 
 export default async function Page ({ searchParams }: { searchParams: { [key: string]: string | undefined } }): Promise<JSX.Element> {
-    let { board } = await searchParams;
+    let { board } = searchParams;
     let startBoard: Board | undefined;
 
-    // Realistically this should be in BoardUI.tsx
-    // -TODO
+    // Realistically this should be in a Board helper file -TODO
     if (typeof board === 'string') {
-        board = board
-            .replaceAll('-', '+')
-            .replaceAll('_', '/')
-            .padEnd(board.length + (4 - (board.length % 4)) % 4, '=');
+        board = URLSafeToB64(board);
 
         try {
             startBoard = Board.from(board);

@@ -21,12 +21,15 @@ const DIM = '\x1b[2m';
 import type Board from './Board';
 import { TYPES } from './Ship';
 
+/**
+ * Prints out a representation of the board to the console
+ * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
+ */
 export function displayBoard (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): void {
     console.log(boardToString(board, showInternal, gridType));
 }
 
 /**
- * Prints out a representation of the board to the console
  * @param showInternal Should internal types be colored differently? (red: horizontal, yellow: vertical)
  */
 export function boardToString (board: Board, showInternal = true, gridType: GridType = GRID_TYPES.FULL): string {
@@ -59,12 +62,15 @@ export function boardToString (board: Board, showInternal = true, gridType: Grid
 
                 for (let x = 0; x < board.width; x++) {
                     const ship = board.getShip([x, y]);
+
                     if (ship.playType === TYPES.WATER) out += DIM + CYAN;
                     out += BRIGHT + WHITE;
+
                     if (showInternal) {
                         if (ship.internalType === TYPES.HORIZONTAL) out += RED;
                         if (ship.internalType === TYPES.VERTICAL) out += YELLOW;
                     }
+
                     out += (gridType === GRID_TYPES.MINIMAL ? `${ship}` : ` ${ship}  `);
                     out += `${RESET}${GRAY}│${RESET}`;
                 }
@@ -108,3 +114,17 @@ export const GRID_TYPES = {
 } as const;
 
 type GridType = typeof GRID_TYPES[keyof typeof GRID_TYPES];
+
+export function b64ToURLSafe (b64: string): string {
+    return b64
+        .replaceAll('+', '-')
+        .replaceAll('/', '_')
+        .replaceAll('=', '');
+}
+
+export function URLSafeToB64 (URLSafe: string): string {
+    return URLSafe
+        .replaceAll('-', '+')
+        .replaceAll('_', '/')
+        .padEnd(URLSafe.length + (4 - (URLSafe.length % 4)) % 4, '=');
+}

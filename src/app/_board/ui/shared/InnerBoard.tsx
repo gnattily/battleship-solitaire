@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { TYPES, PLAY_TYPE_COUNT, GRAPHICAL_TYPE_COUNT } from '../../logic/Ship';
+import { GRAPHICAL_TYPE_COUNT, PLAY_TYPE_COUNT, TYPES } from '../../logic/Ship';
 import { typeToJSX } from '../BoardUI';
 
-import type Board from '../../logic/Board';
 import type { JSX } from 'react';
+import type Board from '../../logic/Board';
 import type { AnyType } from '../../logic/Ship';
 
 type Params = {
@@ -20,7 +20,8 @@ export default function InnerBoard ({ board, setBoard, solved, isEditMode }: Par
     function onMouseDown (event: React.MouseEvent, index: number): void {
         const ship = board.getShip(index);
 
-        if (isEditMode
+        if (true
+            && isEditMode
             && ship.playType !== TYPES.UNKNOWN
             && event.button === 1
         ) {

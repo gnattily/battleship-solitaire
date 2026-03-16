@@ -1,8 +1,8 @@
-import stylistic from '@stylistic/eslint-plugin';
-import * as jsoncParser from 'jsonc-eslint-parser';
-import pluginJsonc from 'eslint-plugin-jsonc';
-import tseslint from 'typescript-eslint';
 import nextPlugin from '@next/eslint-plugin-next';
+import stylistic from '@stylistic/eslint-plugin';
+import pluginJsonc from 'eslint-plugin-jsonc';
+import * as jsoncParser from 'jsonc-eslint-parser';
+import tseslint from 'typescript-eslint';
 
 const allScripts = ['**/*.{js,jsx,mjs,ts,tsx,mts}'];
 const stylisticConfig = stylistic.configs.customize({

@@ -1,5 +1,5 @@
-import type { KeyboardEvent } from 'react';
-import { useRef, type JSX } from 'react';
+import { useRef } from 'react';
+import type { KeyboardEvent, JSX } from 'react';
 
 type Params = {
     updateNum: (count: number) => void;
