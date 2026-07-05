@@ -36,7 +36,7 @@ There are only a few rules to this game:
 ## Deploying Locally
 Deploying a local server is extremely simple. Install [Node.js](https://nodejs.org), then run these commands:
 ```sh
-npm install -g pnpm@latest-10 # pnpm is like npm, but much faster
+npm install -g pnpm@latest-11 # pnpm is like npm, but much faster
 pnpm i # install dependencies
 pnpm build # compile the project
 pnpm start # run the server
